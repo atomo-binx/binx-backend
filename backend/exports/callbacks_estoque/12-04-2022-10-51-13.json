@@ -1,0 +1,501 @@
+{
+  "retorno": {
+    "estoques": [
+      {
+        "estoque": {
+          "id": 7233283417,
+          "codigo": "6766",
+          "nome": null,
+          "estoqueAtual": "6822",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "6902.0000000000",
+                "saldoVirtual": 6822
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "67.0000000000",
+                "saldoVirtual": "67.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12525950671,
+          "codigo": "VIR-6766-ML",
+          "nome": "Kit c/ 30 unidades Terminal Macho para Alojamento Modu",
+          "estoqueAtual": "227",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 230,
+                "saldoVirtual": 227
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 2,
+                "saldoVirtual": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 14374345912,
+          "codigo": "VIR-6742-MLP",
+          "nome": "Kit  Conector Alojamento Modu 2,54mm 4 Vias MACHO + FEMEA + TERMINAIS",
+          "estoqueAtual": "6",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 6,
+                "saldoVirtual": 6
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7233283420,
+          "codigo": "6765",
+          "nome": null,
+          "estoqueAtual": "10372",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "10534.0000000000",
+                "saldoVirtual": 10372
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "32.0000000000",
+                "saldoVirtual": "32.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "380.0000000000",
+                "saldoVirtual": "380.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12525621705,
+          "codigo": "VIR-6765-ML",
+          "nome": "Kit c/ 30 unidades Terminal F\u00eamea para Alojamento Modu",
+          "estoqueAtual": "345",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 351,
+                "saldoVirtual": 345
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 12,
+                "saldoVirtual": 12
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7233945615,
+          "codigo": "6683",
+          "nome": null,
+          "estoqueAtual": "408",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "408.0000000000",
+                "saldoVirtual": "408.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "48.0000000000",
+                "saldoVirtual": "48.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 13604573263,
+          "codigo": "VIR-6683-ML",
+          "nome": "Kit c/ 10 Unidades Conector Alojamento Micro Fit F\u00eamea 3,0mm 8 Vias",
+          "estoqueAtual": "40",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 40,
+                "saldoVirtual": 40
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 4,
+                "saldoVirtual": 4
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7282417965,
+          "codigo": "6742",
+          "nome": null,
+          "estoqueAtual": "494",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "517.0000000000",
+                "saldoVirtual": 494
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "6.0000000000",
+                "saldoVirtual": "6.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "20.0000000000",
+                "saldoVirtual": "20.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12559909968,
+          "codigo": "VIR-6742-ML",
+          "nome": "Kit c/ 40 unidades Conector Alojamento Modu 2,54mm 4 Vias",
+          "estoqueAtual": "12",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 12,
+                "saldoVirtual": 12
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

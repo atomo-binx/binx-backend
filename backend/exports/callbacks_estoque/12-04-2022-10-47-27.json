@@ -1,0 +1,1821 @@
+{
+  "retorno": {
+    "estoques": [
+      {
+        "estoque": {
+          "id": 7188764551,
+          "codigo": "928",
+          "nome": null,
+          "estoqueAtual": "14",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "20.0000000000",
+                "saldoVirtual": 14
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "2.0000000000",
+                "saldoVirtual": "2.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "53.0000000000",
+                "saldoVirtual": "53.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 13373470614,
+          "codigo": "VIR-928-ML",
+          "nome": "Kit c/ 10 Unidades Capacitor Eletrol\u00edtico 1000uF / 63V",
+          "estoqueAtual": "1",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 2,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 5,
+                "saldoVirtual": 5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15451432588,
+          "codigo": "VIR-888-MLP",
+          "nome": "Kit Personalizado Optoacoplador 4N25",
+          "estoqueAtual": "3",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 5,
+                "saldoVirtual": 3
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 2,
+                "saldoVirtual": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7198058727,
+          "codigo": "888",
+          "nome": null,
+          "estoqueAtual": "35",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "72.0000000000",
+                "saldoVirtual": 35
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "6.0000000000",
+                "saldoVirtual": "6.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "34.0000000000",
+                "saldoVirtual": "34.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 13645558912,
+          "codigo": "VIR-4I-ML",
+          "nome": "Kit c/ 350 Unidades resistor, optoacoplador, transistor, led.",
+          "estoqueAtual": 0,
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 1,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 11605745288,
+          "codigo": "VIR-888-ML",
+          "nome": "Kit c/ 10 unidades Optoacoplador 4N25",
+          "estoqueAtual": "3",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 7,
+                "saldoVirtual": 3
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 3,
+                "saldoVirtual": 3
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7215513715,
+          "codigo": "147",
+          "nome": null,
+          "estoqueAtual": "4718",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "4939.0000000000",
+                "saldoVirtual": 4718
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "50.0000000000",
+                "saldoVirtual": "50.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "1042.0000000000",
+                "saldoVirtual": "1042.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 8635484337,
+          "codigo": "VIR-147-ML",
+          "nome": "Kit C/ 100 Unidades Resistor 10R 5% (1/4W)",
+          "estoqueAtual": "47",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 49,
+                "saldoVirtual": 47
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 10,
+                "saldoVirtual": 10
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7227456360,
+          "codigo": "2228",
+          "nome": null,
+          "estoqueAtual": "185",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "188.0000000000",
+                "saldoVirtual": 185
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "50.0000000000",
+                "saldoVirtual": "50.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12096369531,
+          "codigo": "VIR-2228-ML",
+          "nome": "Kit c/ 10 unidades Transistor IRFZ44N - Mosfet De Canal N",
+          "estoqueAtual": "18",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 18,
+                "saldoVirtual": 18
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 5,
+                "saldoVirtual": 5
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7266249989,
+          "codigo": "574",
+          "nome": null,
+          "estoqueAtual": "806",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "841.0000000000",
+                "saldoVirtual": 806
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "50.0000000000",
+                "saldoVirtual": "50.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "41.0000000000",
+                "saldoVirtual": "41.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 13010512135,
+          "codigo": "VIR-574-ML",
+          "nome": "Kit c/ 50 Unidades Diodo Zener 1N4742A [12V / 1W]",
+          "estoqueAtual": "16",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 16,
+                "saldoVirtual": 16
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15444071930,
+          "codigo": "VIR-2934-MLP",
+          "nome": "Kit Personalizado Capacitor de Poliester 680nF / 400V",
+          "estoqueAtual": "49",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 49,
+                "saldoVirtual": 49
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7266370943,
+          "codigo": "567",
+          "nome": null,
+          "estoqueAtual": "13367",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "14301.0000000000",
+                "saldoVirtual": 13367
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "50.0000000000",
+                "saldoVirtual": "50.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "254.0000000000",
+                "saldoVirtual": "254.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 8530184579,
+          "codigo": "VIR-567-ML",
+          "nome": "Kit c/ 100 Unidades Diodo 1N4007",
+          "estoqueAtual": "133",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 143,
+                "saldoVirtual": 133
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 2,
+                "saldoVirtual": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7270488408,
+          "codigo": "514",
+          "nome": null,
+          "estoqueAtual": "1895",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "2015.0000000000",
+                "saldoVirtual": 1895
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "18.0000000000",
+                "saldoVirtual": "18.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "58.0000000000",
+                "saldoVirtual": "58.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12940168639,
+          "codigo": "VIR-514-ML",
+          "nome": "Kit c/ 50 Unidades Transistor NPN - BC548",
+          "estoqueAtual": "37",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 40,
+                "saldoVirtual": 37
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15027332275,
+          "codigo": "VIR-DIVI-ML",
+          "nome": "KIT Diversos ML LED, Buzer, Transistor, Resistor.",
+          "estoqueAtual": "4",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 5,
+                "saldoVirtual": 4
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15027615535,
+          "codigo": "VIR2-DIVI-ML",
+          "nome": "KIT Diversos ML 2 LED, Buzer, Transistor, Resistor.",
+          "estoqueAtual": "4",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 5,
+                "saldoVirtual": 4
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15084323647,
+          "codigo": "VIR-514-ML1",
+          "nome": "Kit Transistor/ Resistor / LED Difuso 3mm/ Buzzer 12V",
+          "estoqueAtual": "37",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 47,
+                "saldoVirtual": 37
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 2,
+                "saldoVirtual": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15153205573,
+          "codigo": "VIR-514-MLP",
+          "nome": "Kit * Personalizado *",
+          "estoqueAtual": 0,
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 0,
+                "saldoVirtual": -2
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7271832701,
+          "codigo": "2934",
+          "nome": null,
+          "estoqueAtual": "98",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "98.0000000000",
+                "saldoVirtual": "98.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "3.0000000000",
+                "saldoVirtual": "3.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "10.0000000000",
+                "saldoVirtual": "10.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 14792422568,
+          "codigo": "VIR-2934-ML",
+          "nome": "Kit c/ 50 Unidades Capacitor de Poliester 680nF / 400V",
+          "estoqueAtual": "1",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7272335126,
+          "codigo": "2989",
+          "nome": null,
+          "estoqueAtual": 0,
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "0.0000000000",
+                "saldoVirtual": "0.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "3.0000000000",
+                "saldoVirtual": "3.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "8.0000000000",
+                "saldoVirtual": "8.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 13445611803,
+          "codigo": "VIR-2989-ML",
+          "nome": "Kit c/ 30 Unidades Fus\u00edvel De Vidro 6X30 - 0,50A  250V",
+          "estoqueAtual": 0,
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7272335138,
+          "codigo": "2990",
+          "nome": null,
+          "estoqueAtual": "102",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "102.0000000000",
+                "saldoVirtual": "102.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "10.0000000000",
+                "saldoVirtual": "10.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "20.0000000000",
+                "saldoVirtual": "20.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15816403223,
+          "codigo": "VIR-2990-ML",
+          "nome": "Kit c/ 50 Unidades Fus\u00edvel De Vidro 6X30 - 0,75A  250V",
+          "estoqueAtual": "2",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 2,
+                "saldoVirtual": 2
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7272430025,
+          "codigo": "3023",
+          "nome": null,
+          "estoqueAtual": "240",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "250.0000000000",
+                "saldoVirtual": 240
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "100.0000000000",
+                "saldoVirtual": "100.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "50.0000000000",
+                "saldoVirtual": "50.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 11347428275,
+          "codigo": "VIR-3023-ML",
+          "nome": "Kit c/ 100Fus\u00edvel de Vidro 5x20 - 0,2A  250V",
+          "estoqueAtual": "2",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 2,
+                "saldoVirtual": 2
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7274287820,
+          "codigo": "3212",
+          "nome": null,
+          "estoqueAtual": "169",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "189.0000000000",
+                "saldoVirtual": 169
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "26.0000000000",
+                "saldoVirtual": "26.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12549825972,
+          "codigo": "VIR-3212-ML",
+          "nome": "Kit c/ 20 Unidades Tubo Termo Retr\u00e1til 1mm Preto",
+          "estoqueAtual": "8",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 9,
+                "saldoVirtual": 8
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7274287830,
+          "codigo": "3213",
+          "nome": null,
+          "estoqueAtual": "61",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "96.0000000000",
+                "saldoVirtual": 61
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "9.0000000000",
+                "saldoVirtual": "9.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 9516705443,
+          "codigo": "7453",
+          "nome": null,
+          "estoqueAtual": "37",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "47.0000000000",
+                "saldoVirtual": 37
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "9.0000000000",
+                "saldoVirtual": "9.0000000000"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

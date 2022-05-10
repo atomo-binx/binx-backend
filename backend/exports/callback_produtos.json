@@ -1,0 +1,281 @@
+{
+  "retorno": {
+    "estoques": [
+      {
+        "estoque": {
+          "id": "7257994025",
+          "codigo": "4008",
+          "nome": "Kit Para Projetos Com Rfid",
+          "estoqueAtual": 15,
+          "depositos": [
+            {
+              "deposito": {
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 16,
+                "desconsiderar": "N",
+                "saldoVirtual": 15
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581139726",
+                "nome": "Produtos em Análises",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "desconsiderar": "N",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "9172701393",
+                "nome": "Loja Física",
+                "saldo": 2,
+                "desconsiderar": "S",
+                "saldoVirtual": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": "7262566883",
+          "codigo": "438",
+          "nome": "Potenciômetro Linear de 10K (10000Ω)",
+          "estoqueAtual": 814,
+          "depositos": [
+            {
+              "deposito": {
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "1130.0000000000",
+                "desconsiderar": "N",
+                "saldoVirtual": 814
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581139726",
+                "nome": "Produtos em Análises",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "desconsiderar": "N",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "0.0000000000",
+                "desconsiderar": "S",
+                "saldoVirtual": "0.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "id": "9172701393",
+                "nome": "Loja Física",
+                "saldo": "144.0000000000",
+                "desconsiderar": "S",
+                "saldoVirtual": "144.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": "7266353410",
+          "codigo": "4800",
+          "nome": "Kit Contador de Peças",
+          "estoqueAtual": 0,
+          "depositos": [
+            {
+              "deposito": {
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 0,
+                "desconsiderar": "N",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581139726",
+                "nome": "Produtos em Análises",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "desconsiderar": "N",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "9172701393",
+                "nome": "Loja Física",
+                "saldo": 3,
+                "desconsiderar": "S",
+                "saldoVirtual": 3
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": "11171796625",
+          "codigo": "VIR-438-ML",
+          "nome": "Kit 10 unidades Potenciômetro Linear de 10K (10000Ω)",
+          "estoqueAtual": 81,
+          "depositos": [
+            {
+              "deposito": {
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 113,
+                "desconsiderar": "N",
+                "saldoVirtual": 81
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581139726",
+                "nome": "Produtos em Análises",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "desconsiderar": "N",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "9172701393",
+                "nome": "Loja Física",
+                "saldo": 14,
+                "desconsiderar": "S",
+                "saldoVirtual": 14
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": "12854983169",
+          "codigo": "VIR-POT-ML",
+          "nome": "Potenciômetro Linear Rotativo 2k-5-10k - 10 Unidades",
+          "estoqueAtual": 6,
+          "depositos": [
+            {
+              "deposito": {
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 13,
+                "desconsiderar": "N",
+                "saldoVirtual": 6
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581139726",
+                "nome": "Produtos em Análises",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "desconsiderar": "N",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "desconsiderar": "S",
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "id": "9172701393",
+                "nome": "Loja Física",
+                "saldo": 2,
+                "desconsiderar": "S",
+                "saldoVirtual": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

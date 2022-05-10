@@ -1,0 +1,501 @@
+{
+  "retorno": {
+    "estoques": [
+      {
+        "estoque": {
+          "id": 7190499401,
+          "codigo": "1103",
+          "nome": null,
+          "estoqueAtual": "8",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "31.0000000000",
+                "saldoVirtual": 8
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "4.0000000000",
+                "saldoVirtual": "4.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7242921240,
+          "codigo": "3342",
+          "nome": null,
+          "estoqueAtual": "1",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "33.0000000000",
+                "saldoVirtual": "33.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 15809735946,
+          "codigo": "VIR-3342-ML",
+          "nome": "Kit c/ 5 Unidades Sensor de Efeito Hall Us1881 / U18",
+          "estoqueAtual": 0,
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 6,
+                "saldoVirtual": 6
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7258720749,
+          "codigo": "418",
+          "nome": null,
+          "estoqueAtual": "96",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "124.0000000000",
+                "saldoVirtual": 97
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "5.0000000000",
+                "saldoVirtual": "5.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "44.0000000000",
+                "saldoVirtual": "44.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 12568824525,
+          "codigo": "VIR-418-ML",
+          "nome": "Kit c/ 5 unidades Clip de Bateria 9V Tipo 1 [Vertical - T]",
+          "estoqueAtual": "19",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 24,
+                "saldoVirtual": 19
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 8,
+                "saldoVirtual": 8
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7270122214,
+          "codigo": "559",
+          "nome": null,
+          "estoqueAtual": "5",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "22.0000000000",
+                "saldoVirtual": 5
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "9.0000000000",
+                "saldoVirtual": "9.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 7272849271,
+          "codigo": "3100",
+          "nome": null,
+          "estoqueAtual": "17",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "17.0000000000",
+                "saldoVirtual": "17.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "9.0000000000",
+                "saldoVirtual": "9.0000000000"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 13582506714,
+          "codigo": "VIR-3100-ML",
+          "nome": "Kit c/ 10 Unidades Garra Jacar\u00e9 Para Bateria de Carro Isolada Preta Grande",
+          "estoqueAtual": "1",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": 1,
+                "saldoVirtual": 1
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "estoque": {
+          "id": 8895862805,
+          "codigo": "7286",
+          "nome": null,
+          "estoqueAtual": "20",
+          "depositos": [
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7141524213",
+                "nome": "Geral",
+                "saldo": "25.0000000000",
+                "saldoVirtual": 20
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "7581139726",
+                "nome": "Produtos em An\u00e1lises",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "N",
+                "id": "7581140130",
+                "nome": "Virtual",
+                "saldo": 0,
+                "saldoVirtual": 0
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "8511401272",
+                "nome": "Extra",
+                "saldo": "1.0000000000",
+                "saldoVirtual": "1.0000000000"
+              }
+            },
+            {
+              "deposito": {
+                "desconsiderar": "S",
+                "id": "9172701393",
+                "nome": "Loja F\u00edsica",
+                "saldo": "19.0000000000",
+                "saldoVirtual": "19.0000000000"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

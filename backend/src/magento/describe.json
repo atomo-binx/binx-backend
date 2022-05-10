@@ -1,0 +1,321 @@
+{
+  "MagentoService": {
+    "Mage_Api_Model_Server_HandlerPort": {
+      "call": {
+        "input": {
+          "sessionId": "xsd:string",
+          "resourcePath": "xsd:string",
+          "args": "xsd:anyType"
+        },
+        "output": { "callReturn": "xsd:anyType" }
+      },
+      "multiCall": {
+        "input": {
+          "sessionId": "xsd:string",
+          "calls": {
+            "allowedChildren": {},
+            "children": [
+              {
+                "allowedChildren": {},
+                "children": [
+                  {
+                    "allowedChildren": {},
+                    "children": [
+                      {
+                        "allowedChildren": {},
+                        "children": [],
+                        "nsName": "attribute",
+                        "prefix": "__tns__",
+                        "name": "attribute",
+                        "xmlns": {},
+                        "schemaXmlns": {},
+                        "valueKey": "$value",
+                        "xmlKey": "$xml",
+                        "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                        "$ref": "soapenc:arrayType",
+                        "$wsdl:arrayType": "xsd:anyType[]"
+                      }
+                    ],
+                    "nsName": "restriction",
+                    "prefix": "__tns__",
+                    "name": "restriction",
+                    "xmlns": {},
+                    "schemaXmlns": {},
+                    "valueKey": "$value",
+                    "xmlKey": "$xml",
+                    "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                    "$base": "soapenc:Array"
+                  }
+                ],
+                "nsName": "complexContent",
+                "prefix": "__tns__",
+                "name": "complexContent",
+                "xmlns": {},
+                "schemaXmlns": {},
+                "valueKey": "$value",
+                "xmlKey": "$xml",
+                "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"]
+              }
+            ],
+            "nsName": "complexType",
+            "prefix": "typens",
+            "name": "complexType",
+            "xmlns": "urn:Magento",
+            "schemaXmlns": {},
+            "valueKey": "$value",
+            "xmlKey": "$xml",
+            "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+            "$name": "FixedArray"
+          },
+          "options": "xsd:anyType"
+        },
+        "output": {
+          "multiCallReturn": {
+            "allowedChildren": {},
+            "children": [
+              {
+                "allowedChildren": {},
+                "children": [
+                  {
+                    "allowedChildren": {},
+                    "children": [
+                      {
+                        "allowedChildren": {},
+                        "children": [],
+                        "nsName": "attribute",
+                        "prefix": "__tns__",
+                        "name": "attribute",
+                        "xmlns": {},
+                        "schemaXmlns": {},
+                        "valueKey": "$value",
+                        "xmlKey": "$xml",
+                        "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                        "$ref": "soapenc:arrayType",
+                        "$wsdl:arrayType": "xsd:anyType[]"
+                      }
+                    ],
+                    "nsName": "restriction",
+                    "prefix": "__tns__",
+                    "name": "restriction",
+                    "xmlns": {},
+                    "schemaXmlns": {},
+                    "valueKey": "$value",
+                    "xmlKey": "$xml",
+                    "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                    "$base": "soapenc:Array"
+                  }
+                ],
+                "nsName": "complexContent",
+                "prefix": "__tns__",
+                "name": "complexContent",
+                "xmlns": {},
+                "schemaXmlns": {},
+                "valueKey": "$value",
+                "xmlKey": "$xml",
+                "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"]
+              }
+            ],
+            "nsName": "complexType",
+            "prefix": "typens",
+            "name": "complexType",
+            "xmlns": "urn:Magento",
+            "schemaXmlns": {},
+            "valueKey": "$value",
+            "xmlKey": "$xml",
+            "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+            "$name": "FixedArray"
+          }
+        }
+      },
+      "endSession": {
+        "input": { "sessionId": "xsd:string" },
+        "output": { "endSessionReturn": "xsd:boolean" }
+      },
+      "login": {
+        "input": { "username": "xsd:string", "apiKey": "xsd:string" },
+        "output": { "loginReturn": "xsd:string" }
+      },
+      "startSession": { "input": null, "output": { "startSessionReturn": "xsd:string" } },
+      "resources": {
+        "input": { "sessionId": "xsd:string" },
+        "output": {
+          "resourcesReturn": {
+            "allowedChildren": {},
+            "children": [
+              {
+                "allowedChildren": {},
+                "children": [
+                  {
+                    "allowedChildren": {},
+                    "children": [
+                      {
+                        "allowedChildren": {},
+                        "children": [],
+                        "nsName": "attribute",
+                        "prefix": "__tns__",
+                        "name": "attribute",
+                        "xmlns": {},
+                        "schemaXmlns": {},
+                        "valueKey": "$value",
+                        "xmlKey": "$xml",
+                        "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                        "$ref": "soapenc:arrayType",
+                        "$wsdl:arrayType": "xsd:anyType[]"
+                      }
+                    ],
+                    "nsName": "restriction",
+                    "prefix": "__tns__",
+                    "name": "restriction",
+                    "xmlns": {},
+                    "schemaXmlns": {},
+                    "valueKey": "$value",
+                    "xmlKey": "$xml",
+                    "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                    "$base": "soapenc:Array"
+                  }
+                ],
+                "nsName": "complexContent",
+                "prefix": "__tns__",
+                "name": "complexContent",
+                "xmlns": {},
+                "schemaXmlns": {},
+                "valueKey": "$value",
+                "xmlKey": "$xml",
+                "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"]
+              }
+            ],
+            "nsName": "complexType",
+            "prefix": "typens",
+            "name": "complexType",
+            "xmlns": "urn:Magento",
+            "schemaXmlns": {},
+            "valueKey": "$value",
+            "xmlKey": "$xml",
+            "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+            "$name": "FixedArray"
+          }
+        }
+      },
+      "globalFaults": {
+        "input": { "sessionId": "xsd:string" },
+        "output": {
+          "globalFaultsReturn": {
+            "allowedChildren": {},
+            "children": [
+              {
+                "allowedChildren": {},
+                "children": [
+                  {
+                    "allowedChildren": {},
+                    "children": [
+                      {
+                        "allowedChildren": {},
+                        "children": [],
+                        "nsName": "attribute",
+                        "prefix": "__tns__",
+                        "name": "attribute",
+                        "xmlns": {},
+                        "schemaXmlns": {},
+                        "valueKey": "$value",
+                        "xmlKey": "$xml",
+                        "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                        "$ref": "soapenc:arrayType",
+                        "$wsdl:arrayType": "xsd:anyType[]"
+                      }
+                    ],
+                    "nsName": "restriction",
+                    "prefix": "__tns__",
+                    "name": "restriction",
+                    "xmlns": {},
+                    "schemaXmlns": {},
+                    "valueKey": "$value",
+                    "xmlKey": "$xml",
+                    "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                    "$base": "soapenc:Array"
+                  }
+                ],
+                "nsName": "complexContent",
+                "prefix": "__tns__",
+                "name": "complexContent",
+                "xmlns": {},
+                "schemaXmlns": {},
+                "valueKey": "$value",
+                "xmlKey": "$xml",
+                "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"]
+              }
+            ],
+            "nsName": "complexType",
+            "prefix": "typens",
+            "name": "complexType",
+            "xmlns": "urn:Magento",
+            "schemaXmlns": {},
+            "valueKey": "$value",
+            "xmlKey": "$xml",
+            "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+            "$name": "FixedArray"
+          }
+        }
+      },
+      "resourceFaults": {
+        "input": { "resourceName": "xsd:string", "sessionId": "xsd:string" },
+        "output": {
+          "resourceFaultsReturn": {
+            "allowedChildren": {},
+            "children": [
+              {
+                "allowedChildren": {},
+                "children": [
+                  {
+                    "allowedChildren": {},
+                    "children": [
+                      {
+                        "allowedChildren": {},
+                        "children": [],
+                        "nsName": "attribute",
+                        "prefix": "__tns__",
+                        "name": "attribute",
+                        "xmlns": {},
+                        "schemaXmlns": {},
+                        "valueKey": "$value",
+                        "xmlKey": "$xml",
+                        "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                        "$ref": "soapenc:arrayType",
+                        "$wsdl:arrayType": "xsd:anyType[]"
+                      }
+                    ],
+                    "nsName": "restriction",
+                    "prefix": "__tns__",
+                    "name": "restriction",
+                    "xmlns": {},
+                    "schemaXmlns": {},
+                    "valueKey": "$value",
+                    "xmlKey": "$xml",
+                    "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+                    "$base": "soapenc:Array"
+                  }
+                ],
+                "nsName": "complexContent",
+                "prefix": "__tns__",
+                "name": "complexContent",
+                "xmlns": {},
+                "schemaXmlns": {},
+                "valueKey": "$value",
+                "xmlKey": "$xml",
+                "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"]
+              }
+            ],
+            "nsName": "complexType",
+            "prefix": "typens",
+            "name": "complexType",
+            "xmlns": "urn:Magento",
+            "schemaXmlns": {},
+            "valueKey": "$value",
+            "xmlKey": "$xml",
+            "ignoredNamespaces": ["tns", "targetNamespace", "typedNamespace"],
+            "$name": "FixedArray"
+          }
+        }
+      }
+    }
+  }
+}
