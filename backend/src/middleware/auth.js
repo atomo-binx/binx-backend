@@ -6,7 +6,7 @@ async function protectedRoute(req, res, next) {
   const decoded = await TokenBusiness.verifyToken(token);
 
   if (decoded["status"] === "error") {
-    return res.status(400).json(decoded);
+    return res.status(401).json(decoded);
   }
 
   req.token = decoded;

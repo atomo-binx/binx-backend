@@ -1,8 +1,9 @@
 const controller = require("../controllers/etiqueta.controller");
+const { protectedRoute } = require("../middleware/auth");
 
 function load(routes) {
-  routes.get("/expedicao/etiqueta/produto", controller.etiquetaProduto);
-  routes.get("/expedicao/etiqueta/pedido", controller.etiquetaPedido);
+  routes.post("/expedicao/etiqueta/produto", protectedRoute, controller.etiquetaProduto);
+  routes.post("/expedicao/etiqueta/pedido", protectedRoute, controller.etiquetaPedido);
 }
 
 module.exports = load;
