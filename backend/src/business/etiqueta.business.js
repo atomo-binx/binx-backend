@@ -36,19 +36,28 @@ module.exports = {
 
   async etiquetaPedido(pedidos) {
     // Busca informações do pedido de venda
-    let dadosVenda = await bling.pedidoVenda(pedidos[0]);
+    let dadosVenda = null;
+    try {
+      dadosVenda = await bling.pedidoVenda(pedidos[0]);
+    } catch (error) {
+      return ok({
+        status: ErrorStatus,
+        response: {
+          message: `O pedido de venda ${pedidos[0]} não foi encontrado.`,
+        },
+      });
+    }
 
     // Desestrutura apenas os itens da venda (array de objetos)
     const itens = dadosVenda["itens"];
 
     const quantidadeLinhas = Math.floor(itens.length / 2) + (itens.length % 2);
-    const alturaPagina = quantidadeLinhas * 25;
 
     // Parametriza o arquivo PDF
     const options = {
+      height: "25mm",
       width: "83mm",
-      height: alturaPagina + "mm",
-      orientation: "landscape",
+      type: "pdf",
     };
 
     // Carrega o corpo da etiqueta em html
@@ -71,10 +80,16 @@ module.exports = {
     html = html.replace("#LINHAS", linhas);
 
     for (const [index, item] of itens.entries()) {
-      html = html.replace("#PRODUTO", item["nome"]);
+      const nomeProduto = item["nome"];
+
+      // const nomeProduto =
+      //   item["nome"].length > 30
+      //     ? item["nome"].substring(0, 30) + " ..."
+      //     : item["nome"];
+
+      html = html.replace("#PRODUTO", nomeProduto);
       html = html.replace("#SKU", item["idsku"]);
       html = html.replace("#QNTD", item["quantidade"]);
-
       // Limpar uma etiqueta vazia quando houver
       if (index === itens.length - 1) {
         html = html.replace("#PRODUTO", "");
@@ -83,6 +98,8 @@ module.exports = {
         html = html.replace("Quantidade: #QNTD", "");
       }
     }
+
+    fs.writeFileSync("/tmp/resultado.html", html);
 
     // Cria o arquivo HTML
     const filename = await this.pdfCreatePromise(html, options);
