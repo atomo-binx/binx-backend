@@ -2,12 +2,13 @@ const fs = require("fs");
 const pdf = require("html-pdf");
 const QRCode = require("qrcode");
 const bling = require("../bling/bling");
+const { Op } = require("sequelize");
+const { ErrorStatus, OkStatus } = require("../modules/codes");
+const { ok } = require("../modules/http");
+const { dictionary } = require("../utils/dict");
+const { ordenaPorChave } = require("../utils/sort");
 
 const Produto = require("../models/produto.model");
-const { ErrorStatus, OkStatus } = require("../modules/codes");
-
-const { ok } = require("../modules/http");
-
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
@@ -37,6 +38,7 @@ module.exports = {
   async etiquetaPedido(pedidos) {
     // Busca informações do pedido de venda
     let dadosVenda = null;
+
     try {
       dadosVenda = await bling.pedidoVenda(pedidos[0]);
     } catch (error) {
@@ -50,6 +52,32 @@ module.exports = {
 
     // Desestrutura apenas os itens da venda (array de objetos)
     const itens = dadosVenda["itens"];
+
+    // Gera lista de SKU's dos itens presentes na venda para aquisição das localizações
+    const skus = itens.map((item) => item["idsku"]);
+
+    // Adquire as localizações dos itens no Binx
+    let produtosBinx = await Produto.findAll({
+      attributes: ["idsku", "localizacao"],
+      where: {
+        idsku: {
+          [Op.in]: skus,
+        },
+      },
+      raw: true,
+    });
+
+    produtosBinx = dictionary(produtosBinx, "idsku", true);
+
+    // Adiciona a localização ao grupo de itens
+    for (const item of itens) {
+      item["localizacao"] = produtosBinx[item["idsku"]]["localizacao"] || "";
+    }
+
+    // Ordena o grupo de itens com base na localização
+    const itensOrdenados = ordenaPorChave(itens, "localizacao");
+
+    console.log("Ordenado", itensOrdenados);
 
     const quantidadeLinhas = Math.floor(itens.length / 2) + (itens.length % 2);
 
