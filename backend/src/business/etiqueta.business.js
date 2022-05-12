@@ -36,7 +36,7 @@ module.exports = {
   },
 
   async etiquetaPedido(pedidos) {
-    // Busca informações do pedido de venda
+    // Busca informações do pedido de venda no Bling
     let dadosVenda = null;
 
     try {
@@ -50,18 +50,15 @@ module.exports = {
       });
     }
 
-    // Desestrutura apenas os itens da venda (array de objetos)
+    // Desestrutura apenas os itens da venda, vira uma array de objetos, cada objeto é um item
     const itens = dadosVenda["itens"];
-
-    // Gera lista de SKU's dos itens presentes na venda para aquisição das localizações
-    const skus = itens.map((item) => item["idsku"]);
 
     // Adquire as localizações dos itens no Binx
     let produtosBinx = await Produto.findAll({
       attributes: ["idsku", "localizacao"],
       where: {
         idsku: {
-          [Op.in]: skus,
+          [Op.in]: itens.map((item) => item["idsku"]),
         },
       },
       raw: true,
@@ -69,24 +66,22 @@ module.exports = {
 
     produtosBinx = dictionary(produtosBinx, "idsku", true);
 
-    // Adiciona a localização ao grupo de itens
+    // Adiciona a localização do Binx ao grupo de itens do Bling
+    // Caso o item não tenha sido retornado do Binx, adicionar um campo vazio à localização
+    // Aplicar a mesma regra caso o item retornado não tenha localização
     for (const item of itens) {
-      item["localizacao"] = produtosBinx[item["idsku"]]["localizacao"] || "";
+      if (produtosBinx[item["idsku"]]) {
+        item["localizacao"] = produtosBinx[item["idsku"]]["localizacao"] || "";
+      } else {
+        item["localizacao"] = "";
+      }
     }
 
     // Ordena o grupo de itens com base na localização
-    const itensOrdenados = ordenaPorChave(itens, "localizacao");
-
-    console.log("Ordenado", itensOrdenados);
-
-    const quantidadeLinhas = Math.floor(itens.length / 2) + (itens.length % 2);
+    ordenaPorChave(itens, "localizacao");
 
     // Parametriza o arquivo PDF
-    const options = {
-      height: "25mm",
-      width: "83mm",
-      type: "pdf",
-    };
+    const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
     let html = (
@@ -97,6 +92,9 @@ module.exports = {
     let linha = (
       await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")
     ).toString();
+
+    // Monta a quantidade correta de linhas
+    const quantidadeLinhas = Math.floor(itens.length / 2) + (itens.length % 2);
 
     let linhas = "";
 
@@ -109,12 +107,6 @@ module.exports = {
 
     for (const [index, item] of itens.entries()) {
       const nomeProduto = item["nome"];
-
-      // const nomeProduto =
-      //   item["nome"].length > 30
-      //     ? item["nome"].substring(0, 30) + " ..."
-      //     : item["nome"];
-
       html = html.replace("#PRODUTO", nomeProduto);
       html = html.replace("#SKU", item["idsku"]);
       html = html.replace("#QNTD", item["quantidade"]);
