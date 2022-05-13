@@ -163,13 +163,14 @@ module.exports = {
 
       // Verifica se o dado foi recebido corretamente via callback
       if (req.body.data) {
-        const file = dateToFilename();
-        const data = req.body.data;
+        // Debug: Salvar callbacks
+        // const file = dateToFilename();
+        // const data = req.body.data;
 
-        debug.save(
-          "callbacks_estoque/" + file + ".json",
-          JSON.parse(JSON.stringify(data))
-        );
+        // debug.save(
+        //   "callbacks_estoque/" + file + ".json",
+        //   JSON.parse(JSON.stringify(data))
+        // );
 
         registros = JSON.parse(req.body.data).retorno.estoques;
       } else {

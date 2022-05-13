@@ -2,6 +2,8 @@
 const Venda = require("../models/venda.model");
 const VendaProduto = require("../models/vendaProduto.model");
 const FreteForcado = require("../models/freteForcado.model");
+const OcorrenciaVenda = require("../models/ocorrenciasVenda.model");
+const FormaPagamento = require("../models/formaPagamento.model");
 
 // Business
 const FreteBusiness = require("./frete.business");
@@ -24,6 +26,8 @@ const http = require("../utils/http");
 const axios = require("axios");
 const url = "https://bling.com.br/Api/v2";
 const blingApi = axios.create({ baseURL: url });
+
+const { dateToFilename } = require("../utils/date");
 
 module.exports = {
   // ==================================================================================================
@@ -98,6 +102,15 @@ module.exports = {
       let pedido = null;
 
       if (req.body.data) {
+        // Debug: Salvar callbacks
+        const file = dateToFilename();
+        const data = req.body.data;
+
+        debug.save(
+          "callbacks_venda/" + file + ".json",
+          JSON.parse(JSON.stringify(data))
+        );
+
         // Dados de pedido recebidos via 'data' enviado pelo callback do Bling
         pedido = JSON.parse(req.body.data).retorno.pedidos[0].pedido;
       } else {
@@ -487,50 +500,72 @@ module.exports = {
 
   // Realiza a transção de pedido de venda e de venda-produto, com os itens
   async vendaTransaction(venda) {
-    let status = false;
-
     // Realiza separação de dados de venda e lista de itens
-    let { itens, ...dadosVenda } = venda;
+    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = venda;
 
-    // Inicia transação de um relacionamento
-    const t = await sequelize.transaction();
-
+    // Transação dos dados no banco de dados
     try {
-      // Tenta inserir dados do pedido de venda
-      await Venda.upsert(dadosVenda, { transaction: t });
+      await sequelize.transaction(async (t) => {
+        // Tenta inserir dados do pedido de venda
+        await Venda.upsert(dadosVenda, { transaction: t });
 
-      // Tenta inserir relacionamento de venda-produto
-      for (const relacionamento of itens) {
-        await VendaProduto.upsert(relacionamento, { transaction: t });
-      }
+        // Tenta inserir relacionamento de venda-produto
+        if (itens) {
+          await VendaProduto.destroy({
+            where: {
+              idpedidovenda: dadosVenda["idpedidovenda"],
+            },
+            transaction: t,
+          });
 
-      //Se chegamos até aqui, as inserções foram bem sucedidas
-      await t
-        .commit()
-        .then(() => {
-          status = true;
-        })
-        .catch((error) => {
-          console.log(
-            filename,
-            `Pedido de Venda: ${dadosVenda.idpedidovenda} -`,
-            `Erro durante o commit da transaction para o pedido de venda:`,
-            error.message
-          );
-        });
-    } catch (error) {
-      // Se caímos no catch, a inserção foi mal executada, executar rollback na transação
-      await t.rollback().catch((error) => {
-        console.log(
-          filename,
-          `Pedido de Venda: ${dadosVenda.idpedidovenda} -`,
-          `Erro durante o rollback da transaction para o pedido de venda:`,
-          error.message
-        );
+          for (const relacionamento of itens) {
+            await VendaProduto.upsert(relacionamento, {
+              transaction: t,
+            });
+          }
+        }
+
+        // Tenta inserir relacionamentos de ocorrencias
+        if (ocorrencias) {
+          await OcorrenciaVenda.destroy({
+            where: {
+              idpedidovenda: dadosVenda["idpedidovenda"],
+            },
+            transaction: t,
+          });
+
+          for (const ocorrencia of ocorrencias) {
+            await OcorrenciaVenda.create(
+              {
+                idocorrencia: "default",
+                ...ocorrencia,
+              },
+              {
+                transaction: t,
+              }
+            );
+          }
+        }
+
+        // Tenta inserir o relacionamento de forma de pagamento
+        if (objFormaPagamento) {
+          await FormaPagamento.upsert(objFormaPagamento, { transaction: t });
+        }
       });
-    }
 
-    return status;
+      // Operações no banco de dados finalizadas com sucesso
+      return true;
+    } catch (error) {
+      // Falha nas operaçõs no banco de dados
+      console.log(
+        filename,
+        `Pedido de Venda: ${dadosVenda["idpedidovenda"]} -`,
+        `Erro durante a transação de pedido de venda:`,
+        error.message
+      );
+
+      return false;
+    }
   },
 
   // Monta dicionário de sistuações de pedidos de venda existentes

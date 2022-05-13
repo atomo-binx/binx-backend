@@ -10,6 +10,7 @@ const url = "https://bling.com.br/Api/v2";
 const api = axios.create({ baseURL: url });
 
 const crypto = require("crypto");
+const { ObjectLockConfiguration } = require("@aws-sdk/client-s3");
 
 const situacoes = {
   "Em aberto": 6,
@@ -47,16 +48,18 @@ module.exports = {
   desestruturaPedidoVenda(venda) {
     try {
       // Variáveis que dependem de lógica e regras para serem desestruturadas
-      let formaPagamento = "";
+      let idformapagamento = null;
+      let formapagamento = "";
+      let objFormaPagamento = null;
       let transportadora = "";
       let rastreio = "";
       let servico = "";
       let idpedidoloja = "";
       let vendedor = "";
-      let numeroNota = "";
-      let serieNota = "";
-      let dataNota = null;
-      let valorFrete = null;
+      let numeronota = "";
+      let serienota = "";
+      let datanota = null;
+      let fretecliente = null;
       let numeroproposta = "";
       let endereco = "";
       let cep = "";
@@ -65,6 +68,7 @@ module.exports = {
       let bairro = "";
       let cidade = "";
       let uf = "";
+      let itens = [];
 
       // Verifica se o pedido possui um vendedor
       if (venda.hasOwnProperty("vendedor")) {
@@ -73,9 +77,9 @@ module.exports = {
 
       // Verifica se o pedido possui uma nota fiscal
       if (venda.hasOwnProperty("nota")) {
-        numeroNota = venda["nota"]["numero"];
-        serieNota = venda["nota"]["serie"];
-        dataNota = venda["nota"]["dataEmissao"];
+        numeronota = venda["nota"]["numero"];
+        serienota = venda["nota"]["serie"];
+        datanota = venda["nota"]["dataEmissao"];
       }
 
       // Verifica se o pedido possui um número de ligação com alguma loja
@@ -85,8 +89,15 @@ module.exports = {
 
       // Verifica se o pedido possui uma forma de pagamento associada
       if (venda.hasOwnProperty("parcelas")) {
-        formaPagamento =
-          venda["parcelas"][0]["parcela"]["forma_pagamento"]["descricao"];
+        pagamento = venda["parcelas"][0]["parcela"]["forma_pagamento"];
+
+        idformapagamento = pagamento["id"];
+        formapagamento = pagamento["descricao"];
+
+        objFormaPagamento = {
+          idformapagamento: pagamento["id"],
+          descricao: pagamento["descricao"],
+        };
       }
 
       // Verifica se o pedido possui uma transportadora associada
@@ -142,13 +153,10 @@ module.exports = {
 
       // Verifica se o pedido possui um valor de frete associado
       if (venda["valorfrete"]) {
-        valorFrete = venda["valorfrete"];
+        fretecliente = venda["valorfrete"];
       }
 
       // Realiza desestruturação dos itens presentes no pedido de venda
-      let itens = [];
-
-      // Verificar se o pedido de venda contém itens
       if (venda["itens"]) {
         for (const item of venda["itens"]) {
           // Verificar se o item está retornando do Bling com SKU válido
@@ -176,6 +184,21 @@ module.exports = {
         }
       }
 
+      // Realiza desestruturação das ocorrências no pedido de venda
+      let ocorrencias = [];
+
+      if (venda["ocorrencias"]) {
+        for (const ocorrencia of venda["ocorrencias"]) {
+          ocorrencias.push({
+            idpedidovenda: venda["numero"],
+            datapedido: ocorrencia["ocorrencia"]["dataCriacaoPedido"],
+            dataocorrencia: ocorrencia["ocorrencia"]["data"],
+            ocorrencia: ocorrencia["ocorrencia"]["ocorrencia"],
+            situacao: ocorrencia["ocorrencia"]["situacao"],
+          });
+        }
+      }
+
       // Monta um objeto que representa o pedido de venda
       const dadosVenda = {
         idpedidovenda: venda["numero"],
@@ -187,29 +210,30 @@ module.exports = {
         totalprodutos: venda["totalprodutos"],
         totalvenda: venda["totalvenda"],
         desconto: venda["desconto"],
-        fretecliente: valorFrete,
-        itens: itens,
+        fretecliente,
+        itens,
         email: venda["cliente"]["email"],
         cpfcnpj: venda["cliente"]["cnpj"],
-        idpedidoloja: idpedidoloja,
-        formapagamento: formaPagamento,
-        transportadora: transportadora,
-        rastreio: rastreio,
-        servico: servico,
-        endereco: endereco,
-        cep: cep,
-        vendedor: vendedor,
-        numeronota: numeroNota,
-        serienota: serieNota,
-        datanota: dataNota,
-
+        idpedidoloja,
+        idformapagamento,
+        formapagamento,
+        transportadora,
+        rastreio,
+        servico,
+        endereco,
+        cep,
+        vendedor,
+        numeronota,
+        serienota,
+        datanota,
         rua,
         numero,
         bairro,
         cidade,
         uf,
-
         numeroproposta,
+        ocorrencias,
+        objFormaPagamento,
       };
 
       // Retorna o objeto final que representa o pedido de venda
@@ -313,7 +337,7 @@ module.exports = {
         situacao: proposta["situacao"],
         vendedor: proposta["vendedor"],
         totalprodutos: proposta["subtotal"],
-        frete: proposta["valorFrete"],
+        frete: proposta["fretecliente"],
         total: proposta["totalOrcamento"],
         cliente: proposta.cliente["nome"],
         endereco: proposta.cliente["endereco"],
@@ -559,6 +583,7 @@ module.exports = {
       await this.blingRequest("GET", `/pedido/${pedido}/json/`, {
         params: {
           apikey: process.env.BLING_API_KEY,
+          historico: "true",
         },
       })
         .then(async (res) => {
@@ -674,6 +699,7 @@ module.exports = {
         params: {
           filters: filtros,
           apikey: process.env.BLING_API_KEY,
+          historico: "true",
         },
       })
         .then(async (res) => {

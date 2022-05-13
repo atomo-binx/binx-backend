@@ -13,7 +13,11 @@ const http = require("../utils/http");
 // Funções auxiliares para manuseio de valores monetários
 const BRL = (value, precision) => currency(value, { precision });
 const formatBRL = (currency) =>
-  currency.format({ symbol: "" }).replace(",", "+").replace(".", ",").replace("+", ".");
+  currency
+    .format({ symbol: "" })
+    .replace(",", "+")
+    .replace(".", ",")
+    .replace("+", ".");
 
 module.exports = {
   // Rotina para envio de email em ambiente de Debug (informando o destinarário)
@@ -111,7 +115,9 @@ module.exports = {
             assunto = `Recebemos o seu pedido ${venda["idpedidoloja"]}!`;
 
             // Carrega arquivo base
-            html = (await fs.readFile("src/emails/html/1_pedido_criado.html")).toString();
+            html = (
+              await fs.readFile("src/emails/html/1_pedido_criado.html")
+            ).toString();
 
             // Realiza substituições
             html = await this.replaceCliente(html, venda);
@@ -232,8 +238,14 @@ module.exports = {
   },
 
   async replaceValores(html, venda) {
-    html = html.replace("#VALOR_PRODUTOS", formatBRL(BRL(venda["totalprodutos"], 2)));
-    html = html.replace("#VALOR_FRETE", formatBRL(BRL(venda["fretecliente"], 2)));
+    html = html.replace(
+      "#VALOR_PRODUTOS",
+      formatBRL(BRL(venda["totalprodutos"], 2))
+    );
+    html = html.replace(
+      "#VALOR_FRETE",
+      formatBRL(BRL(venda["fretecliente"], 2))
+    );
     html = html.replace("#VALOR_TOTAL", formatBRL(BRL(venda["totalvenda"], 2)));
 
     // Verifica se existe desconto neste pedido
@@ -403,17 +415,23 @@ module.exports = {
     switch (prazoQuery["servico"]) {
       case "Retirada na Loja":
         infoRow = (
-          await fs.readFile("src/emails/html/row_pagamento_aprovado_retira.html")
+          await fs.readFile(
+            "src/emails/html/row_pagamento_aprovado_retira.html"
+          )
         ).toString();
         break;
       case "Motoboy":
         infoRow = (
-          await fs.readFile("src/emails/html/row_pagamento_aprovado_motoboy.html")
+          await fs.readFile(
+            "src/emails/html/row_pagamento_aprovado_motoboy.html"
+          )
         ).toString();
         break;
       default:
         infoRow = (
-          await fs.readFile("src/emails/html/row_pagamento_aprovado_transportadora.html")
+          await fs.readFile(
+            "src/emails/html/row_pagamento_aprovado_transportadora.html"
+          )
         ).toString();
         break;
     }
@@ -435,7 +453,13 @@ module.exports = {
       where: {
         idpedidovenda: venda["idpedidovenda"],
       },
-      attributes: ["transportadora", "servico", "rastreio", "cpfcnpj", "numeronota"],
+      attributes: [
+        "transportadora",
+        "servico",
+        "rastreio",
+        "cpfcnpj",
+        "numeronota",
+      ],
       raw: true,
     });
 
@@ -588,7 +612,10 @@ module.exports = {
         // Aguardando Retirada
         22679: [1, 2, 4, 6],
         // Atendido - Verificação de método de entrega necessária
-        9: venda.transportadora == "Retirada na Loja" ? [1, 2, 4, 6] : [1, 2, 4, 5],
+        9:
+          venda.transportadora == "Retirada na Loja"
+            ? [1, 2, 4, 6]
+            : [1, 2, 4, 5],
       };
 
       // Recuperar lista de emails necessários a partir do status
@@ -650,14 +677,16 @@ module.exports = {
 
       // Após o envio dos emails, salvar no banco os emails que foram enviados com sucesso
 
-      await EmailEnviado.bulkCreate(emailsEnviadosSucesso).catch((error) => {
-        console.log(
-          filename,
-          `Pedido de Venda: ${venda.idpedidovenda}`,
-          "Erro ao salvar registros de emails enviados no banco de dados:",
-          error.message
-        );
-      });
+      if (emailsEnviadosSucesso) {
+        await EmailEnviado.bulkCreate(emailsEnviadosSucesso).catch((error) => {
+          console.log(
+            filename,
+            `Pedido de Venda: ${venda.idpedidovenda}`,
+            "Erro ao salvar registros de emails enviados no banco de dados:",
+            error.message
+          );
+        });
+      }
     } catch (error) {
       console.log(
         filename,
