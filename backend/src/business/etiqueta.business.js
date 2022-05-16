@@ -107,6 +107,9 @@ module.exports = {
 
     for (const [index, item] of itens.entries()) {
       const nomeProduto = item["nome"];
+      // Configurar corretamente a quebra de linha
+      html = html.replace("#QUEBRA_LINHA", "duas-linhas");
+
       html = html.replace("#PRODUTO", nomeProduto);
       html = html.replace("#SKU", item["idsku"]);
       html = html.replace("#QNTD", item["quantidade"]);
@@ -119,7 +122,7 @@ module.exports = {
       }
     }
 
-    fs.writeFileSync("/tmp/resultado.html", html);
+    // fs.writeFileSync("/tmp/resultado.html", html);
 
     // Cria o arquivo HTML
     const filename = await this.pdfCreatePromise(html, options);
@@ -132,12 +135,12 @@ module.exports = {
     });
   },
 
-  async etiquetaProduto(idsku) {
+  async etiquetaProduto(idsku, quantidade, etiquetaSimples) {
     // Adquire dados do produto
     const produto = await Produto.findOne({
       attributes: ["idsku", "nome", "urlproduto"],
       where: {
-        idsku: idsku[0],
+        idsku: idsku,
       },
       raw: true,
     });
@@ -152,19 +155,55 @@ module.exports = {
     }
 
     // Parametriza o arquivo PDF
-    const options = { width: "83mm", height: "25mm", orientation: "landscape" };
+    const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
     let html = (
-      await fs.promises.readFile("src/etiquetas/etiqueta_produto.html")
+      await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")
     ).toString();
 
-    // Realiza substituições no corpo HTML da etiqueta
-    html = html.replace("#PRODUTO", produto["nome"]);
-    html = html.replace("#SKU", produto["idsku"]);
+    // Carrega uma linha de etiqueta em html
+    let linha = (
+      await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")
+    ).toString();
 
-    html = html.replace("#PRODUTO", produto["nome"]);
-    html = html.replace("#SKU", produto["idsku"]);
+    if (etiquetaSimples) {
+      // Neste modo, a quantidade representa quantas etiquetas se deseja imprimir
+
+      // Monta a quantidade correta de linhas
+      const quantidadeLinhas = Math.floor(quantidade / 2) + (quantidade % 2);
+
+      let linhas = "";
+
+      for (let i = 0; i < quantidadeLinhas; i++) {
+        linhas += linha;
+      }
+
+      // Insere as linhas geradas no corpo do HTML
+      html = html.replace("#LINHAS", linhas);
+
+      // Realiza substituições no corpo HTML da etiqueta
+      for (let i = 0; i < quantidade; i++) {
+        // Remover campo de quantidade
+        html = html.replace("Quantidade: #QNTD", "");
+
+        // Configurar corretamente a quebra de linha
+        html = html.replace("#QUEBRA_LINHA", "tres-linhas");
+
+        html = html.replace("#PRODUTO", produto["nome"]);
+        html = html.replace("#SKU", produto["idsku"]);
+
+        // Limpar uma etiqueta vazia quando houver
+        if (i === quantidade - 1) {
+          html = html.replace("#PRODUTO", "");
+          html = html.replace("SKU: #SKU", "");
+          html = html.replace("QNTD: #QNTD", "");
+          html = html.replace("Quantidade: #QNTD", "");
+        }
+      }
+    } else {
+      // A quantidade representa a quantidade a ser impressa em cada etiqueta
+    }
 
     // Cria o arquivo HTML
     const filename = await this.pdfCreatePromise(html, options);

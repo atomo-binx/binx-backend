@@ -6,9 +6,15 @@ const { OkStatus } = require("../modules/codes");
 module.exports = {
   async etiquetaProduto(req, res, next) {
     try {
-      const { idsku } = req.body;
+      const idsku = parseInt(req.body["idsku"]);
+      const quantidade = parseInt(req.body["quantidade"]);
+      const etiquetaSimples = req.body["etiquetaSimples"] || false;
 
-      const resposta = await EtiquetaBusiness.etiquetaProduto(idsku);
+      const resposta = await EtiquetaBusiness.etiquetaProduto(
+        idsku,
+        quantidade,
+        etiquetaSimples
+      );
 
       if (resposta.body.status === OkStatus) {
         const filename = resposta["body"]["response"]["filename"];
