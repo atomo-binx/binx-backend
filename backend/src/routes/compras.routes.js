@@ -1,5 +1,5 @@
 const controller = require("../controllers/compras.controller");
-const { protectedRoute } = require("../middleware/auth");
+const { protectedRoute } = require("../middlewares/auth");
 
 function load(routes) {
   routes.get("/compras/dashboard", controller.dashboard);
