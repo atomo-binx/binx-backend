@@ -2,6 +2,7 @@ const { sequelize } = require("../modules/sequelize");
 const { ok, failure } = require("../modules/http");
 const { SequelizeAuto } = require("sequelize-auto");
 const { DatabaseFailure, OkStatus, ErrorStatus } = require("../modules/codes");
+const fs = require("fs");
 
 module.exports = {
   async connection() {
@@ -28,6 +29,16 @@ module.exports = {
     await auto
       .run()
       .then((data) => {
+        const arquivosCriados = Object.getOwnPropertyNames(data.tables).map(
+          (name) => name + ".js"
+        );
+
+        fs.readdirSync("./sequelize/models").forEach((file) => {
+          if (!arquivosCriados.includes(file) && file !== "init-models.js") {
+            fs.unlinkSync("./sequelize/models/" + file);
+          }
+        });
+
         response = ok({
           status: OkStatus,
           response: {
