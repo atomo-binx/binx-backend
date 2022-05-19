@@ -9,7 +9,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     idsituacao: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'tbsituacaocaixa',
         key: 'idsituacao'
@@ -17,7 +17,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     idoperadorabertura: {
       type: DataTypes.STRING(45),
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'tbusuario',
         key: 'idusuario'
@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     dataabertura: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     },
     datafechamento: {
       type: DataTypes.DATE,

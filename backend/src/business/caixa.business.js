@@ -20,34 +20,6 @@ module.exports = {
     });
 
     for (const caixa of caixas) {
-      // Ajuste dos horários para horário local
-      const dataAbertura = caixa["dataabertura"];
-      const dataFechamento = caixa["datafechamento"];
-      const dataConferencia = caixa["dataconferencia"];
-
-      if (dataAbertura) {
-        caixa["dataabertura"] = new Date(dataAbertura).toLocaleString("pt-BR", {
-          timeZone: "Brazil/East",
-        });
-      }
-
-      if (dataFechamento) {
-        caixa["dataabertura"] = new Date(dataFechamento).toLocaleString(
-          "pt-BR",
-          {
-            timeZone: "Brazil/East",
-          }
-        );
-      }
-      if (dataConferencia) {
-        caixa["dataabertura"] = new Date(dataConferencia).toLocaleString(
-          "pt-BR",
-          {
-            timeZone: "Brazil/East",
-          }
-        );
-      }
-
       // Inclusão dos usuários
       // const operadorAbertura = caixa["idusuarioabertura"];
       // const operadorFechamento = caixa["idoperadorfechamento"];
