@@ -254,4 +254,20 @@ module.exports = {
       },
     });
   },
+
+  async removerEtiquetas() {
+    const regex = /[.]pdf$/;
+
+    fs.readdirSync("/tmp")
+      .filter((f) => regex.test(f))
+      .map((f) => fs.unlinkSync("/tmp/" + f));
+
+    return ok({
+      status: OkStatus,
+      response: {
+        message:
+          "Arquivos de etiquetas do diretório temporário removidas com sucesso.",
+      },
+    });
+  },
 };

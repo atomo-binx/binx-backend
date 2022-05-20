@@ -19,7 +19,7 @@ module.exports = {
       if (resposta.body.status === OkStatus) {
         const filename = resposta["body"]["response"]["filename"];
         fs.createReadStream(filename).pipe(res);
-        fs.unlinkSync(filename);
+        // fs.unlinkSync(filename);
         return;
       } else {
         return res.status(resposta.statusCode).json(resposta.body);
@@ -38,11 +38,21 @@ module.exports = {
       if (resposta.body.status === OkStatus) {
         const filename = resposta["body"]["response"]["filename"];
         fs.createReadStream(filename).pipe(res);
-        fs.unlinkSync(filename);
+        // fs.unlinkSync(filename);
         return;
       } else {
         return res.status(resposta.statusCode).json(resposta.body);
       }
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async removerEtiquetas(req, res, next) {
+    try {
+      const resposta = await EtiquetaBusiness.removerEtiquetas();
+
+      return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
       next(error);
     }
