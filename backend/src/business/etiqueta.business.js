@@ -4,11 +4,14 @@ const QRCode = require("qrcode");
 const bling = require("../bling/bling");
 const { Op } = require("sequelize");
 const { ErrorStatus, OkStatus } = require("../modules/codes");
-const { ok } = require("../modules/http");
+const { ok, badRequest, notFound } = require("../modules/http");
 const { dictionary } = require("../utils/dict");
 const { ordenaPorChave } = require("../utils/sort");
+const htmlToPdf = require("html-pdf-node");
+const { randomUUID } = require("crypto");
 
 const Produto = require("../models/produto.model");
+const { NotFound } = require("@aws-sdk/client-s3");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
@@ -24,6 +27,15 @@ module.exports = {
   },
 
   async pdfCreatePromise(html, options) {
+    // Para utilização com o módulo atualizado "html-pdf-node"
+    // return new Promise(async (resolve, reject) => {
+    //   htmlToPdf.generatePdf(html, options).then((output) => {
+    //     const filename = `etiquetas/${randomUUID()}.pdf`;
+    //     fs.writeFileSync(filename, output);
+    //     resolve(filename);
+    //   });
+    // });
+
     return new Promise(async (resolve, reject) => {
       pdf.create(html, options).toFile((err, res) => {
         if (!err) {
@@ -42,11 +54,10 @@ module.exports = {
     try {
       dadosVenda = await bling.pedidoVenda(pedidos[0]);
     } catch (error) {
-      return ok({
+      return notFound({
         status: ErrorStatus,
-        response: {
-          message: `O pedido de venda ${pedidos[0]} não foi encontrado.`,
-        },
+        code: NotFound,
+        message: "O pedido de venda informado não foi encontrado.",
       });
     }
 
@@ -88,6 +99,11 @@ module.exports = {
       await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")
     ).toString();
 
+    // Verifica necessidade de aplicar Zoom no arquivo principal de html
+    if (process.env.NODE_ENV === "production") {
+      html = html.replace("zoom: 1;", `zoom: 0.75;`);
+    }
+
     // Carrega uma linha de etiqueta em html
     let linha = (
       await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")
@@ -124,7 +140,11 @@ module.exports = {
 
     // fs.writeFileSync("/tmp/resultado.html", html);
 
-    // Cria o arquivo HTML
+    // Para utilização com o módulo atualizado html-pdf-node
+    // const file = { content: html };
+    // const filename = await this.pdfCreatePromise(file, options);
+
+    // Para utilização com o módulo antigo html-pdf
     const filename = await this.pdfCreatePromise(html, options);
 
     return ok({
@@ -146,11 +166,9 @@ module.exports = {
     });
 
     if (!produto) {
-      return ok({
+      return notFound({
         status: ErrorStatus,
-        response: {
-          message: "Não foi encontrado nenhum produto para o SKU informado.",
-        },
+        message: "Não foi encontrado nenhum produto para o SKU informado.",
       });
     }
 
@@ -162,13 +180,18 @@ module.exports = {
       await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")
     ).toString();
 
+    // Verifica necessidade de aplicar Zoom no arquivo principal de html
+    if (process.env.NODE_ENV === "production") {
+      html = html.replace("zoom: 1;", `zoom: 0.75;`);
+    }
+
     // Carrega uma linha de etiqueta em html
     let linha = (
       await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")
     ).toString();
 
     if (etiquetaSimples) {
-      // Neste modo, a quantidade representa quantas etiquetas se deseja imprimir
+      // Neste modo, a quantidade representa o número de cópias desejado
 
       // Monta a quantidade correta de linhas
       const quantidadeLinhas = Math.floor(quantidade / 2) + (quantidade % 2);
@@ -202,7 +225,23 @@ module.exports = {
         }
       }
     } else {
-      // A quantidade representa a quantidade a ser impressa em cada etiqueta
+      // A quantidade representa a quantidade a ser impressa na etiqueta
+
+      // Insere apenas uma linha no arquivo
+      html = html.replace("#LINHAS", linha);
+
+      // Configurar corretamente a quebra de linha
+      html = html.replace("#QUEBRA_LINHA", "duas-linhas");
+
+      // Substituições do produto
+      html = html.replace("#PRODUTO", produto["nome"]);
+      html = html.replace("#SKU", produto["idsku"]);
+      html = html.replace("#QNTD", quantidade);
+
+      // Substituições da etiqueta vazia
+      html = html.replace("#PRODUTO", "");
+      html = html.replace("SKU: #SKU", "");
+      html = html.replace("Quantidade: #QNTD", "");
     }
 
     // Cria o arquivo HTML
