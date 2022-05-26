@@ -270,4 +270,48 @@ module.exports = {
       },
     });
   },
+
+  async etiquetaPersonalizada() {
+    // Parametriza o arquivo PDF
+    const options = { height: "25mm", width: "83mm" };
+
+    // Carrega o corpo da etiqueta em html
+    let html = (
+      await fs.promises.readFile(
+        "src/etiquetas/etiqueta_corpo personalizada.html"
+      )
+    ).toString();
+
+    // Verifica necessidade de aplicar Zoom no arquivo principal de html
+    if (process.env.NODE_ENV === "production") {
+      html = html.replace("zoom: 1;", `zoom: 0.75;`);
+    }
+
+    // Carrega uma linha de etiqueta em html
+    let linha = (
+      await fs.promises.readFile(
+        "src/etiquetas/etiqueta_linha personalizada.html"
+      )
+    ).toString();
+
+    html = html.replace("#LINHAS", linha);
+
+    // Carrega imagem
+    var bitmap = fs.readFileSync("../backend/src/etiquetas/imagens/bordas.png");
+    const imgBuffer =
+      "data:image/png;base64," + new Buffer.from(bitmap).toString("base64");
+    html = html.replace("#IMG_1", imgBuffer);
+
+    console.log(imgBuffer);
+
+    // Cria o arquivo HTML
+    const filename = await this.pdfCreatePromise(html, options);
+
+    return ok({
+      status: OkStatus,
+      response: {
+        filename,
+      },
+    });
+  },
 };

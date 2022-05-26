@@ -8,12 +8,19 @@ const { ok, failure } = require("../modules/http");
 const { models } = require("../modules/sequelize");
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
+const currency = require("currency.js");
 
 const { CONTROLE_CAIXA_PAGE_SIZE } = require("../modules/constants");
 
 module.exports = {
   async listarCaixas() {
     const caixas = await models.tbcontrolecaixa.findAll({
+      attributes: [
+        ["idcaixa", "idCaixa"],
+        ["IdSituacao", "idSituacao"],
+        ["dataabertura", "dataAbertura"],
+        ["idoperadorabertura", "idOperadorAbertura"],
+      ],
       order: [["idcaixa", "desc"]],
       raw: true,
       nest: true,
@@ -21,9 +28,26 @@ module.exports = {
 
     for (const caixa of caixas) {
       // Inclusão dos usuários
-      // const operadorAbertura = caixa["idusuarioabertura"];
-      // const operadorFechamento = caixa["idoperadorfechamento"];
-      // const operadorConferencia = caixa["idoperadorconferencia"];
+      const operadorAbertura = await models.tbusuario.findOne({
+        attributes: ["nome"],
+        where: {
+          idusuario: caixa["idOperadorAbertura"],
+        },
+        raw: true,
+      });
+
+      caixa["operadorAbertura"] = operadorAbertura["nome"];
+
+      // Incluir situação
+      const situacao = await models.tbsituacaocaixa.findOne({
+        attributes: ["nome"],
+        where: {
+          idsituacao: caixa["idSituacao"],
+        },
+        raw: true,
+      });
+
+      caixa["situacao"] = situacao["nome"];
     }
 
     return ok({
@@ -34,7 +58,7 @@ module.exports = {
     });
   },
 
-  async criarCaixa(token) {
+  async criarCaixa(token, trocoAbertura) {
     console.log(token);
 
     // Procurar por caixas que já estejam abertos no momento
@@ -44,7 +68,7 @@ module.exports = {
       },
     });
 
-    if (caixasAbertos.length > 0) {
+    if (caixasAbertos.length < 0) {
       return failure({
         status: ErrorStatus,
         code: CaixaJaAberto,
@@ -57,21 +81,13 @@ module.exports = {
       idsituacao: 1,
       idoperadorabertura: token["sub"],
       dataabertura: new Date(),
+      trocoabertura: parseFloat(trocoAbertura),
     });
 
-    if (caixa) {
-      return ok({
-        status: OkStatus,
-        response: caixa,
-      });
-    } else {
-      return failure({
-        status: ErrorStatus,
-        code: DatabaseFailure,
-        message:
-          "Não foi possível realizar o registro do caixa no banco de dados.",
-      });
-    }
+    return ok({
+      status: OkStatus,
+      response: caixa,
+    });
   },
 
   async lerCaixa(idCaixa) {
@@ -85,6 +101,8 @@ module.exports = {
         ["dataabertura", "dataAbertura"],
         ["datafechamento", "dataFechamento"],
         ["dataconferencia", "dataConferencia"],
+        ["trocoabertura", "trocoAbertura"],
+        ["trocofechamento", "trocoFechamento"],
       ],
       where: {
         idcaixa: idCaixa,
@@ -130,7 +148,15 @@ module.exports = {
       if (operadorConferencia)
         caixa["operadorFechamento"] = operadorConferencia["nome"];
 
-      this.pedidosPorCaixa(idCaixa);
+      // Adquirir os pedidos considerados para este caixa
+      const pedidosConsiderados = await this.pedidosPorCaixa(idCaixa);
+      caixa["pedidosConsiderados"] = pedidosConsiderados;
+
+      // Acumular os valores registrados dos pedidos
+      const valoresRegistrados = await this.acumularValoresRegistrados(
+        pedidosConsiderados
+      );
+      caixa["valoresRegistrados"] = valoresRegistrados;
 
       return ok({
         status: OkStatus,
@@ -148,43 +174,83 @@ module.exports = {
       },
     });
 
-    // Definir a data de abertura do caixa
-    // No banco de dados, as datas são salvas em UTC
-    // O filtro de busca por ocorrências precisa ser feito em UTC
-    let dataInicial = dayjs(caixa["dataabertura"]).format(
-      "YYYY-MM-DD HH:mm:ss"
-    );
+    // Definir as datas iniciais e finais para consideração do período de caixa
+    let dataInicial = dayjs(caixa["dataabertura"])
+      .startOf("day")
+      .format("YYYY-MM-DD HH:mm:ss");
 
     let dataFinal = dayjs(caixa["dataabertura"])
       .endOf("day")
       .format("YYYY-MM-DD HH:mm:ss");
 
-    console.log(dataInicial, dataFinal);
-
-    if (caixa) {
-      const pedidos = await models.tbpedidovenda.findAll({
-        attributes: [["idpedidovenda", "idPedidoVenda"]],
-        where: {
-          idloja: "203398261",
-        },
-        include: [
-          {
-            model: models.tbocorrenciavenda,
-            attributes: [],
-            where: {
-              situacao: "Atendido",
-              dataocorrencia: {
-                [Op.between]: [dataInicial, dataFinal],
-              },
+    const pedidos = await models.tbpedidovenda.findAll({
+      attributes: [
+        ["idpedidovenda", "idPedidoVenda"],
+        ["cliente", "cliente"],
+        ["formapagamento", "formaPagamento"],
+        ["totalvenda", "totalVenda"],
+      ],
+      where: {
+        idloja: "203398261",
+      },
+      include: [
+        {
+          model: models.tbocorrenciavenda,
+          attributes: [],
+          where: {
+            situacao: "Atendido",
+            dataocorrencia: {
+              [Op.between]: [dataInicial, dataFinal],
             },
           },
-        ],
-        raw: true,
-        nest: true,
-        useUTC: true,
-      });
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
 
-      console.log(pedidos.length);
-    }
+    console.log("Pedidos registrados:", pedidos);
+
+    return pedidos;
+
+    // Agrupar os pagamentos e quantidades por método
+    const metodosPagamento = {};
+
+    pedidos.forEach((pedido) => {
+      if (metodosPagamento.hasOwnProperty(pedido["formaPagamento"])) {
+        // Método de pagamento já registrado, acumular valor
+        metodosPagamento[pedido["formaPagamento"]] = [
+          ...metodosPagamento[pedido["formaPagamento"]],
+          pedido,
+        ];
+      } else {
+        // Método de pagamento não registrado, criar campo no objeto
+        metodosPagamento[pedido["formaPagamento"]] = [pedido];
+      }
+    });
+
+    console.log("Métodos de pagamentos agrupados:", metodosPagamento);
+
+    return metodosPagamento;
+  },
+
+  async acumularValoresRegistrados(pedidos) {
+    const registros = {};
+
+    pedidos.forEach((pedido) => {
+      if (registros.hasOwnProperty(pedido.formaPagamento)) {
+        // Forma de pagamento já existe, acumular valor
+        const acumulado = currency(registros[pedido.formaPagamento]).add(
+          pedido["totalVenda"]
+        );
+
+        registros[pedido.formaPagamento] = acumulado;
+      } else {
+        // Forma de pagamento não registrada, criar e acumular
+        registros[pedido.formaPagamento] = currency(pedido["totalVenda"]);
+      }
+    });
+
+    return registros;
   },
 };

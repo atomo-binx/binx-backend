@@ -39,6 +39,14 @@ module.exports = function(sequelize, DataTypes) {
         key: 'idusuario'
       }
     },
+    trocoabertura: {
+      type: DataTypes.DECIMAL(10,3),
+      allowNull: true
+    },
+    trocofechamento: {
+      type: DataTypes.DECIMAL(10,3),
+      allowNull: true
+    },
     dataabertura: {
       type: DataTypes.DATE,
       allowNull: true
