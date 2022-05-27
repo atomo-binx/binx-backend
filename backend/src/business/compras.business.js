@@ -6,16 +6,19 @@ const DisponibilidadeCurva = require("../models/disponibilidadeCurva.model");
 const Curva = require("../models/curva.model");
 const PedidoCompra = require("../models/pedidoCompra.model");
 const CompraProduto = require("../models/compraProduto.model");
-const Fornecedor = require("../models/fornecedor.model");
 
 const sequelize = require("../services/sequelize");
-const { Op, Sequelize } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const moment = require("moment");
+const fs = require("fs");
+const { OkStatus, ErrorStatus } = require("../modules/codes");
+const { dateToFilename } = require("../utils/date");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 const ExcelJS = require("exceljs");
 const http = require("../utils/http");
+const { ok } = require("../utils/http");
 
 module.exports = {
   async salvarDashboardDiario() {
@@ -643,5 +646,100 @@ module.exports = {
       message: "Ok",
       time: queryElapsed,
     });
+  },
+
+  async relatorioPrecificacao() {
+    const query = (
+      await fs.promises.readFile("src/queries/relatorio_precificacao.sql")
+    ).toString();
+
+    const resultados = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+    });
+
+    const nomeArquivo = "exports/relatorio-precificacao-" + dateToFilename();
+
+    await this.exportToExcel(resultados, nomeArquivo);
+
+    return ok({
+      status: OkStatus,
+      response: {
+        filename: nomeArquivo + ".xlsx",
+      },
+    });
+  },
+
+  async ultimoCusto() {
+    const query = (
+      await fs.promises.readFile("src/queries/ultimo_custo.sql")
+    ).toString();
+
+    const resultados = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+    });
+
+    const nomeArquivo = "exports/relatorio-ultimo-custo-" + dateToFilename();
+
+    await this.exportToExcel(resultados, nomeArquivo);
+
+    return ok({
+      status: OkStatus,
+      response: {
+        filename: nomeArquivo + ".xlsx",
+      },
+    });
+  },
+
+  async exportToExcel(lista, arquivo) {
+    const workbook = new ExcelJS.Workbook();
+
+    let worksheets = [];
+
+    let nomes = [];
+    for (const name in lista[0]) {
+      nomes.push(name);
+    }
+
+    const sheet = workbook.addWorksheet("Relatório");
+
+    let sheetColumns = [];
+
+    for (const nome of nomes) {
+      sheetColumns.push({
+        header: nome,
+      });
+    }
+
+    sheet.columns = sheetColumns;
+
+    worksheets.push(sheet);
+
+    // Insere cada um dos itens da lista como sendo uma linha na tabela
+    for (const item of lista) {
+      let row = [];
+
+      for (const nome of nomes) {
+        row.push(item[nome]);
+      }
+
+      worksheets[0].addRow(row);
+    }
+
+    // Ajuste de tamanho das colunas
+    worksheets[0].columns.forEach((column) => {
+      const lengths = column.values.map((v) => v.toString().length);
+      const maxLength = Math.max(
+        ...lengths.filter((v) => typeof v === "number")
+      );
+      column.width = maxLength + 2;
+    });
+
+    // Escreve arquivo final
+    await workbook.xlsx
+      .writeFile(arquivo + ".xlsx")
+      .then((res) => console.log("Arquivo excel exportado com sucesso"))
+      .catch((error) =>
+        console.log("Erro ao exportar arquivo excel: ", error.message)
+      );
   },
 };
