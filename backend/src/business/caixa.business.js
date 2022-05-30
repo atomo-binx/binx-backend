@@ -11,6 +11,7 @@ const dayjs = require("dayjs");
 const currency = require("currency.js");
 
 const { CONTROLE_CAIXA_PAGE_SIZE } = require("../modules/constants");
+const { BRLString } = require("../utils/money");
 
 module.exports = {
   async listarCaixas() {
@@ -59,7 +60,7 @@ module.exports = {
   },
 
   async criarCaixa(token, trocoAbertura) {
-    console.log(token);
+    // console.log(token);
 
     // Procurar por caixas que já estejam abertos no momento
     const caixasAbertos = await models.tbcontrolecaixa.findAll({
@@ -152,11 +153,23 @@ module.exports = {
       const pedidosConsiderados = await this.pedidosPorCaixa(idCaixa);
       caixa["pedidosConsiderados"] = pedidosConsiderados;
 
-      // Acumular os valores registrados dos pedidos
+      // Acumular os valores registrados
       const valoresRegistrados = await this.acumularValoresRegistrados(
         pedidosConsiderados
       );
       caixa["valoresRegistrados"] = valoresRegistrados;
+
+      // Adquirir valores informados
+      // TODO: adquirir valores informados
+      const valoresInformados = [];
+
+      // Interpolar valores registrados com valores informados
+      let valores = await this.interpolarValores(
+        valoresRegistrados,
+        valoresInformados
+      );
+
+      caixa["valores"] = valores;
 
       return ok({
         status: OkStatus,
@@ -189,6 +202,7 @@ module.exports = {
         ["cliente", "cliente"],
         ["formapagamento", "formaPagamento"],
         ["totalvenda", "totalVenda"],
+        ["datavenda", "dataVenda"],
       ],
       where: {
         idloja: "203398261",
@@ -196,7 +210,7 @@ module.exports = {
       include: [
         {
           model: models.tbocorrenciavenda,
-          attributes: [],
+          attributes: [["dataocorrencia", "dataOcorrencia"]],
           where: {
             situacao: "Atendido",
             dataocorrencia: {
@@ -205,33 +219,14 @@ module.exports = {
           },
         },
       ],
+      group: "idPedidoVenda",
       raw: true,
       nest: true,
     });
 
-    console.log("Pedidos registrados:", pedidos);
+    // console.log("Pedidos registrados:", pedidos);
 
     return pedidos;
-
-    // Agrupar os pagamentos e quantidades por método
-    const metodosPagamento = {};
-
-    pedidos.forEach((pedido) => {
-      if (metodosPagamento.hasOwnProperty(pedido["formaPagamento"])) {
-        // Método de pagamento já registrado, acumular valor
-        metodosPagamento[pedido["formaPagamento"]] = [
-          ...metodosPagamento[pedido["formaPagamento"]],
-          pedido,
-        ];
-      } else {
-        // Método de pagamento não registrado, criar campo no objeto
-        metodosPagamento[pedido["formaPagamento"]] = [pedido];
-      }
-    });
-
-    console.log("Métodos de pagamentos agrupados:", metodosPagamento);
-
-    return metodosPagamento;
   },
 
   async acumularValoresRegistrados(pedidos) {
@@ -252,5 +247,69 @@ module.exports = {
     });
 
     return registros;
+  },
+
+  async interpolarValores(registrados, informados) {
+    let valores = {};
+
+    for (const valor in registrados) {
+      if (valores.hasOwnProperty(valor)) {
+        valores[valor]["registrado"] = registrados["valor"];
+      } else {
+        valores[valor] = {
+          registrado: registrados[valor],
+          informado: 0,
+        };
+      }
+    }
+
+    for (const valor in informados) {
+      if (valores.hasOwnProperty(valor)) {
+        valores[valor]["informado"] = informados["valor"];
+      } else {
+        valores[valor] = {
+          registrado: 0,
+          informado: informados[valor],
+        };
+      }
+    }
+
+    // Converter a estrutura de objeto para lista
+    // Nessa etapa calcula também a diferença entre os dois valores
+
+    // Estrutura inicial
+    // {
+    //   "Forma de Pagamento" :{
+    //     "registrado": "0",
+    //     "informado": "0"
+    //   }
+    // }
+
+    // Estrutura final
+    // [
+    //   {
+    //     "formaPagamento": "Forma de Pagamento",
+    //     "registrado": "0",
+    //     "informado": "0",
+    //   }
+    // ]
+
+    let valoresLista = [];
+
+    for (const valor in valores) {
+      valoresLista.push({
+        formaPagamento: valor,
+        registrado: BRLString(valores[valor]["registrado"], ""),
+        informado: BRLString(valores[valor]["informado"], ""),
+        diferencas: BRLString(
+          currency(valores[valor]["informado"]).subtract(
+            currency(valores[valor]["registrado"])
+          ),
+          ""
+        ),
+      });
+    }
+
+    return valoresLista;
   },
 };
