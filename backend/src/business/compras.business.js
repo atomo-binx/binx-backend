@@ -13,6 +13,7 @@ const moment = require("moment");
 const fs = require("fs");
 const { OkStatus, ErrorStatus } = require("../modules/codes");
 const { dateToFilename } = require("../utils/date");
+const validator = require("validator");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
@@ -719,6 +720,21 @@ module.exports = {
       let row = [];
 
       for (const nome of nomes) {
+        // console.log(
+        //   "Coluna:",
+        //   nome,
+        //   "| Tipo:",
+        //   typeof item[nome],
+        //   "| Valor:",
+        //   item[nome]
+        // );
+
+        if (typeof item[nome] === "string") {
+          if (validator.isDecimal(item[nome], { locale: "pt-BR" })) {
+            item[nome] = parseFloat(item[nome].replace(",", "."));
+          }
+        }
+
         row.push(item[nome]);
       }
 

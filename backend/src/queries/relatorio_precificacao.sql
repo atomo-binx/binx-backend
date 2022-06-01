@@ -12,7 +12,12 @@ select
     else "-"
   end as "Situação",
   tbpedidocompra.idpedidocompra as "Pedido",
-  tbfornecedor.nomefornecedor as "Fornecedor"
+  tbfornecedor.nomefornecedor as "Fornecedor",
+  replace(
+    (tbproduto.precovenda - tbcompraproduto.valor) / tbproduto.precovenda,
+    ".",
+    ","
+  ) as "Margem"
 from
   tbproduto
   join tbcompraproduto on tbproduto.idsku = tbcompraproduto.idsku
