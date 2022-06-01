@@ -6,7 +6,11 @@ const customErrorHandler = require("./src/modules/error");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    exposedHeaders: "filename",
+  })
+);
 app.use(express.json({ limit: "1gb" }));
 app.use(
   express.urlencoded({
