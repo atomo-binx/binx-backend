@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.87.0",
+    "@aws-sdk/client-eventbridge": "^3.100.0",
     "@aws-sdk/client-s3": "^3.87.0",
     "@aws-sdk/client-ses": "^3.87.0",
     "aws-jwt-verify": "^3.0.0",
@@ -44,6 +45,7 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
+    "eslint": "^8.17.0",
     "nodemon": "^2.0.16",
     "sequelize-cli": "^6.4.1"
   }

@@ -19,15 +19,12 @@ const sequelize = require("../services/sequelize");
 
 // Helpers
 const filename = __filename.slice(__dirname.length + 1) + " -";
-const debug = require("../utils/debug");
 const puppetter = require("../puppeteer/puppeteer");
 const http = require("../utils/http");
 
 const axios = require("axios");
 const url = "https://bling.com.br/Api/v2";
 const blingApi = axios.create({ baseURL: url });
-
-const { dateToFilename } = require("../utils/date");
 
 module.exports = {
   // ==================================================================================================
@@ -103,13 +100,13 @@ module.exports = {
 
       if (req.body.data) {
         // Debug: Salvar callbacks
-        const file = dateToFilename();
-        const data = req.body.data;
+        // const file = dateToFilename();
+        // const data = req.body.data;
 
-        debug.save(
-          "callbacks_venda/" + file + ".json",
-          JSON.parse(JSON.stringify(data))
-        );
+        // debug.save(
+        //   "callbacks_venda/" + file + ".json",
+        //   JSON.parse(JSON.stringify(data))
+        // );
 
         // Dados de pedido recebidos via 'data' enviado pelo callback do Bling
         pedido = JSON.parse(req.body.data).retorno.pedidos[0].pedido;
@@ -287,6 +284,7 @@ module.exports = {
 
               // Para Correios, contabilizar, e inserir na lista de ocorrências de correios
               case "Correios":
+                // eslint-disable-next-line no-unused-vars
                 qntdMetodosCorreios++;
                 correios.push(metodo);
                 break;
@@ -506,6 +504,13 @@ module.exports = {
     // Transação dos dados no banco de dados
     try {
       await sequelize.transaction(async (t) => {
+        // Atualiza entidade de forma de pagamento no banco de dados
+        // if (objFormaPagamento) {
+        //   await FormaPagamento.upsert(objFormaPagamento, {
+        //     transaction: t,
+        //   });
+        // }
+
         // Tenta inserir dados do pedido de venda
         await Venda.upsert(dadosVenda, { transaction: t });
 
@@ -545,11 +550,6 @@ module.exports = {
               }
             );
           }
-        }
-
-        // Tenta inserir o relacionamento de forma de pagamento
-        if (objFormaPagamento) {
-          await FormaPagamento.upsert(objFormaPagamento, { transaction: t });
         }
       });
 
@@ -605,6 +605,7 @@ module.exports = {
 
       // Dicionario de situações
       // O dicionário de situações é utilizado para verificar se foi passado um ID de situação válido
+      // eslint-disable-next-line no-unused-vars
       const situacoes = await this.dicionarioSituacoes();
 
       // A nova função de sincronização irá buscar apenas pedidos com situação em aberto
@@ -787,12 +788,5 @@ module.exports = {
       );
       return false;
     }
-  },
-
-  // Função que gera um delay
-  async forcedDelay(tempo) {
-    return new Promise(async (resolve, reject) => {
-      setTimeout(resolve, tempo);
-    });
   },
 };

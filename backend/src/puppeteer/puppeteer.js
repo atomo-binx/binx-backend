@@ -254,7 +254,7 @@ module.exports = {
         // await this.delay(500);
 
         switch (metodo) {
-          case "dlog":
+          case "dlog": {
             // Caso 1 - DLOG
             console.log(
               filename,
@@ -264,8 +264,9 @@ module.exports = {
             await page.select("select#integracaoLogistica", options.dlog);
             await this.delay(500);
             break;
+          }
 
-          case "pac":
+          case "pac": {
             // Caso 2 - Correios PAC
             console.log(
               filename,
@@ -291,8 +292,9 @@ module.exports = {
             );
             await this.delay(500);
             break;
+          }
 
-          case "sedex":
+          case "sedex": {
             // Caso 2 - Correios sedex
             console.log(
               filename,
@@ -319,7 +321,7 @@ module.exports = {
             await this.delay(500);
 
             break;
-
+          }
           default:
             console.log(
               filename,
@@ -327,7 +329,6 @@ module.exports = {
               "Erro ao alterar integração logística: não foi recebido um tipo válido de integração."
             );
             return false;
-            break;
         }
 
         // await page.screenshot({ path: "./example.png" });
@@ -441,7 +442,7 @@ module.exports = {
   },
 
   async delay(tempo) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve) => {
       setTimeout(resolve, tempo);
     });
   },

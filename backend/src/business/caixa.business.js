@@ -1,21 +1,15 @@
-const {
-  OkStatus,
-  ErrorStatus,
-  DatabaseFailure,
-  CaixaJaAberto,
-} = require("../modules/codes");
+const { OkStatus, ErrorStatus, CaixaJaAberto } = require("../modules/codes");
 const { ok, failure } = require("../modules/http");
 const { models } = require("../modules/sequelize");
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
 const currency = require("currency.js");
 
-const { CONTROLE_CAIXA_PAGE_SIZE } = require("../modules/constants");
 const { BRLString } = require("../utils/money");
 
 module.exports = {
   async listarCaixas() {
-    const caixas = await models.tbcontrolecaixa.findAll({
+    const caixas = await models.tbcaixa.findAll({
       attributes: [
         ["idcaixa", "idCaixa"],
         ["IdSituacao", "idSituacao"],
@@ -63,7 +57,7 @@ module.exports = {
     // console.log(token);
 
     // Procurar por caixas que já estejam abertos no momento
-    const caixasAbertos = await models.tbcontrolecaixa.findAll({
+    const caixasAbertos = await models.tbcaixa.findAll({
       where: {
         idsituacao: 1,
       },
@@ -78,7 +72,7 @@ module.exports = {
       });
     }
 
-    const caixa = await models.tbcontrolecaixa.create({
+    const caixa = await models.caixa.create({
       idsituacao: 1,
       idoperadorabertura: token["sub"],
       dataabertura: new Date(),
@@ -92,7 +86,7 @@ module.exports = {
   },
 
   async lerCaixa(idCaixa) {
-    const caixa = await models.tbcontrolecaixa.findOne({
+    const caixa = await models.tbcaixa.findOne({
       attributes: [
         ["idcaixa", "idCaixa"],
         ["idsituacao", "idSituacao"],
@@ -180,8 +174,10 @@ module.exports = {
     }
   },
 
+  async fecharCaixa(token, idCaixa, valores) {},
+
   async pedidosPorCaixa(idCaixa) {
-    const caixa = await models.tbcontrolecaixa.findOne({
+    const caixa = await models.tbcaixa.findOne({
       where: {
         idcaixa: idCaixa,
       },
@@ -233,7 +229,9 @@ module.exports = {
     const registros = {};
 
     pedidos.forEach((pedido) => {
-      if (registros.hasOwnProperty(pedido.formaPagamento)) {
+      if (
+        Object.prototype.hasOwnProperty.call(registros, pedido.formaPagamento)
+      ) {
         // Forma de pagamento já existe, acumular valor
         const acumulado = currency(registros[pedido.formaPagamento]).add(
           pedido["totalVenda"]
@@ -253,7 +251,7 @@ module.exports = {
     let valores = {};
 
     for (const valor in registrados) {
-      if (valores.hasOwnProperty(valor)) {
+      if (Object.prototype.hasOwnProperty.call(valores, valor)) {
         valores[valor]["registrado"] = registrados["valor"];
       } else {
         valores[valor] = {
@@ -264,7 +262,7 @@ module.exports = {
     }
 
     for (const valor in informados) {
-      if (valores.hasOwnProperty(valor)) {
+      if (Object.prototype.hasOwnProperty.call(valores, valor)) {
         valores[valor]["informado"] = informados["valor"];
       } else {
         valores[valor] = {

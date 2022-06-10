@@ -3,14 +3,12 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "../../.env" });
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
-const debug = require("../utils/debug");
 const delay = require("../utils/delay").delay;
 
 const url = "https://bling.com.br/Api/v2";
 const api = axios.create({ baseURL: url });
 
 const crypto = require("crypto");
-const { ObjectLockConfiguration } = require("@aws-sdk/client-s3");
 
 const situacoes = {
   "Em aberto": 6,
@@ -71,25 +69,25 @@ module.exports = {
       let itens = [];
 
       // Verifica se o pedido possui um vendedor
-      if (venda.hasOwnProperty("vendedor")) {
+      if (Object.prototype.hasOwnProperty.call(venda, "vendedor")) {
         vendedor = venda["vendedor"];
       }
 
       // Verifica se o pedido possui uma nota fiscal
-      if (venda.hasOwnProperty("nota")) {
+      if (Object.prototype.hasOwnProperty.call(venda, "nota")) {
         numeronota = venda["nota"]["numero"];
         serienota = venda["nota"]["serie"];
         datanota = venda["nota"]["dataEmissao"];
       }
 
       // Verifica se o pedido possui um número de ligação com alguma loja
-      if (venda.hasOwnProperty("numeroPedidoLoja")) {
+      if (Object.prototype.hasOwnProperty.call(venda, "numeroPedidoLoja")) {
         idpedidoloja = venda["numeroPedidoLoja"];
       }
 
       // Verifica se o pedido possui uma forma de pagamento associada
-      if (venda.hasOwnProperty("parcelas")) {
-        pagamento = venda["parcelas"][0]["parcela"]["forma_pagamento"];
+      if (Object.prototype.hasOwnProperty.call(venda, "parcelas")) {
+        let pagamento = venda["parcelas"][0]["parcela"]["forma_pagamento"];
 
         idformapagamento = pagamento["id"];
         formapagamento = pagamento["descricao"];
@@ -100,27 +98,27 @@ module.exports = {
         };
       }
 
-      // Verifica se o pedido possui uma transportadora associada
-      if (venda.hasOwnProperty("transporte")) {
-        transportadora = venda["transporte"]["transportadora"];
-      }
-
       // Verifica se o pedido possui um método de transporte associado
       // O campo de transporte é fixo, e sempre irá existir independente da loja do pedido
-      if (venda.hasOwnProperty("transporte")) {
-        // Caso exista um volume, é porque existe um código de rastreio e um serviço de entrega
-        if (venda["transporte"].hasOwnProperty("volumes")) {
-          // Salva dados do código de rastreio
+      if (Object.prototype.hasOwnProperty.call(venda, "transporte")) {
+        // Verifica se o pedido possui uma transportadora associada
+        transportadora = venda["transporte"]["transportadora"];
+
+        // Caso exista um volume, existe um código de rastreio e um serviço de entrega
+        if (Object.prototype.hasOwnProperty.call(venda.transporte, "volumes")) {
           rastreio =
             venda["transporte"]["volumes"][0]["volume"]["codigoRastreamento"];
 
-          // Salva o serviço escolhido para entrega do volume
           servico = venda["transporte"]["volumes"][0]["volume"]["servico"];
         }
 
         // Caso exista um endereço de entrega, podemos acessa-lo
-
-        if (venda["transporte"].hasOwnProperty("enderecoEntrega")) {
+        if (
+          Object.prototype.hasOwnProperty.call(
+            venda.transporte,
+            "enderecoEntrega"
+          )
+        ) {
           // Salva o Endereço de Entrega
           rua = venda["transporte"]["enderecoEntrega"]["endereco"];
           numero = venda["transporte"]["enderecoEntrega"]["numero"];
@@ -152,7 +150,7 @@ module.exports = {
       }
 
       // Verifica se o pedido possui um valor de frete associado
-      if (venda["valorfrete"]) {
+      if (Object.prototype.hasOwnProperty.call(venda, "valorfrete")) {
         fretecliente = venda["valorfrete"];
       }
 
@@ -177,8 +175,13 @@ module.exports = {
       }
 
       // Verifica se o pedido possui um número de proposta comercial associado
-      if (venda.hasOwnProperty("origem")) {
-        if (venda["origem"].hasOwnProperty("propostaComercial")) {
+      if (Object.prototype.hasOwnProperty.call(venda, "origem")) {
+        if (
+          Object.prototype.hasOwnProperty.call(
+            venda.origem,
+            "propostaComercial"
+          )
+        ) {
           numeroproposta =
             venda["origem"]["propostaComercial"]["numeroProposta"];
         }
@@ -187,7 +190,7 @@ module.exports = {
       // Realiza desestruturação das ocorrências no pedido de venda
       let ocorrencias = [];
 
-      if (venda["ocorrencias"]) {
+      if (Object.prototype.hasOwnProperty.call(venda, "ocorrencias")) {
         for (const ocorrencia of venda["ocorrencias"]) {
           ocorrencias.push({
             idpedidovenda: venda["numero"],
@@ -372,7 +375,7 @@ module.exports = {
       const depositos = this.desestruturaDepositos(produto);
 
       // Verifica desestruturação de itens com estrutura
-      if (produto.hasOwnProperty("estrutura")) {
+      if (Object.prototype.hasOwnProperty.call(produto, "estrutura")) {
         formato = "Com Composição";
 
         for (const componente of produto["estrutura"]) {
@@ -438,11 +441,6 @@ module.exports = {
           quantidade: deposito["deposito"]["saldoVirtual"],
         });
       }
-    } else {
-      // console.log(
-      //   filename,
-      //   `Este produto não possui depósitos associados: ${produto["codigo"]}`
-      // );
     }
 
     return objetoDepositos;
@@ -545,8 +543,8 @@ module.exports = {
 
   // Adquire dados de um produto da API do Bling
   async produto(sku) {
-    return new Promise(async (resolve, reject) => {
-      await this.blingRequest("GET", `/produto/${sku}/json/`, {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/produto/${sku}/json/`, {
         params: {
           apikey: process.env.BLING_API_KEY,
         },
@@ -579,8 +577,8 @@ module.exports = {
 
   // Busca pedido de venda no Bling
   async pedidoVenda(pedido) {
-    return new Promise(async (resolve, reject) => {
-      await this.blingRequest("GET", `/pedido/${pedido}/json/`, {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/pedido/${pedido}/json/`, {
         params: {
           apikey: process.env.BLING_API_KEY,
           historico: "true",
@@ -636,8 +634,8 @@ module.exports = {
 
   // Busca pedido de compra no Bling
   async pedidoCompra(pedido) {
-    return new Promise(async (resolve, reject) => {
-      await this.blingRequest("GET", `/pedidocompra/${pedido}/json/`, {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/pedidocompra/${pedido}/json/`, {
         params: {
           apikey: process.env.BLING_API_KEY,
         },
@@ -692,17 +690,17 @@ module.exports = {
 
   // Busca uma única página de pedidos de venda do Bling
   async listaPaginaVendas(pagina, filtros) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let vendas = [];
 
-      await this.blingRequest("GET", `/pedidos/page=${pagina}/json/`, {
+      this.blingRequest("GET", `/pedidos/page=${pagina}/json/`, {
         params: {
           filters: filtros,
           apikey: process.env.BLING_API_KEY,
           historico: "true",
         },
       })
-        .then(async (res) => {
+        .then((res) => {
           try {
             // A API do Bling retornou um erro, ou chegamos no fim da página ou algo deu errado
             const erroBling = res.data.retorno.erros[0].erro.cod;
@@ -734,6 +732,8 @@ module.exports = {
               const venda = this.desestruturaPedidoVenda(pedido["pedido"]);
               vendas.push(venda);
             }
+
+            resolve(vendas);
           }
         })
         .catch((error) => {
@@ -746,22 +746,21 @@ module.exports = {
             message: error.message,
           });
         });
-      resolve(vendas);
     });
   },
 
   // Busca uma única página de pedidos de venda do Bling
   async listaPaginaCompras(pagina, filtros) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let compras = [];
 
-      await this.blingRequest("GET", `/pedidoscompra/page=${pagina}/json/`, {
+      this.blingRequest("GET", `/pedidoscompra/page=${pagina}/json/`, {
         params: {
           filters: filtros,
           apikey: process.env.BLING_API_KEY,
         },
       })
-        .then(async (res) => {
+        .then((res) => {
           try {
             // A API do Bling retornou um erro, ou chegamos no fim da página ou algo deu errado
             const erroBling = res.data.retorno.erros[0].erro.cod;
@@ -797,6 +796,8 @@ module.exports = {
               );
               compras.push(compra);
             }
+
+            resolve(compras);
           }
         })
         .catch((error) => {
@@ -809,13 +810,12 @@ module.exports = {
             message: error.message,
           });
         });
-      resolve(compras);
     });
   },
 
   // Lista uma única página de produtos do Bling
   async listaPaginaProdutos(status, pagina) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let produtos = [];
 
       // Por padrão retorna apenas produtos ativos
@@ -835,7 +835,7 @@ module.exports = {
         }
       }
 
-      await this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
+      this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
         params: params,
       })
         .then((res) => {
@@ -873,6 +873,14 @@ module.exports = {
                 produtos.push(produtoDesestruturado);
               }
             }
+
+            console.log(
+              filename,
+              "Total de produtos encontrados:",
+              produtos.length
+            );
+
+            resolve(produtos);
           }
         })
         .catch((error) => {
@@ -883,16 +891,12 @@ module.exports = {
           );
           reject(error);
         });
-
-      console.log(filename, "Total de produtos encontrados:", produtos.length);
-
-      resolve(produtos);
     });
   },
 
   // Atualiza o status de um pedido no Bling
   async atualizaStatusPedido(pedido, status) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let xml = `
       <?xml version="1.0" encoding="UTF-8"?>
       <pedido>
@@ -905,29 +909,25 @@ module.exports = {
         xml: xml,
       };
 
-      try {
-        await this.blingRequest(
-          "PUT",
-          `/pedido/${pedido}`,
-          new URLSearchParams(params)
-        );
-      } catch (error) {
-        reject(error);
-      }
-
-      resolve();
+      this.blingRequest("PUT", `/pedido/${pedido}`, new URLSearchParams(params))
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   },
 
   // Busca dados de uma proposta comercial
   async propostaComercial(proposta) {
-    return new Promise(async (resolve, reject) => {
-      await this.blingRequest("GET", `/propostacomercial/${proposta}/json/`, {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/propostacomercial/${proposta}/json/`, {
         params: {
           apikey: process.env.BLING_API_KEY,
         },
       })
-        .then(async (res) => {
+        .then((res) => {
           try {
             // A API do Bling retornou um erro, a proposta comercial especificada não foi encontrada
             const erroBling = res.data.retorno.erros[0].erro.cod;

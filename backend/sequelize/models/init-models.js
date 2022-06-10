@@ -1,10 +1,10 @@
 var DataTypes = require("sequelize").DataTypes;
 var _tbanunciosml = require("./tbanunciosml");
+var _tbcaixa = require("./tbcaixa");
 var _tbcategoria = require("./tbcategoria");
 var _tbcategoriacompra = require("./tbcategoriacompra");
 var _tbcompraproduto = require("./tbcompraproduto");
 var _tbconfigvalidadeprecificacao = require("./tbconfigvalidadeprecificacao");
-var _tbcontrolecaixa = require("./tbcontrolecaixa");
 var _tbcurva = require("./tbcurva");
 var _tbcustopedido = require("./tbcustopedido");
 var _tbcustoproposta = require("./tbcustoproposta");
@@ -27,7 +27,9 @@ var _tbprecificacao = require("./tbprecificacao");
 var _tbproduto = require("./tbproduto");
 var _tbprodutoestoque = require("./tbprodutoestoque");
 var _tbprodutofornecedor = require("./tbprodutofornecedor");
+var _tbprodutoszerados = require("./tbprodutoszerados");
 var _tbprospeccao = require("./tbprospeccao");
+var _tbregistrocaixa = require("./tbregistrocaixa");
 var _tbsituacaocaixa = require("./tbsituacaocaixa");
 var _tbstatus = require("./tbstatus");
 var _tbstatuscompra = require("./tbstatuscompra");
@@ -36,11 +38,11 @@ var _tbvendaproduto = require("./tbvendaproduto");
 
 function initModels(sequelize) {
   var tbanunciosml = _tbanunciosml(sequelize, DataTypes);
+  var tbcaixa = _tbcaixa(sequelize, DataTypes);
   var tbcategoria = _tbcategoria(sequelize, DataTypes);
   var tbcategoriacompra = _tbcategoriacompra(sequelize, DataTypes);
   var tbcompraproduto = _tbcompraproduto(sequelize, DataTypes);
   var tbconfigvalidadeprecificacao = _tbconfigvalidadeprecificacao(sequelize, DataTypes);
-  var tbcontrolecaixa = _tbcontrolecaixa(sequelize, DataTypes);
   var tbcurva = _tbcurva(sequelize, DataTypes);
   var tbcustopedido = _tbcustopedido(sequelize, DataTypes);
   var tbcustoproposta = _tbcustoproposta(sequelize, DataTypes);
@@ -63,7 +65,9 @@ function initModels(sequelize) {
   var tbproduto = _tbproduto(sequelize, DataTypes);
   var tbprodutoestoque = _tbprodutoestoque(sequelize, DataTypes);
   var tbprodutofornecedor = _tbprodutofornecedor(sequelize, DataTypes);
+  var tbprodutoszerados = _tbprodutoszerados(sequelize, DataTypes);
   var tbprospeccao = _tbprospeccao(sequelize, DataTypes);
+  var tbregistrocaixa = _tbregistrocaixa(sequelize, DataTypes);
   var tbsituacaocaixa = _tbsituacaocaixa(sequelize, DataTypes);
   var tbstatus = _tbstatus(sequelize, DataTypes);
   var tbstatuscompra = _tbstatuscompra(sequelize, DataTypes);
@@ -82,6 +86,8 @@ function initModels(sequelize) {
   tbproduto.belongsToMany(tbproduto, { as: 'skupai_tbprodutos', through: tbestrutura, foreignKey: "skufilho", otherKey: "skupai" });
   tbproduto.belongsToMany(tbproduto, { as: 'idskufilho_tbprodutos', through: tbkits, foreignKey: "idskupai", otherKey: "idskufilho" });
   tbproduto.belongsToMany(tbproduto, { as: 'idskupai_tbprodutos', through: tbkits, foreignKey: "idskufilho", otherKey: "idskupai" });
+  tbregistrocaixa.belongsTo(tbcaixa, { foreignKey: "idcaixa"});
+  tbcaixa.hasMany(tbregistrocaixa, { foreignKey: "idcaixa"});
   tbconfigvalidadeprecificacao.belongsTo(tbcategoria, { foreignKey: "idcategoria"});
   tbcategoria.hasMany(tbconfigvalidadeprecificacao, { foreignKey: "idcategoria"});
   tbproduto.belongsTo(tbcategoria, { foreignKey: "idcategoria"});
@@ -94,6 +100,10 @@ function initModels(sequelize) {
   tbemail.hasMany(tbemailenviado, { foreignKey: "idemail"});
   tbprodutoestoque.belongsTo(tbestoque, { foreignKey: "idestoque"});
   tbestoque.hasMany(tbprodutoestoque, { foreignKey: "idestoque"});
+  tbpedidovenda.belongsTo(tbformapagamento, { foreignKey: "idformapagamento"});
+  tbformapagamento.hasMany(tbpedidovenda, { foreignKey: "idformapagamento"});
+  tbregistrocaixa.belongsTo(tbformapagamento, { foreignKey: "idformapagamento"});
+  tbformapagamento.hasMany(tbregistrocaixa, { foreignKey: "idformapagamento"});
   tbpedidocompra.belongsTo(tbfornecedor, { foreignKey: "idfornecedor"});
   tbfornecedor.hasMany(tbpedidocompra, { foreignKey: "idfornecedor"});
   tbpedidovenda.belongsTo(tbloja, { foreignKey: "idloja"});
@@ -130,28 +140,30 @@ function initModels(sequelize) {
   tbproduto.hasMany(tbprodutoestoque, { foreignKey: "idsku"});
   tbprodutofornecedor.belongsTo(tbproduto, { foreignKey: "idsku"});
   tbproduto.hasMany(tbprodutofornecedor, { foreignKey: "idsku"});
+  tbprodutoszerados.belongsTo(tbproduto, { foreignKey: "idsku"});
+  tbproduto.hasMany(tbprodutoszerados, { foreignKey: "idsku"});
   tbvendaproduto.belongsTo(tbproduto, { foreignKey: "idsku"});
   tbproduto.hasMany(tbvendaproduto, { foreignKey: "idsku"});
-  tbcontrolecaixa.belongsTo(tbsituacaocaixa, { foreignKey: "idsituacao"});
-  tbsituacaocaixa.hasMany(tbcontrolecaixa, { foreignKey: "idsituacao"});
+  tbcaixa.belongsTo(tbsituacaocaixa, { foreignKey: "idsituacao"});
+  tbsituacaocaixa.hasMany(tbcaixa, { foreignKey: "idsituacao"});
   tbpedidovenda.belongsTo(tbstatus, { foreignKey: "idstatusvenda"});
   tbstatus.hasMany(tbpedidovenda, { foreignKey: "idstatusvenda"});
   tbpedidocompra.belongsTo(tbstatuscompra, { foreignKey: "idstatus"});
   tbstatuscompra.hasMany(tbpedidocompra, { foreignKey: "idstatus"});
-  tbcontrolecaixa.belongsTo(tbusuario, { foreignKey: "idoperadorabertura"});
-  tbusuario.hasMany(tbcontrolecaixa, { foreignKey: "idoperadorabertura"});
-  tbcontrolecaixa.belongsTo(tbusuario, { foreignKey: "idoperadorconferencia"});
-  tbusuario.hasMany(tbcontrolecaixa, { foreignKey: "idoperadorconferencia"});
-  tbcontrolecaixa.belongsTo(tbusuario, { foreignKey: "idoperadorfechamento"});
-  tbusuario.hasMany(tbcontrolecaixa, { foreignKey: "idoperadorfechamento"});
+  tbcaixa.belongsTo(tbusuario, { foreignKey: "idoperadorabertura"});
+  tbusuario.hasMany(tbcaixa, { foreignKey: "idoperadorabertura"});
+  tbcaixa.belongsTo(tbusuario, { foreignKey: "idoperadorconferencia"});
+  tbusuario.hasMany(tbcaixa, { foreignKey: "idoperadorconferencia"});
+  tbcaixa.belongsTo(tbusuario, { foreignKey: "idoperadorfechamento"});
+  tbusuario.hasMany(tbcaixa, { foreignKey: "idoperadorfechamento"});
 
   return {
     tbanunciosml,
+    tbcaixa,
     tbcategoria,
     tbcategoriacompra,
     tbcompraproduto,
     tbconfigvalidadeprecificacao,
-    tbcontrolecaixa,
     tbcurva,
     tbcustopedido,
     tbcustoproposta,
@@ -174,7 +186,9 @@ function initModels(sequelize) {
     tbproduto,
     tbprodutoestoque,
     tbprodutofornecedor,
+    tbprodutoszerados,
     tbprospeccao,
+    tbregistrocaixa,
     tbsituacaocaixa,
     tbstatus,
     tbstatuscompra,

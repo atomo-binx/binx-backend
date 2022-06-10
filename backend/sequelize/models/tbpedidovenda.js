@@ -46,6 +46,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DECIMAL(18,2),
       allowNull: true
     },
+    idformapagamento: {
+      type: DataTypes.STRING(16),
+      allowNull: true,
+      references: {
+        model: 'tbformapagamento',
+        key: 'idformapagamento'
+      }
+    },
     formapagamento: {
       type: DataTypes.STRING(45),
       allowNull: true
@@ -143,6 +151,13 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "idstatusvenda" },
+        ]
+      },
+      {
+        name: "tbpedidovenda_idformapagamento_idx",
+        using: "BTREE",
+        fields: [
+          { name: "idformapagamento" },
         ]
       },
     ]

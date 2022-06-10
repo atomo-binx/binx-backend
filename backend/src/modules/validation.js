@@ -13,10 +13,25 @@ function run(rules) {
     let required = true;
 
     if (options) {
-      if (options.hasOwnProperty("required")) required = options["required"];
+      if (Object.prototype.hasOwnProperty.call(options, "required"))
+        required = options["required"];
     }
 
-    const result = rule.validate(field, required);
+    let result = {};
+
+    // Executa validações individuais caso parâmetro recebido seja uma Array
+    if (typeof field === "object") {
+      if (field.length >= 1) {
+        for (const element of field) {
+          result = rule.validate(element, required);
+          if (result["status"] === "error") break;
+        }
+      } else {
+        result = rule.validate(null, required);
+      }
+    } else {
+      result = rule.validate(field, required);
+    }
 
     const error = result["status"] === "error";
 
