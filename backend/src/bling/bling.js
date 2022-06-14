@@ -446,6 +446,34 @@ module.exports = {
     return objetoDepositos;
   },
 
+  desestruturaContato(contato) {
+    return {
+      idcontato: contato.id,
+      nome: contato.nome,
+      fantasia: contato.fantasia,
+      tipo: contato.tipo,
+      cpfcnpj: contato.cpnj,
+      ireg: contato.ie_rg,
+      endereco: contato.endereco,
+      numero: contato.numero,
+      bairro: contato.bairro,
+      cep: contato.cep,
+      cidade: contato.cidade,
+      complemento: contato.complemento,
+      uf: contato.uf,
+      telefone: contato.fone,
+      celular: contato.celular,
+      email: contato.email,
+      situacao: contato.situacao,
+      contribuinte: contato.contribuinte,
+      vendedor: contato.nomeVendedor,
+      dataalteracao: contato.dataAlteracao,
+      datainclusao: contato.dataInclusao,
+      clientedeste: contato.clienteDesde,
+      limitecredito: contato.limiteCredito,
+    };
+  },
+
   // Rotina para política de tentativa de chamada ao Bling
   async blingRequest(metodo, caminho, params) {
     return new Promise(async (resolve, reject) => {
@@ -954,6 +982,55 @@ module.exports = {
               this.desestruturaProposta(propostaAtual);
 
             resolve(propostaDesestruturada);
+          }
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            "Erro na requisição de proposta comercial na api do Bling"
+          );
+          console.log(filename, error.message);
+          reject(error.message);
+        });
+    });
+  },
+
+  async listaPaginaContatos(filtros, pagina = 1) {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/contatos/page=${pagina}/json/`, {
+        params: {
+          apikey: process.env.BLING_API_KEY,
+        },
+        filters: filtros,
+      })
+        .then((res) => {
+          try {
+            const erroBling = res.data.retorno.erros[0].erro.cod;
+            console.log(filename, "Erro Bling Encontrado:", erroBling);
+
+            if (erroBling == 14) {
+              console.log(filename, "Falha na listagem de contatos");
+              reject(res.data.retorno.erros[0].erro.msg);
+            } else {
+              console.log(filename, "Erro inesperado encontrado ...");
+              reject(res.data.retorno.erros[0].erro.msg);
+            }
+          } catch (error) {
+            let resultados = [];
+
+            const contatos = res.data.retorno.contatos;
+
+            for (const contato of contatos) {
+              resultados.push(this.desestruturaContato(contato.contato));
+            }
+
+            console.log(
+              filename,
+              "Total de contatos encontrados:",
+              resultados.length
+            );
+
+            resolve(resultados);
           }
         })
         .catch((error) => {
