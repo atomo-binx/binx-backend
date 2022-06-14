@@ -1,11 +1,12 @@
 const controller = require("../controllers/usuario.controller");
-const { protectedRoute } = require("../middleware/auth");
+const { protectedRoute } = require("../middlewares/auth");
 
 function load(routes) {
-  routes.post("/usuario", controller.cadastrarUsuario); // Criação de novo usuário
-  routes.get("/usuario/:id", controller.lerUsuario); // Leitura de um usuário específico
-  routes.put("/usuario", controller.atualizarUsuario);
-  routes.get("/usuario", controller.listarUsuarios); // Lista todos os usuários
+  routes.post("/usuario", protectedRoute, controller.cadastrarUsuario); 
+  routes.get("/usuario/:id", protectedRoute, controller.lerUsuario); 
+  routes.put("/usuario", protectedRoute, controller.atualizarUsuario);
+  routes.get("/usuario", protectedRoute, controller.listarUsuarios);
+  routes.post("/usuario/sincronizar", protectedRoute, controller.sincronizarUsuarios); 
 }
 
 module.exports = load;

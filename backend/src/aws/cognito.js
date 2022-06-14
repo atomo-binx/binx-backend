@@ -5,6 +5,7 @@ const {
   ListUsersCommand,
   InitiateAuthCommand,
 } = require("@aws-sdk/client-cognito-identity-provider");
+const { ErrorStatus, OkStatus, UserNotFound } = require("../modules/codes");
 
 const client = new CognitoIdentityProviderClient({
   credentials: {
@@ -79,48 +80,63 @@ module.exports = {
   },
 
   async lerUsuario(sub) {
-    return new Promise((resolve, reject) => {
-      params = {
-        UserPoolId: process.env.COGNITO_USER_POOL_ID,
-        Username: sub,
-      };
+    params = {
+      UserPoolId: process.env.COGNITO_USER_POOL_ID,
+      Username: sub,
+    };
 
-      const command = new AdminGetUserCommand(params);
+    const command = new AdminGetUserCommand(params);
 
-      client
-        .send(command)
-        .then((result) => {
-          const usuario = this.desestruturaUsuario(result, "UserAttributes");
-          resolve(usuario);
-        })
-        .catch((error) => {
-          console.log(filename, "Erro ao ler usuário:", error.message);
-          reject(error);
-        });
+    return client.send(command).then((result) => {
+      const usuario = this.desestruturaUsuario(result, "UserAttributes");
+      return usuario;
     });
   },
 
   async listarUsuarios() {
-    return new Promise((resolve, reject) => {
-      params = {
-        UserPoolId: process.env.COGNITO_USER_POOL_ID,
-      };
+    return new Promise(async (resolve, reject) => {
+      let usuarios = [];
+      let procurando = true;
+      let paginationToken = null;
+      let error = null;
 
-      const command = new ListUsersCommand(params);
+      // Obter lista completa de usuários do Cognito
+      while (procurando) {
+        const params = {
+          UserPoolId: process.env.COGNITO_USER_POOL_ID,
+          PaginationToken: paginationToken,
+        };
 
-      client
-        .send(command)
-        .then((result) => {
-          const usuarios = this.desestruturaUsuarios(
-            result["Users"],
-            "Attributes"
-          );
-          resolve(usuarios);
-        })
-        .catch((error) => {
-          console.log(filename, "Erro ao listar usuários:", error.message);
-          reject(error);
-        });
+        const command = new ListUsersCommand(params);
+
+        await client
+          .send(command)
+          .then((result) => {
+            const usuariosRetornados = this.desestruturaUsuarios(
+              result["Users"],
+              "Attributes"
+            );
+
+            usuarios.push(...usuariosRetornados);
+
+            if (result["PaginationToken"]) {
+              paginationToken = result["PaginationToken"];
+            } else {
+              procurando = false;
+            }
+          })
+          .catch((err) => {
+            console.log(filename, "Erro ao listar usuários:", err.message);
+            procurando = false;
+            error = err;
+          });
+      }
+
+      if (error) {
+        reject(err);
+      } else {
+        resolve(usuarios);
+      }
     });
   },
 

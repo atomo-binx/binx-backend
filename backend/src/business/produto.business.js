@@ -7,11 +7,7 @@ const Bling = require("../bling/bling");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 const sequelize = require("../services/sequelize");
-const debug = require("../utils/debug");
 const { Op } = require("sequelize");
-
-const { fileName, getFileName } = require("../modules/debug");
-const { dateToFilename } = require("../utils/date");
 
 const http = require("../utils/http");
 
@@ -47,7 +43,7 @@ module.exports = {
   },
 
   // Executa a sincronização de produtos
-  async rotinaSincronizacao(req) {
+  async rotinaSincronizacao() {
     /*
 
     Procedimento:
@@ -77,14 +73,11 @@ module.exports = {
     let paginaAlvo = 1;
 
     // Utilizar para debug, para restringir a quantidade de páginas buscadas
-    let maximoPaginas = 5;
+    // let maximoPaginas = 5;
 
     //Contadores
     let contadorInseridos = 0;
     let contadorRejeitados = 0;
-
-    // Objeto para guardar produtos que geraram erro de atualização
-    let produtosRejeitados = [];
 
     // Flags para controlar busca por produtos ativos/inativos
     let finalizadoAtivos = false;
@@ -149,53 +142,25 @@ module.exports = {
   // Callback de alteração de estoque de produtos
   async callbackProdutos(req) {
     try {
-      // Para cada produto contido no verificar a seguinte rotina:
-      // 1 - Upsert do produto na tabela de produtos
-      // 2 - Bulk Create dos depositos, com cláusula de update on duplicate
-
-      // O produto precisa existir na tabela de produtos para poder ser criado um registro de depósito
-      // Portanto, primeiro é necessário o upsert na tabela de produtos
-
-      // Rotina para Callback de produtos
       console.log(filename, "Iniciando rotina de callback de produto");
 
       let registros = null;
 
-      // Verifica se o dado foi recebido corretamente via callback
       if (req.body.data) {
-        const file = dateToFilename();
-        const data = req.body.data;
+        // Debug: Salvar callbacks
+        // const file = dateToFilename();
+        // const data = req.body.data;
 
-        debug.save(
-          "callbacks_estoque/" + file + ".json",
-          JSON.parse(JSON.stringify(data))
-        );
+        // debug.save(
+        //   "callbacks_estoque/" + file + ".json",
+        //   JSON.parse(JSON.stringify(data))
+        // );
 
         registros = JSON.parse(req.body.data).retorno.estoques;
       } else {
-        console.log(filename, "Retornando Erro");
         return http.badRequest({
-          message: "Nenhuma estrutura de callback de produto válida recebida.",
+          message: "A estrutura de callback de produto recebida não é válida.",
         });
-
-        // Removendo estrutura de callback de produtos em modo debug
-        // Utilizar apenas quando necessários
-
-        // // Tentar entrar no modo de Debug, quanod o callback não é recebido do Bling e sim via API
-        // if (req.body.produto) {
-        //   console.log(filename, "Iniciando callback de estoque em modo debug");
-        //   registros = JSON.parse(req.body.produto).retorno.estoques;
-        // } else {
-        //   // Nenhum dado válido recebido via callback ou modo de debug
-        //   console.log(
-        //     filename,
-        //     "Nenhuma estrutura de callback de produto válida recebida."
-        //   );
-
-        //   return http.badRequest({
-        //     message: "Nenhuma estrutura de callback de produto válida recebida.",
-        //   });
-        // }
       }
 
       // Algum formato válido foi recebido, realizar procedimento de callback
@@ -205,7 +170,7 @@ module.exports = {
         const dadosProduto = registro["estoque"];
 
         // Verifica se o produto retornou um nome válido
-        // Correção devido um bug no Bling no dia 12/04/2022
+        // Correção devido um bug no Bling descoberto no dia 12/04/2022
         // Foi percebido, que o callback de movimentação de estoque não está retornando o nome dos produtos
         // O nome retorna apenas para produtos "VIR ...", mas não para SKU's numéricos
         if (dadosProduto["nome"] == null) {
@@ -216,8 +181,6 @@ module.exports = {
             },
             raw: true,
           });
-
-          // console.log(filename, "Nome encontrado:", nome);
 
           if (nome) {
             dadosProduto["nome"] = nome["nome"];
@@ -233,9 +196,8 @@ module.exports = {
         // Gera objeto referente aos depósitos
         const depositos = Bling.desestruturaDepositos(dadosProduto);
 
-        // @Debug
-        // console.log(filename, "Produto:", produto);
-        // console.log(filename, "Depósitos:", depositos);
+        // Analisar ocorrências de produtos que estão ficando zerados
+        // ...
 
         // Monta objeto compatível com a transação de produto existe
         produto["depositos"] = depositos;
@@ -283,6 +245,10 @@ module.exports = {
     try {
       await sequelize.transaction(async (t) => {
         // Inserção de Produto
+
+        // O produto precisa existir na tabela de produtos
+        // Portanto, primeiro é necessário realizar o upsert na tabela de produtos
+
         await Produto.upsert(dadosProduto, {
           transaction: t,
         });
@@ -368,11 +334,5 @@ module.exports = {
         message: `Erro ao buscar produtos: ${error.message}`,
       });
     }
-  },
-
-  async forcedDelay(tempo) {
-    return new Promise(async (resolve, reject) => {
-      setTimeout(resolve, tempo);
-    });
   },
 };

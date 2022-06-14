@@ -1,5 +1,5 @@
 const controller = require("../controllers/pedidocompra.controller");
-const { protectedRoute } = require("../middleware/auth");
+const { protectedRoute } = require("../middlewares/auth");
 
 function load(routes) {
   routes.get("/pedidocompra/sincroniza", controller.sincroniza);

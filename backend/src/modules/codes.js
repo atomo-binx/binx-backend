@@ -17,6 +17,14 @@ module.exports = {
   // Falha na manipulação de algum registro de escrita ou leitura no banco de dados
   DatabaseFailure: "DatabaseFailure",
 
+  // Usuário informado não foi encontrado
+  UserNotFound: "UserNotFound",
+
+  // Falha durante manipulação de JWT
   JWTFailure: "JWTFailure",
+
+  // JWT com data expirada
   JWTExpired: "JWTExpired",
+
+  CaixaJaAberto: "CaixaJaAberto",
 };

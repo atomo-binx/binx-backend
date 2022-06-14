@@ -2,6 +2,10 @@
 const Venda = require("../models/venda.model");
 const VendaProduto = require("../models/vendaProduto.model");
 const FreteForcado = require("../models/freteForcado.model");
+const OcorrenciaVenda = require("../models/ocorrenciasVenda.model");
+const FormaPagamento = require("../models/formaPagamento.model");
+
+const { models } = require("../modules/sequelize");
 
 // Business
 const FreteBusiness = require("./frete.business");
@@ -17,7 +21,6 @@ const sequelize = require("../services/sequelize");
 
 // Helpers
 const filename = __filename.slice(__dirname.length + 1) + " -";
-const debug = require("../utils/debug");
 const puppetter = require("../puppeteer/puppeteer");
 const http = require("../utils/http");
 
@@ -98,6 +101,15 @@ module.exports = {
       let pedido = null;
 
       if (req.body.data) {
+        // Debug: Salvar callbacks
+        // const file = dateToFilename();
+        // const data = req.body.data;
+
+        // debug.save(
+        //   "callbacks_venda/" + file + ".json",
+        //   JSON.parse(JSON.stringify(data))
+        // );
+
         // Dados de pedido recebidos via 'data' enviado pelo callback do Bling
         pedido = JSON.parse(req.body.data).retorno.pedidos[0].pedido;
       } else {
@@ -274,6 +286,7 @@ module.exports = {
 
               // Para Correios, contabilizar, e inserir na lista de ocorrências de correios
               case "Correios":
+                // eslint-disable-next-line no-unused-vars
                 qntdMetodosCorreios++;
                 correios.push(metodo);
                 break;
@@ -487,50 +500,74 @@ module.exports = {
 
   // Realiza a transção de pedido de venda e de venda-produto, com os itens
   async vendaTransaction(venda) {
-    let status = false;
-
     // Realiza separação de dados de venda e lista de itens
-    let { itens, ...dadosVenda } = venda;
+    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = venda;
 
-    // Inicia transação de um relacionamento
-    const t = await sequelize.transaction();
-
+    // Transação dos dados no banco de dados
     try {
-      // Tenta inserir dados do pedido de venda
-      await Venda.upsert(dadosVenda, { transaction: t });
+      await sequelize.transaction(async (t) => {
+        // Atualiza entidade de forma de pagamento no banco de dados
+        if (objFormaPagamento) {
+          await models.tbformapagamento.upsert(objFormaPagamento, {
+            transaction: t,
+          });
+        }
 
-      // Tenta inserir relacionamento de venda-produto
-      for (const relacionamento of itens) {
-        await VendaProduto.upsert(relacionamento, { transaction: t });
-      }
+        // Tenta inserir dados do pedido de venda
+        await models.tbpedidovenda.upsert(dadosVenda, { transaction: t });
 
-      //Se chegamos até aqui, as inserções foram bem sucedidas
-      await t
-        .commit()
-        .then(() => {
-          status = true;
-        })
-        .catch((error) => {
-          console.log(
-            filename,
-            `Pedido de Venda: ${dadosVenda.idpedidovenda} -`,
-            `Erro durante o commit da transaction para o pedido de venda:`,
-            error.message
-          );
-        });
-    } catch (error) {
-      // Se caímos no catch, a inserção foi mal executada, executar rollback na transação
-      await t.rollback().catch((error) => {
-        console.log(
-          filename,
-          `Pedido de Venda: ${dadosVenda.idpedidovenda} -`,
-          `Erro durante o rollback da transaction para o pedido de venda:`,
-          error.message
-        );
+        // Tenta inserir relacionamento de venda-produto
+        if (itens) {
+          await models.tbvendaproduto.destroy({
+            where: {
+              idpedidovenda: dadosVenda["idpedidovenda"],
+            },
+            transaction: t,
+          });
+
+          for (const relacionamento of itens) {
+            await models.tbvendaproduto.upsert(relacionamento, {
+              transaction: t,
+            });
+          }
+        }
+
+        // Tenta inserir relacionamentos de ocorrencias
+        if (ocorrencias) {
+          await models.tbocorrenciavenda.destroy({
+            where: {
+              idpedidovenda: dadosVenda["idpedidovenda"],
+            },
+            transaction: t,
+          });
+
+          for (const ocorrencia of ocorrencias) {
+            await models.tbocorrenciavenda.create(
+              {
+                idocorrencia: "default",
+                ...ocorrencia,
+              },
+              {
+                transaction: t,
+              }
+            );
+          }
+        }
       });
-    }
 
-    return status;
+      // Operações no banco de dados finalizadas com sucesso
+      return true;
+    } catch (error) {
+      // Falha nas operaçõs no banco de dados
+      console.log(
+        filename,
+        `Pedido de Venda: ${dadosVenda["idpedidovenda"]} -`,
+        `Erro durante a transação de pedido de venda:`,
+        error.message
+      );
+
+      return false;
+    }
   },
 
   // Monta dicionário de sistuações de pedidos de venda existentes
@@ -570,6 +607,7 @@ module.exports = {
 
       // Dicionario de situações
       // O dicionário de situações é utilizado para verificar se foi passado um ID de situação válido
+      // eslint-disable-next-line no-unused-vars
       const situacoes = await this.dicionarioSituacoes();
 
       // A nova função de sincronização irá buscar apenas pedidos com situação em aberto
@@ -752,12 +790,5 @@ module.exports = {
       );
       return false;
     }
-  },
-
-  // Função que gera um delay
-  async forcedDelay(tempo) {
-    return new Promise(async (resolve, reject) => {
-      setTimeout(resolve, tempo);
-    });
   },
 };

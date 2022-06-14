@@ -1,5 +1,7 @@
 // Express.js Custom Error Handler
 module.exports = (err, req, res, next) => {
+  console.log(err);
+
   let file = "";
 
   if (err.stack.includes("/")) {

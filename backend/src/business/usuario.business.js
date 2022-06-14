@@ -1,15 +1,17 @@
 const cognito = require("../aws/cognito");
 
 const Usuario = require("../models/usuario.model");
+const { models } = require("../modules/sequelize");
 
 const {
   OkStatus,
   ErrorStatus,
   InternalServerError,
   DatabaseFailure,
+  UserNotFound,
 } = require("../modules/codes");
 
-const { ok, failure } = require("../modules/http");
+const { ok, failure, notFound } = require("../modules/http");
 
 const http = require("../utils/http");
 
@@ -29,9 +31,9 @@ module.exports = {
     } catch (error) {
       console.log(filename, "Erro na leitura de usuário:", error.message);
 
-      return failure({
+      return notFound({
         status: ErrorStatus,
-        code: InternalServerError,
+        code: UserNotFound,
         response: `Erro durante a leitura de usuário: ${error.message}`,
       });
     }
@@ -173,6 +175,39 @@ module.exports = {
       );
       return http.failure({
         message: `Erro durante o procedimento de completar cadastro de usuário: ${error.message}`,
+      });
+    }
+  },
+
+  async sincronizarUsuarios() {
+    try {
+      const usuariosCognito = await cognito.listarUsuarios();
+
+      const updated = await models.tbusuario.bulkCreate(usuariosCognito, {
+        updateOnDuplicate: ["situacao", "nome"],
+      });
+
+      if (updated) {
+        return ok({
+          status: OkStatus,
+          response: {
+            message: "Usuários sincronizados com sucesso.",
+          },
+        });
+      } else {
+        return failure({
+          status: ErrorStatus,
+          code: DatabaseFailure,
+          message: "Falha durante atualização de usuários no banco de dados.",
+        });
+      }
+    } catch (error) {
+      console.log(filename, "Erro ao sincronizar usuários:", error.message);
+
+      return failure({
+        status: ErrorStatus,
+        code: InternalServerError,
+        response: `Erro ao sincronizar usuários:: ${error.message}`,
       });
     }
   },

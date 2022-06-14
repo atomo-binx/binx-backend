@@ -1,7 +1,7 @@
 const validator = require("validator");
 
 module.exports = {
-  validar(param) {
+  validate(param) {
     if (!param) {
       return {
         error: "Parâmetro incorreto",

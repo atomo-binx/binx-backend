@@ -1,29 +1,20 @@
-<body>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+      html {
+        zoom: 1;
+      }
 
       * {
         font-family: "Roboto", sans-serif;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
-      }
-
-      body {
         margin: 0px;
         padding: 0px;
-        width: 83mm;
-        height: 25mm;
-        max-width: 83mm;
-        max-height: 25mm;
-        /* background-color: tan; */
-        /* border: 1px solid black; */
       }
-
-      /* img {
-        margin: 0px;
-        padding: 0px;
-      } */
 
       /* display: flex */
       .display-flex {
@@ -55,6 +46,13 @@
         justify-content: center;
       }
 
+      /* justify-content: space-between */
+      .justify-space-between {
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
       /* align-content: center */
       .align-center {
         -ms-flex-line-pack: center;
@@ -68,90 +66,75 @@
         align-items: center;
       }
 
-      #container {
+      /* align-items: flex-start */
+      .align-items-flex-start {
+        -webkit-box-align: start;
+        -ms-flex-align: start;
+        align-items: flex-start;
+      }
+
+      #etiqueta {
         /* border: 1px solid red; */
 
-        width: 40mm;
         height: 25mm;
-
-        max-width: 40mm;
         max-height: 25mm;
-      }
+        width: 40mm;
+        max-width: 40mm;
 
-      #img-container {
-        /* border: 1px solid blue; */
-        margin: 0px;
-        padding: 0;
-      }
-
-      #info-container {
-        /* border: 1px solid yellow; */
-        padding: 0px;
-        margin: 0px;
-        width: 100%;
-        max-width: 23mm;
         text-align: center;
-      }
 
-      #p-titulo {
-        font-size: 0.6rem;
-        /* font-weight: bold; */
-      }
-
-      #p-info {
-        font-size: 0.6rem;
-        margin-top: 3px;
-      }
-
-      #corpo {
-        /* display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap; */
-        margin: 0px;
-        padding: 0px;
+        padding: 5px 5px 5px 0px;
       }
 
       #divisoria {
-        /* border: 1px solid seagreen; */
-        width: 3mm;
-        max-width: 3mm;
-
+        /* border: 1px solid lightgreen; */
         height: 25mm;
         max-height: 25mm;
+        width: 1mm;
+        max-width: 1mm;
+      }
+
+      #p-titulo {
+        font-size: 90%;
+        font-weight: bold;
+        margin-top: 3px;
+      }
+
+      #p-info {
+        font-size: 80%;
+        margin-top: 3px;
+      }
+
+      .duas-linhas {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* number of lines to show */
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+
+      .tres-linhas {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* number of lines to show */
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+
+      table,
+      th,
+      td {
+        border: none;
+        border-collapse: collapse;
       }
     </style>
   </head>
+
   <body>
-    <div id="corpo" class="display-flex flex-direction-row">
-      <div id="container" class="display-flex">
-        <div id="img-container" class="display-flex align-items-center">
-          <img src="./qrcode_teste.png" style="width: 60px" />
-        </div>
-        <div
-          id="info-container"
-          class="display-flex justify-center align-center flex-direction-column"
-        >
-          <p id="p-titulo">#PRODUTO</p>
-          <p id="p-info"><strong>SKU: #SKU</strong></p>
-          <!-- <p id="p-info">Qtnd: #QNTD</p> -->
-          <!-- <p id="p-info">Pedido: #PEDIDO</p> -->
-        </div>
-      </div>
-      <div id="divisoria"></div>
-      <div id="container" class="display-flex">
-        <div id="img-container" class="display-flex align-items-center">
-          <img src="./qrcode_teste.png" style="width: 60px" />
-        </div>
-        <div
-          id="info-container"
-          class="display-flex justify-center align-center flex-direction-column"
-        >
-          <p id="p-titulo">#PRODUTO</p>
-          <p id="p-info"><strong>SKU: #SKU</strong></p>
-          <!-- <p id="p-info">Qtnd: #QNTD</p> -->
-          <!-- <p id="p-info">Pedido: #PEDIDO</p> -->
-        </div>
-      </div>
-    </div>
+    <table>
+      #LINHAS
+    </table>
   </body>
-</body>
+</html>

@@ -5,10 +5,8 @@
 
       * {
         font-family: "Roboto", sans-serif;
-
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
-
         margin: 0px;
         padding: 0px;
       }
@@ -16,10 +14,8 @@
       body {
         width: 83mm;
         height: 25mm;
-
         max-width: 83mm;
         max-height: 25mm;
-
         /* background-color: tan; */
         /* border: 1px solid black; */
       }
@@ -78,35 +74,27 @@
 
       #etiqueta {
         border: 1px solid red;
-
         width: 40mm;
         height: 25mm;
-
         max-width: 40mm;
         max-height: 25mm;
       }
 
-      /* #etiqueta-img {
-        border: 1px solid blue;
-      } */
-
       #etiqueta-info {
-        border: 1px solid yellow;
-        /* width: 100%;
-        max-width: 23mm; */
-        
+        /* border: 1px solid yellow; */
+        width: 100%;
         text-align: center;
         margin-right: auto;
       }
 
       #p-titulo {
-        font-size: 0.6rem;
-        /* font-weight: bold; */
+        font-size: 0.8rem;
+        font-weight: bold;
       }
 
       #p-info {
-        font-size: 0.6rem;
-        margin-top: 3px;
+        font-size: 0.7rem;
+        margin-top: 6px;
       }
 
       #corpo {
@@ -130,32 +118,22 @@
   <body>
     <div id="corpo" class="display-flex flex-direction-row">
       <div id="etiqueta" class="display-flex">
-        <div id="etiqueta-img" class="display-flex align-items-center">
-          <img src="./qrcode_teste.png" style="width: 60px" />
-        </div>
         <div
           id="etiqueta-info"
           class="display-flex justify-center align-center flex-direction-column"
         >
-          <p id="p-titulo">#PRODUTO</p>
-          <p id="p-info"><strong>SKU: #SKU</strong></p>
-          <!-- <p id="p-info">Qtnd: #QNTD</p> -->
-          <!-- <p id="p-info">Pedido: #PEDIDO</p> -->
+          <p id="p-titulo"><strong>#PRODUTO</strong></p>
+          <p id="p-info">SKU: #SKU</p>
         </div>
       </div>
       <div id="divisoria"></div>
       <div id="etiqueta" class="display-flex">
-        <div id="etiqueta-img" class="display-flex align-items-center">
-          <img src="./qrcode_teste.png" style="width: 60px" />
-        </div>
         <div
           id="etiqueta-info"
           class="display-flex justify-center align-center flex-direction-column"
         >
-          <p id="p-titulo">#PRODUTO</p>
-          <p id="p-info"><strong>SKU: #SKU</strong></p>
-          <!-- <p id="p-info">Qtnd: #QNTD</p> -->
-          <!-- <p id="p-info">Pedido: #PEDIDO</p> -->
+          <p id="p-titulo"><strong>#PRODUTO</strong></p>
+          <p id="p-info">SKU: #SKU</p>
         </div>
       </div>
     </div>
