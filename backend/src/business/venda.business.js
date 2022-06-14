@@ -5,6 +5,8 @@ const FreteForcado = require("../models/freteForcado.model");
 const OcorrenciaVenda = require("../models/ocorrenciasVenda.model");
 const FormaPagamento = require("../models/formaPagamento.model");
 
+const { models } = require("../modules/sequelize");
+
 // Business
 const FreteBusiness = require("./frete.business");
 const EmailBusiness = require("./email.business");
@@ -505,18 +507,18 @@ module.exports = {
     try {
       await sequelize.transaction(async (t) => {
         // Atualiza entidade de forma de pagamento no banco de dados
-        // if (objFormaPagamento) {
-        //   await FormaPagamento.upsert(objFormaPagamento, {
-        //     transaction: t,
-        //   });
-        // }
+        if (objFormaPagamento) {
+          await models.tbformapagamento.upsert(objFormaPagamento, {
+            transaction: t,
+          });
+        }
 
         // Tenta inserir dados do pedido de venda
-        await Venda.upsert(dadosVenda, { transaction: t });
+        await models.tbpedidovenda.upsert(dadosVenda, { transaction: t });
 
         // Tenta inserir relacionamento de venda-produto
         if (itens) {
-          await VendaProduto.destroy({
+          await models.tbvendaproduto.destroy({
             where: {
               idpedidovenda: dadosVenda["idpedidovenda"],
             },
@@ -524,7 +526,7 @@ module.exports = {
           });
 
           for (const relacionamento of itens) {
-            await VendaProduto.upsert(relacionamento, {
+            await models.tbvendaproduto.upsert(relacionamento, {
               transaction: t,
             });
           }
@@ -532,7 +534,7 @@ module.exports = {
 
         // Tenta inserir relacionamentos de ocorrencias
         if (ocorrencias) {
-          await OcorrenciaVenda.destroy({
+          await models.tbocorrenciavenda.destroy({
             where: {
               idpedidovenda: dadosVenda["idpedidovenda"],
             },
@@ -540,7 +542,7 @@ module.exports = {
           });
 
           for (const ocorrencia of ocorrencias) {
-            await OcorrenciaVenda.create(
+            await models.tbocorrenciavenda.create(
               {
                 idocorrencia: "default",
                 ...ocorrencia,

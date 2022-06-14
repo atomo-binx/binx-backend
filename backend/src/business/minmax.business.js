@@ -11,7 +11,6 @@ const ProdutoDeposito = require("../models/produtoDeposito.model");
 const { Op } = require("sequelize");
 const ss = require("simple-statistics");
 
-const debug = require("../utils/debug");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
@@ -236,6 +235,14 @@ module.exports = {
     return curvasOrdenadas;
   },
 
+  monthDiff(dateFrom, dateTo) {
+    return (
+      dateTo.getMonth() -
+      dateFrom.getMonth() +
+      12 * (dateTo.getFullYear() - dateFrom.getFullYear())
+    );
+  },
+
   // Cálcula valores médios de venda por mês
   async mediaMes(curvas, itens) {
     let qntdItem = [{}, {}, {}, {}, {}, {}]; // Quantidades x Item + id da loja
@@ -326,14 +333,7 @@ module.exports = {
 
         var primeiraData = new Date(Math.min.apply(null, datas));
 
-        function monthDiff(dateFrom, dateTo) {
-          return (
-            dateTo.getMonth() -
-            dateFrom.getMonth() +
-            12 * (dateTo.getFullYear() - dateFrom.getFullYear())
-          );
-        }
-        let mesesVendidos = monthDiff(primeiraData, new Date());
+        let mesesVendidos = this.monthDiff(primeiraData, new Date());
         mesesVendidos = mesesVendidos == 0 ? 1 : mesesVendidos;
 
         let mediaMes = Math.round(totalFiltrada / mesesVendidos);
@@ -746,9 +746,6 @@ module.exports = {
       this.exportarBling();
 
       status = true;
-      response = "Informações exportadas para o banco de dados";
-    } else {
-      response = "Não foi recebido nenhum dado para ser exportado";
     }
 
     return {
@@ -820,7 +817,7 @@ module.exports = {
     // Escreve arquivo final
     await workbook.xlsx
       .writeFile("./exports/minmax.xlsx")
-      .then((res) => console.log("Arquivo excel exportado com sucesso"))
+      .then(() => console.log("Arquivo excel exportado com sucesso"))
       .catch((error) =>
         console.log("Erro ao exportar arquivo excel: ", error.message)
       );
