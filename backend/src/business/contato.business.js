@@ -3,6 +3,7 @@ const { ok } = require("../modules/http");
 const Bling = require("../bling/bling");
 
 const { models } = require("../modules/sequelize");
+const { sequelize } = require("../modules/sequelize");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
@@ -29,7 +30,7 @@ module.exports = {
 
       if (contatos.length > 0) {
         for (const contato of contatos) {
-          const status = await this.sincronizaContato(contato);
+          const status = await this.contatoTransaction(contato);
 
           if (status) {
             inseridos++;
@@ -66,5 +67,24 @@ module.exports = {
     });
   },
 
-  async sincronizaContato(contato) {},
+  async contatoTransaction(contato) {
+    // console.log(filename, `Contato: ${contato.nome} -`, `Iniciando transação.`);
+
+    try {
+      await sequelize.transaction(async (t) => {
+        await models.tbcontato.upsert(contato, { transaction: t });
+      });
+
+      return true;
+    } catch (error) {
+      console.log(
+        filename,
+        `Contato: ${contato.nome} - (ID ${contato.idcontato}) -`,
+        `Erro durante a transação contato:`,
+        error.message
+      );
+
+      return false;
+    }
+  },
 };

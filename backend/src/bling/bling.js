@@ -7,6 +7,7 @@ const delay = require("../utils/delay").delay;
 
 const url = "https://bling.com.br/Api/v2";
 const api = axios.create({ baseURL: url });
+const { replaceAll, manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
 
@@ -447,29 +448,61 @@ module.exports = {
   },
 
   desestruturaContato(contato) {
+    // Dados que necessitam de lógica para extração
+    let cpfcnpj = "";
+    let ierg = "";
+    let cep = "";
+    let telefone = "";
+    let celular = "";
+
+    // Remover caracteres especiais do CPF/CNPJ
+    if (contato.cnpj) {
+      cpfcnpj = manterApenasNumeros(contato.cnpj);
+    }
+
+    // Remover caracteres especiais da Inscrição Estadual
+    if (contato.ie_rg) {
+      ierg = manterApenasNumeros(contato.ie_rg);
+    }
+
+    // Remover caracteres especiais do CEP
+    if (contato.cep) {
+      cep = manterApenasNumeros(contato.cep);
+    }
+
+    // Remover caracteres especiais do Telefone
+    if (contato.fone) {
+      telefone = manterApenasNumeros(contato.fone);
+    }
+
+    // Remover caracteres especiais do Celular
+    if (contato.celular) {
+      celular = manterApenasNumeros(contato.celular);
+    }
+
     return {
       idcontato: contato.id,
       nome: contato.nome,
       fantasia: contato.fantasia,
       tipo: contato.tipo,
-      cpfcnpj: contato.cpnj,
-      ireg: contato.ie_rg,
+      cpfcnpj: cpfcnpj,
+      ierg: ierg,
       endereco: contato.endereco,
       numero: contato.numero,
       bairro: contato.bairro,
-      cep: contato.cep,
+      cep: cep,
       cidade: contato.cidade,
       complemento: contato.complemento,
       uf: contato.uf,
-      telefone: contato.fone,
-      celular: contato.celular,
+      telefone: telefone,
+      celular: celular,
       email: contato.email,
       situacao: contato.situacao,
       contribuinte: contato.contribuinte,
       vendedor: contato.nomeVendedor,
       dataalteracao: contato.dataAlteracao,
       datainclusao: contato.dataInclusao,
-      clientedeste: contato.clienteDesde,
+      clientedesde: contato.clienteDesde,
       limitecredito: contato.limiteCredito,
     };
   },

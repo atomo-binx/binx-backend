@@ -5,6 +5,7 @@ var _tbcategoria = require("./tbcategoria");
 var _tbcategoriacompra = require("./tbcategoriacompra");
 var _tbcompraproduto = require("./tbcompraproduto");
 var _tbconfigvalidadeprecificacao = require("./tbconfigvalidadeprecificacao");
+var _tbcontato = require("./tbcontato");
 var _tbcurva = require("./tbcurva");
 var _tbcustopedido = require("./tbcustopedido");
 var _tbcustoproposta = require("./tbcustoproposta");
@@ -43,6 +44,7 @@ function initModels(sequelize) {
   var tbcategoriacompra = _tbcategoriacompra(sequelize, DataTypes);
   var tbcompraproduto = _tbcompraproduto(sequelize, DataTypes);
   var tbconfigvalidadeprecificacao = _tbconfigvalidadeprecificacao(sequelize, DataTypes);
+  var tbcontato = _tbcontato(sequelize, DataTypes);
   var tbcurva = _tbcurva(sequelize, DataTypes);
   var tbcustopedido = _tbcustopedido(sequelize, DataTypes);
   var tbcustoproposta = _tbcustoproposta(sequelize, DataTypes);
@@ -164,6 +166,7 @@ function initModels(sequelize) {
     tbcategoriacompra,
     tbcompraproduto,
     tbconfigvalidadeprecificacao,
+    tbcontato,
     tbcurva,
     tbcustopedido,
     tbcustoproposta,
