@@ -883,6 +883,7 @@ module.exports = {
       let params = {
         apikey: process.env.BLING_API_KEY,
         estoque: "S",
+        // filters: "dataAlteracao[20/06/2022 TO 24/06/2022]",
       };
 
       // Verifica se foi passado uma opção para buscar por produtos inativos
@@ -911,6 +912,8 @@ module.exports = {
                 "Última página de produtos encontrada:",
                 pagina - 1
               );
+
+              resolve(produtos);
             } else {
               console.log(filename, "Erro inesperado retornado do Bling");
             }
