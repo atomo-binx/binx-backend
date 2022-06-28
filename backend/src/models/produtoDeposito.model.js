@@ -23,6 +23,9 @@ const ProdutoDeposito = sequelize.define(
     quantidade: {
       type: DataTypes.INTEGER,
     },
+    mediames: {
+      type: DataTypes.INTEGER,
+    },
   },
   {
     tableName: "tbprodutoestoque",
