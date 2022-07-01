@@ -875,27 +875,15 @@ module.exports = {
   },
 
   // Lista uma única página de produtos do Bling
-  async listaPaginaProdutos(status, pagina) {
+  async listaPaginaProdutos(pagina, filtros) {
     return new Promise((resolve, reject) => {
       let produtos = [];
 
-      // Por padrão retorna apenas produtos ativos
       let params = {
         apikey: process.env.BLING_API_KEY,
         estoque: "S",
-        // filters: "dataAlteracao[20/06/2022 TO 24/06/2022]",
+        filters: filtros,
       };
-
-      // Verifica se foi passado uma opção para buscar por produtos inativos
-      if (status) {
-        switch (status) {
-          case "inativos":
-            params["filters"] = "situacao[I]";
-            break;
-          default:
-            break;
-        }
-      }
 
       this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
         params: params,
@@ -916,14 +904,11 @@ module.exports = {
               resolve(produtos);
             } else {
               console.log(filename, "Erro inesperado retornado do Bling");
+              reject();
             }
           } catch (error) {
             // A API do Bling retornou uma página válida, continuar a busca
-            console.log(
-              filename,
-              `Página de produtos encontrada (${status}):`,
-              pagina
-            );
+            console.log(filename, `Página de produtos encontrada:`, pagina);
 
             const paginaProdutos = res.data.retorno.produtos;
 
