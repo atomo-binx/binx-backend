@@ -9,6 +9,7 @@ const loginArgs = {
 };
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
+const xml2js = require("xml2js");
 
 module.exports = {
   async createClient() {
@@ -61,6 +62,7 @@ module.exports = {
     });
   },
 
+  // Lista de Pedidos de Venda
   async salesOrderList(client, sessionId) {
     return new Promise((resolve, reject) => {
       let dataInicial = moment()
@@ -139,23 +141,116 @@ module.exports = {
     });
   },
 
+  // Informações Básicas sobre um Produto
   async catalogProductInfo(client, sessionId, productId) {
     return new Promise((resolve, reject) => {
       const callArgs = {
         sessionId,
-        product: productId,
+        product: productId + " ",
+        identifier: "sku",
+        attributes: [["169"], []],
       };
 
       client
         .catalogProductInfoAsync(callArgs)
         .then((result) => {
-          console.log(result);
-          resolve(result);
+          var parser = new xml2js.Parser({
+            ignoreAttrs: true,
+            explicitRoot: false,
+            mergeAttrs: true,
+            explicitArray: false,
+          });
+
+          parser.parseStringPromise(result[1]).then(function (result) {
+            console.dir(result);
+            console.log("Done");
+
+            resolve(result["SOAP-ENV:Body"]["ns1:catalogProductInfoResponse"]);
+          });
         })
         .catch((error) => {
           console.log(
             filename,
             "Erro durante a chamada 'catalogProductInfo':",
+            error.message
+          );
+          reject(error);
+        });
+    });
+  },
+
+  // Lista de Imagens de um Produto
+  async catalogProductAttributeMediaList(client, sessionId, productId) {
+    return new Promise((resolve, reject) => {
+      const callArgs = {
+        sessionId,
+        product: productId + " ",
+        identifier: "sku",
+      };
+
+      client
+        .catalogProductAttributeMediaListAsync(callArgs)
+        .then((result) => {
+          var parser = new xml2js.Parser({
+            ignoreAttrs: true,
+            explicitRoot: false,
+            mergeAttrs: true,
+            explicitArray: false,
+          });
+
+          parser.parseStringPromise(result[1]).then(function (result) {
+            console.dir(result);
+            console.log("Done");
+
+            resolve(
+              result["SOAP-ENV:Body"][
+                "ns1:catalogProductAttributeMediaListResponse"
+              ]
+            );
+          });
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            "Erro durante a chamada 'catalogProductAttributeMediaList':",
+            error.message
+          );
+          reject(error);
+        });
+    });
+  },
+
+  // Lista de Atributos de um Conjunto (SetId)
+  async catalogProductAttributeList(client, sessionId, setId) {
+    return new Promise((resolve, reject) => {
+      const callArgs = {
+        sessionId,
+        setId,
+      };
+
+      client
+        .catalogProductAttributeListAsync(callArgs)
+        .then((result) => {
+          var parser = new xml2js.Parser({
+            ignoreAttrs: true,
+            explicitRoot: false,
+            mergeAttrs: true,
+            explicitArray: false,
+          });
+
+          parser.parseStringPromise(result[1]).then(function (result) {
+            console.dir(result);
+            console.log("Done");
+
+            resolve(
+              result["SOAP-ENV:Body"]["ns1:catalogProductAttributeListResponse"]
+            );
+          });
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            "Erro durante a chamada 'catalogProductAttributeList':",
             error.message
           );
           reject(error);

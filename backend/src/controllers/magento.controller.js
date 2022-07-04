@@ -22,4 +22,28 @@ module.exports = {
       next(error);
     }
   },
+
+  async imagens(req, res, next) {
+    try {
+      const { productId } = req.query;
+
+      const response = await MagentoBusiness.imagens(productId);
+
+      return res.status(response.statusCode).json(response.body);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async conjuntoAtributos(req, res, next) {
+    try {
+      const { setId } = req.query;
+
+      const response = await MagentoBusiness.conjuntoAtributos(setId);
+
+      return res.status(response.statusCode).json(response.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
