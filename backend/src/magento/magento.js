@@ -12,7 +12,7 @@ const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
   async createClient() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       soap
         .createClientAsync(url)
         .then((client) => {
@@ -20,14 +20,17 @@ module.exports = {
           resolve(client);
         })
         .catch((error) => {
-          console.log(filename, `Erro durante a criação do cliente: ${error.message}`);
+          console.log(
+            filename,
+            `Erro durante a criação do cliente: ${error.message}`
+          );
           reject(error);
         });
     });
   },
 
   async login(client) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       client
         .loginAsync(loginArgs)
         .then((result) => {
@@ -44,10 +47,10 @@ module.exports = {
   },
 
   async endSession(client, sessionId) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       client
         .endSessionAsync({ sessionId })
-        .then((result) => {
+        .then(() => {
           console.log(filename, "Sessão finalizada");
           resolve();
         })
@@ -59,13 +62,16 @@ module.exports = {
   },
 
   async salesOrderList(client, sessionId) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let dataInicial = moment()
         .subtract(14, "days")
         .startOf("day")
         .format("YYYY-MM-DD HH:mm:ss");
 
-      let dataFinal = moment().add(1, "days").endOf("day").format("YYYY-MM-DD HH:mm:ss");
+      let dataFinal = moment()
+        .add(1, "days")
+        .endOf("day")
+        .format("YYYY-MM-DD HH:mm:ss");
 
       console.log(filename, "Data Inicial:", dataInicial);
       console.log(filename, "Data Final:", dataFinal);
@@ -133,37 +139,27 @@ module.exports = {
     });
   },
 
-  async pedidosVenda() {
-    try {
-      // Cria o Client
-      const client = await this.createClient();
+  async catalogProductInfo(client, sessionId, productId) {
+    return new Promise((resolve, reject) => {
+      const callArgs = {
+        sessionId,
+        product: productId,
+      };
 
-      // Realiza login e adquire Session ID
-      const sessionId = await this.login(client);
-
-      // Chama rota de pedidos de vendas
-      let vendas = [];
-
-      try {
-        vendas = await this.salesOrderList(client, sessionId);
-      } catch (error) {
-        console.log(filename, "Erro durante o retorno de objeto de vendas do Magento");
-      }
-
-      // Finaliza sessão
-      try {
-        await this.endSession(client, sessionId);
-        return vendas;
-      } catch (error) {
-        console.log(
-          filename,
-          "Não foi possível finalizar a sessão, retornando resultados"
-        );
-        return vendas;
-      }
-    } catch (error) {
-      console.log(filename, "Erro na rotina: 'pedidosVenda':", error.message);
-      return null;
-    }
+      client
+        .catalogProductInfoAsync(callArgs)
+        .then((result) => {
+          console.log(result);
+          resolve(result);
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            "Erro durante a chamada 'catalogProductInfo':",
+            error.message
+          );
+          reject(error);
+        });
+    });
   },
 };
