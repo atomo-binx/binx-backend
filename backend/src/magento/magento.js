@@ -148,12 +148,18 @@ module.exports = {
         sessionId,
         product: productId + " ",
         identifier: "sku",
-        attributes: [["169"], []],
+        attributes: {
+          complexObjectArray: {
+            key: "additional_attributes",
+            value: ["169", 169, "descajax"],
+          },
+        },
       };
 
       client
         .catalogProductInfoAsync(callArgs)
         .then((result) => {
+          // Converter o resultado de XML para Json
           var parser = new xml2js.Parser({
             ignoreAttrs: true,
             explicitRoot: false,
@@ -161,18 +167,14 @@ module.exports = {
             explicitArray: false,
           });
 
-          parser.parseStringPromise(result[1]).then(function (result) {
-            console.dir(result);
-            console.log("Done");
-
+          parser.parseStringPromise(result[1]).then((result) => {
             resolve(result["SOAP-ENV:Body"]["ns1:catalogProductInfoResponse"]);
           });
         })
         .catch((error) => {
           console.log(
             filename,
-            "Erro durante a chamada 'catalogProductInfo':",
-            error.message
+            `Erro durante a chamada 'catalogProductInfo': ${error.message}`
           );
           reject(error);
         });
