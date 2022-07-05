@@ -17,6 +17,30 @@ const options = {
 };
 
 module.exports = {
+  async removePopUp(page) {
+    page.setDefaultTimeout(15000);
+
+    try {
+      await page.waitForXPath(
+        `//span[@class='menu-username hidden-xs hidden-sm']`,
+        {
+          visible: true,
+        }
+      );
+
+      const popUpButton = await page.$x(
+        "//button[contains(text(), 'Não mostrar novamente')]"
+      );
+
+      await popUpButton[0].click();
+
+      console.log(filename, "Botão de remover Pop Up acionado.");
+    } catch (error) {
+      console.log(filename, `O popup já foi removido ou não foi encontrado`);
+    }
+    page.setDefaultTimeout(100000);
+  },
+
   async alterarTransportadora(pedido, metodo) {
     // Cria uma nova instância do navegador
     try {
@@ -156,6 +180,11 @@ module.exports = {
         await page.goto("https://www.bling.com.br/vendas.php#list");
         await page.waitForSelector("#pesquisa-mini", { visible: true });
 
+        // No dia 28/06/2022 o Bling alterou a tela de pedidos e passou a exibir um popup
+        // É necessário clicar no botão de "Não mostrar novamente" para não exibi-lo definitivamente
+        await this.removePopUp(page);
+        //button[contains(text(), 'Não mostrar novamente')]
+
         // Buscar pelo pedido
         console.log(
           filename,
@@ -234,6 +263,8 @@ module.exports = {
           `Página do pedido de venda aberto:`,
           numeroPedido
         );
+
+        await this.removePopUp(page);
 
         if (numeroPedido != pedido) {
           console.log(
@@ -390,56 +421,56 @@ module.exports = {
     }
   },
 
-  async alterarTransportadoraMulti(pedidos) {
-    // Realizar Login apenas uma vez
-    // Percorrer cada um dos pedidos e alterar a transportadora
-    // Erros durante a alteração de um pedido não devem comprometer outros pedidos
-    // Finalizar o browser
-    // O Browser é finalizado apenas ao final da execução
+  // async alterarTransportadoraMulti(pedidos) {
+  //   // Realizar Login apenas uma vez
+  //   // Percorrer cada um dos pedidos e alterar a transportadora
+  //   // Erros durante a alteração de um pedido não devem comprometer outros pedidos
+  //   // Finalizar o browser
+  //   // O Browser é finalizado apenas ao final da execução
 
-    try {
-      const browser = await puppeteer.launch({
-        headless: false,
-        args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
-        defaultViewport: {
-          width: 1024 + Math.floor(Math.random() * 100),
-          height: 720 + Math.floor(Math.random() * 100),
-        },
-      });
+  //   try {
+  //     const browser = await puppeteer.launch({
+  //       headless: false,
+  //       args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
+  //       defaultViewport: {
+  //         width: 1024 + Math.floor(Math.random() * 100),
+  //         height: 720 + Math.floor(Math.random() * 100),
+  //       },
+  //     });
 
-      // A instância foi iniciada com sucesso, prosseguir
-      try {
-        // Manusear a página aqui
+  //     // A instância foi iniciada com sucesso, prosseguir
+  //     try {
+  //       // Manusear a página aqui
 
-        // Tempo de inicio da operação
-        let tempoInicio = new Date();
-      } catch (error) {
-        // Erro durante o manuseio de um pedido em específico
-        console.log(
-          filename,
-          "Erro durante o manuseio da página:",
-          error.message
-        );
+  //       // Tempo de inicio da operação
+  //       let tempoInicio = new Date();
+  //     } catch (error) {
+  //       // Erro durante o manuseio de um pedido em específico
+  //       console.log(
+  //         filename,
+  //         "Erro durante o manuseio da página:",
+  //         error.message
+  //       );
 
-        // Se o navegador não fechou, podemos iniciar o procedimento do próximo pedido
-        // ...
-      } finally {
-        console.log(
-          filename,
-          "Procedimento finalizado no Puppeteer, fechando navegador"
-        );
-        await browser.close();
-        if (browser && browser.process() != null)
-          browser.process().kill("SIGKILL");
-      }
-    } catch (error) {
-      console.log(
-        filename,
-        "Erro durante a abertura do navegador:",
-        error.message
-      );
-    }
-  },
+  //       // Se o navegador não fechou, podemos iniciar o procedimento do próximo pedido
+  //       // ...
+  //     } finally {
+  //       console.log(
+  //         filename,
+  //         "Procedimento finalizado no Puppeteer, fechando navegador"
+  //       );
+  //       await browser.close();
+  //       if (browser && browser.process() != null)
+  //         browser.process().kill("SIGKILL");
+  //     }
+  //   } catch (error) {
+  //     console.log(
+  //       filename,
+  //       "Erro durante a abertura do navegador:",
+  //       error.message
+  //     );
+  //   }
+  // },
 
   async delay(tempo) {
     return new Promise((resolve) => {

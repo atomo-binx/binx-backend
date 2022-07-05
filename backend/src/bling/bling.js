@@ -7,6 +7,7 @@ const delay = require("../utils/delay").delay;
 
 const url = "https://bling.com.br/Api/v2";
 const api = axios.create({ baseURL: url });
+const { replaceAll, manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
 
@@ -446,6 +447,66 @@ module.exports = {
     return objetoDepositos;
   },
 
+  desestruturaContato(contato) {
+    // Dados que necessitam de lógica para extração
+    let cpfcnpj = "";
+    let ierg = "";
+    let cep = "";
+    let telefone = "";
+    let celular = "";
+
+    // Remover caracteres especiais do CPF/CNPJ
+    if (contato.cnpj) {
+      cpfcnpj = manterApenasNumeros(contato.cnpj);
+    }
+
+    // Remover caracteres especiais da Inscrição Estadual
+    if (contato.ie_rg) {
+      ierg = manterApenasNumeros(contato.ie_rg);
+    }
+
+    // Remover caracteres especiais do CEP
+    if (contato.cep) {
+      cep = manterApenasNumeros(contato.cep);
+    }
+
+    // Remover caracteres especiais do Telefone
+    if (contato.fone) {
+      telefone = manterApenasNumeros(contato.fone);
+    }
+
+    // Remover caracteres especiais do Celular
+    if (contato.celular) {
+      celular = manterApenasNumeros(contato.celular);
+    }
+
+    return {
+      idcontato: contato.id,
+      nome: contato.nome,
+      fantasia: contato.fantasia,
+      tipo: contato.tipo,
+      cpfcnpj: cpfcnpj,
+      ierg: ierg,
+      endereco: contato.endereco,
+      numero: contato.numero,
+      bairro: contato.bairro,
+      cep: cep,
+      cidade: contato.cidade,
+      complemento: contato.complemento,
+      uf: contato.uf,
+      telefone: telefone,
+      celular: celular,
+      email: contato.email,
+      situacao: contato.situacao,
+      contribuinte: contato.contribuinte,
+      vendedor: contato.nomeVendedor,
+      dataalteracao: contato.dataAlteracao,
+      datainclusao: contato.dataInclusao,
+      clientedesde: contato.clienteDesde,
+      limitecredito: contato.limiteCredito,
+    };
+  },
+
   // Rotina para política de tentativa de chamada ao Bling
   async blingRequest(metodo, caminho, params) {
     return new Promise(async (resolve, reject) => {
@@ -814,26 +875,15 @@ module.exports = {
   },
 
   // Lista uma única página de produtos do Bling
-  async listaPaginaProdutos(status, pagina) {
+  async listaPaginaProdutos(pagina, filtros) {
     return new Promise((resolve, reject) => {
       let produtos = [];
 
-      // Por padrão retorna apenas produtos ativos
       let params = {
         apikey: process.env.BLING_API_KEY,
         estoque: "S",
+        filters: filtros,
       };
-
-      // Verifica se foi passado uma opção para buscar por produtos inativos
-      if (status) {
-        switch (status) {
-          case "inativos":
-            params["filters"] = "situacao[I]";
-            break;
-          default:
-            break;
-        }
-      }
 
       this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
         params: params,
@@ -850,16 +900,15 @@ module.exports = {
                 "Última página de produtos encontrada:",
                 pagina - 1
               );
+
+              resolve(produtos);
             } else {
               console.log(filename, "Erro inesperado retornado do Bling");
+              reject();
             }
           } catch (error) {
             // A API do Bling retornou uma página válida, continuar a busca
-            console.log(
-              filename,
-              `Página de produtos encontrada (${status}):`,
-              pagina
-            );
+            console.log(filename, `Página de produtos encontrada:`, pagina);
 
             const paginaProdutos = res.data.retorno.produtos;
 
@@ -954,6 +1003,55 @@ module.exports = {
               this.desestruturaProposta(propostaAtual);
 
             resolve(propostaDesestruturada);
+          }
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            "Erro na requisição de proposta comercial na api do Bling"
+          );
+          console.log(filename, error.message);
+          reject(error.message);
+        });
+    });
+  },
+
+  async listaPaginaContatos(filtros, pagina = 1) {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/contatos/page=${pagina}/json/`, {
+        params: {
+          apikey: process.env.BLING_API_KEY,
+        },
+        filters: filtros,
+      })
+        .then((res) => {
+          try {
+            const erroBling = res.data.retorno.erros[0].erro.cod;
+            console.log(filename, "Erro Bling Encontrado:", erroBling);
+
+            if (erroBling == 14) {
+              console.log(filename, "Falha na listagem de contatos");
+              reject(res.data.retorno.erros[0].erro.msg);
+            } else {
+              console.log(filename, "Erro inesperado encontrado ...");
+              reject(res.data.retorno.erros[0].erro.msg);
+            }
+          } catch (error) {
+            let resultados = [];
+
+            const contatos = res.data.retorno.contatos;
+
+            for (const contato of contatos) {
+              resultados.push(this.desestruturaContato(contato.contato));
+            }
+
+            console.log(
+              filename,
+              "Total de contatos encontrados:",
+              resultados.length
+            );
+
+            resolve(resultados);
           }
         })
         .catch((error) => {

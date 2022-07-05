@@ -11,7 +11,7 @@ const sequelize = require("../services/sequelize");
 const { Op, QueryTypes } = require("sequelize");
 const moment = require("moment");
 const fs = require("fs");
-const { OkStatus, ErrorStatus } = require("../modules/codes");
+const { OkStatus } = require("../modules/codes");
 const { dateToFilename } = require("../utils/date");
 const validator = require("validator");
 
@@ -132,7 +132,7 @@ module.exports = {
           });
         } else {
           return http.failure({
-            message: `Falha durante o procedimento de commit ao salvar valores diários do dashboard de compras: ${error.message}`,
+            message: `Falha durante o procedimento de commit ao salvar valores diários do dashboard de compras.`,
           });
         }
       } else {
@@ -217,6 +217,7 @@ module.exports = {
       let contProdutosPorCurva = [0, 0, 0, 0];
       let disponibilidadePorCurva = [0, 0, 0, 0];
       let pDisponibilidadePorCurva = [0, 0, 0, 0];
+      let contAbaixoMinPorCurva = [0, 0, 0, 0];
 
       let dicionarioCurvas = {
         "Curva A": 0,
@@ -260,6 +261,25 @@ module.exports = {
         if (produto.quantidade >= 1 && produto.quantidade < produto.minimo) {
           contAbaixoMin++;
           consideradosAbaixoMin.push(produto);
+
+          // Adiciona indicador de quantidade abaixo do mínimo por curva
+          switch (produto.curva) {
+            case "Curva A":
+              contAbaixoMinPorCurva[0] = contAbaixoMinPorCurva[0] + 1;
+              break;
+            case "Curva B":
+              contAbaixoMinPorCurva[1] = contAbaixoMinPorCurva[1] + 1;
+              break;
+            case "Curva C":
+              contAbaixoMinPorCurva[2] = contAbaixoMinPorCurva[2] + 1;
+              break;
+            case "Sem Curva":
+              contAbaixoMinPorCurva[3] = contAbaixoMinPorCurva[3] + 1;
+              break;
+
+            default:
+              break;
+          }
         }
 
         // Realiza contagem de produtos por Curva
@@ -371,6 +391,11 @@ module.exports = {
         "Porcentagem de Disponibilidade por Curva:",
         pDisponibilidadePorCurva
       );
+      console.log(
+        filename,
+        "Quantidade de itens abaixo do mínimo por curva:",
+        contAbaixoMinPorCurva
+      );
 
       // Adquire os últimos valores de disponibilidade de produtos para montar o gráfico de histórico
       let ultimasDisponibilidades = await Disponibilidade.findAll({
@@ -402,6 +427,7 @@ module.exports = {
         pDisponivelPorCurva: pDisponibilidadePorCurva,
         disponibilidades: ultimasDisponibilidades,
         disponiblidadesCurva: ultimasDisponibilidadesCurva,
+        abaixoMinPorCurva: contAbaixoMinPorCurva,
       };
 
       // Exportação para Excel
@@ -477,15 +503,13 @@ module.exports = {
     // Escreve arquivo final
     await workbook.xlsx
       .writeFile("./exports/dashboard_compras.xlsx")
-      .then((res) =>
-        console.log(filename, "Arquivo excel exportado com sucesso")
-      )
+      .then(() => console.log(filename, "Arquivo excel exportado com sucesso"))
       .catch((error) =>
         console.log(filename, "Erro ao exportar arquivo excel: ", error.message)
       );
   },
 
-  async disponibilidade(req) {
+  async disponibilidade() {
     // Possibilidades:
 
     // Mês atual
@@ -753,7 +777,7 @@ module.exports = {
     // Escreve arquivo final
     await workbook.xlsx
       .writeFile(arquivo + ".xlsx")
-      .then((res) => console.log("Arquivo excel exportado com sucesso"))
+      .then(() => console.log("Arquivo excel exportado com sucesso"))
       .catch((error) =>
         console.log("Erro ao exportar arquivo excel: ", error.message)
       );

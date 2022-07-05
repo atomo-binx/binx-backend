@@ -9,11 +9,9 @@ const filename = __filename.slice(__dirname.length + 1) + " -";
 const { Op } = require("sequelize");
 
 const Vendas = require("../models/venda.model");
-const VendasBusiness = require("../business/venda.business");
-
-const debug = require("../utils/debug");
 
 const http = require("../utils/http");
+const VendaBusiness = require("../business/venda.business");
 const magento = require("../magento/magento");
 
 module.exports = {
@@ -46,7 +44,12 @@ module.exports = {
 
     // Realiza leitura dos pedidos do banco de dados do Binx
     const pedidosBancoBruto = await Vendas.findAll({
-      attributes: ["idpedidovenda", "idstatusvenda", "idpedidoloja", "formapagamento"],
+      attributes: [
+        "idpedidovenda",
+        "idstatusvenda",
+        "idpedidoloja",
+        "formapagamento",
+      ],
       where: {
         datavenda: {
           [Op.gt]: moment().subtract(15, "days"),
@@ -94,17 +97,20 @@ module.exports = {
         let dataHoje = moment().startOf("day");
         let diasCorridos = moment(dataHoje).diff(dataPedido, "days");
 
-        // Debug
-        if (false) {
-          console.log("Pedido:", idPedidoBling, "/", idPedidoLoja);
-          console.log("Data do pedido (Magento):", dataPedido.format("DD/MM/YYYY"));
-          console.log("Dias Corridos", diasCorridos);
+        // // Debug
+        // if (false) {
+        //   console.log("Pedido:", idPedidoBling, "/", idPedidoLoja);
+        //   console.log(
+        //     "Data do pedido (Magento):",
+        //     dataPedido.format("DD/MM/YYYY")
+        //   );
+        //   console.log("Dias Corridos", diasCorridos);
 
-          console.log(`Pedido Magento: [${idPedidoLoja}]`);
-          console.log(`Pedido Bling: [${idPedidoBling}]`);
-          console.log(`Status Magento: [${statusMagento}]`);
-          console.log(`Status Bling: [${statusBling}]`);
-        }
+        //   console.log(`Pedido Magento: [${idPedidoLoja}]`);
+        //   console.log(`Pedido Bling: [${idPedidoBling}]`);
+        //   console.log(`Status Magento: [${statusMagento}]`);
+        //   console.log(`Status Bling: [${statusBling}]`);
+        // }
 
         // Pedido sem pagamento há mais de 7 dias, cancelar
         if (
@@ -183,15 +189,8 @@ module.exports = {
     };
   },
 
-  // Delay forçado de meio segundo para chamadas de alteração de status de pedido de venda
-  async forcedDelay() {
-    return new Promise(async (resolve, reject) => {
-      setTimeout(resolve, 1000);
-    });
-  },
-
   // Altera status de um pedido ou uma lista de pedidos
-  async alterarStatusPedido(req, res) {
+  async alterarStatusPedido(req) {
     if (req.body.pedidos && req.body.status) {
       const pedidos = req.body.pedidos;
       const status = req.body.status;
@@ -246,7 +245,7 @@ module.exports = {
   },
 
   // Realiza integração de pedidos do Magento para o Bling
-  async sync(req, res) {
+  async sync() {
     // Ao chegar até aqui, o arquivo ja foi criado
     // Com o middleware Multer no arquivo de Rotas, o arquivo é criado no momento da chamada da API
     // Ao responder ao post, o routes já criou o arquivo no diretório de destino
@@ -285,7 +284,12 @@ module.exports = {
   async listaPedidosBinx() {
     // Realiza leitura dos pedidos do banco de dados do Binx
     const pedidos = await Vendas.findAll({
-      attributes: ["idpedidovenda", "idstatusvenda", "idpedidoloja", "formapagamento"],
+      attributes: [
+        "idpedidovenda",
+        "idstatusvenda",
+        "idpedidoloja",
+        "formapagamento",
+      ],
       where: {
         datavenda: {
           // Obs: nesta função, chamar 15 dias, um dia a mais do que o do Magento
@@ -359,7 +363,8 @@ module.exports = {
 
         // Pedido aprovado no Magento, aprovar no Bling
         if (
-          (statusMagento == "Pagamento Aprovado" || statusMagento == "processing") &&
+          (statusMagento == "Pagamento Aprovado" ||
+            statusMagento == "processing") &&
           statusBling == 6
         ) {
           pedidosAprovar.push({
@@ -425,26 +430,42 @@ module.exports = {
     try {
       // Listar vendas do Magento
       console.log(filename, "Listando pedidos Magento");
-      const pedidosMagento = await magento.pedidosVenda();
+
+      // Adquire lista de pedidos de venda do Magento
+      const client = await magento.createClient();
+      const sessionId = await magento.login(client);
+      const pedidosMagento = await magento.salesOrderList(client, sessionId);
 
       // Listar vendas do Binx
       console.log(filename, "Listando pedidos Binx");
       const pedidosBinx = await this.listaPedidosBinx();
 
       // Monta dicionários
-      const dicionarioMagento = this.montarDicionario(pedidosMagento, "idpedido");
+      const dicionarioMagento = this.montarDicionario(
+        pedidosMagento,
+        "idpedido"
+      );
+
       const dicionarioBinx = this.montarDicionario(pedidosBinx, "idpedidoloja");
 
       // Cruzar dados
       console.log(filename, "Iniciando cruzamento de dados");
 
-      let { pedidosCancelar, pedidosAprovar, erros } = await this.cruzarPedidos(
+      let { pedidosCancelar, pedidosAprovar } = await this.cruzarPedidos(
         dicionarioMagento,
         dicionarioBinx
       );
 
-      console.log(filename, "Qntd de pedidos para aprovar:", pedidosAprovar.length);
-      console.log(filename, "Qntd de pedidos para cancelar:", pedidosCancelar.length);
+      console.log(
+        filename,
+        "Qntd de pedidos para aprovar:",
+        pedidosAprovar.length
+      );
+      console.log(
+        filename,
+        "Qntd de pedidos para cancelar:",
+        pedidosCancelar.length
+      );
 
       // Debug
       // console.log(filename, "Pedidos para Aprovar:", pedidosAprovar);
@@ -455,11 +476,29 @@ module.exports = {
 
       // Desestrutura pedidos para montar os pacotes para a aprovação/cancelamento
       pedidosAprovar = pedidosAprovar.map((pedido) => pedido["bling"]);
+
       pedidosCancelar = pedidosCancelar.map((pedido) => pedido["bling"]);
 
       // Realiza alterações nos status
       await this.alterarStatus(pedidosAprovar, 15005);
+
       await this.alterarStatus(pedidosCancelar, 12);
+
+      // Após alteração de status, realiza sincronização apenas dos pedidos que foram atlerados
+      const pedidosAtualizar = [...pedidosAprovar, ...pedidosCancelar];
+
+      try {
+        await VendaBusiness.sincronizaPedidos({
+          body: {
+            pedidos: pedidosAtualizar,
+          },
+        });
+      } catch (error) {
+        console.log(
+          filename,
+          `Erro durante sincronização de pedidos: ${error.message}`
+        );
+      }
 
       console.log(filename, "Rotina de aprovação automática finalizada");
 

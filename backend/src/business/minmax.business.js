@@ -494,6 +494,7 @@ module.exports = {
           idsku: item.idsku,
           minimo: item.minimo,
           maximo: item.maximo,
+          mediames: item.mediames,
         };
 
         // Insere pacotes montados nas listas de exportação
@@ -522,7 +523,7 @@ module.exports = {
     // Salva valores de Máximo e Mínimo no banco de dados
     try {
       await ProdutoDeposito.bulkCreate(produtosDepositos, {
-        updateOnDuplicate: ["maximo", "minimo"],
+        updateOnDuplicate: ["maximo", "minimo", "mediames"],
       });
       console.log(
         filename,
@@ -743,10 +744,12 @@ module.exports = {
       // O procedimento de exportação para o Bling é assíncrono
       // Devemos respeitar a taxa de chamadas do Bling
       // Portanto essa etapa será executada em background
-      this.exportarBling();
+      //  this.exportarBling();
 
       status = true;
     }
+
+    console.log(filename, "Procedimento finalizado");
 
     return {
       status: status,

@@ -1,9 +1,5 @@
 // Modelos
-const Venda = require("../models/venda.model");
-const VendaProduto = require("../models/vendaProduto.model");
 const FreteForcado = require("../models/freteForcado.model");
-const OcorrenciaVenda = require("../models/ocorrenciasVenda.model");
-const FormaPagamento = require("../models/formaPagamento.model");
 
 const { models } = require("../modules/sequelize");
 

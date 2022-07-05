@@ -19,8 +19,8 @@ module.exports = {
 
         console.log(filename, "Parse do XML para objeto completo");
       })
-      .catch(function (err) {
-        // Failed
+      .catch((error) => {
+        console.log(error.message);
       });
 
     for (const produto of produtos) {

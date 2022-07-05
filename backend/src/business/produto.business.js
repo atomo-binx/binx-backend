@@ -10,70 +10,47 @@ const sequelize = require("../services/sequelize");
 const { Op } = require("sequelize");
 
 const http = require("../utils/http");
+const { ok } = require("../modules/http");
 
 module.exports = {
-  async startSync(req) {
-    // Os pedidos de sincronização disparados pelo frontend ou pelo lambda passam por uma etapa a mais
-    // Chamamos internamente a sincronização, mas não aguardamos o resultado
-    // Devolvemos ao frontend/lambda a informação de que a sincronização foi iniciada
+  async iniciaSincronizacao(dataAlteracao, dataInclusao, situacao) {
+    console.log(filename, "Iniciando sincronização de produtos.");
 
-    try {
-      console.log(
-        filename,
-        "Iniciando nova rotina de sincronização de produtos."
-      );
+    this.rotinaSincronizacao(dataAlteracao, dataInclusao, situacao);
 
-      // Disparar rotina de sincronização de produtos
-      this.rotinaSincronizacao(req);
-
-      // Devolver ao frontend/lambda status de sincronização
-      return http.ok({
-        message: "Rotina de sincronização de produtos iniciada.",
-      });
-    } catch (error) {
-      console.log(
-        filename,
-        "Erro no início de sincronização de produtos:",
-        error.message
-      );
-      return http.failure({
-        message: `Erro no início de sincronização de produtos: ${error.message}`,
-      });
-    }
+    return ok({
+      message: "Rotina de sincronização de produtos iniciada.",
+    });
   },
 
-  // Executa a sincronização de produtos
-  async rotinaSincronizacao() {
-    /*
+  async rotinaSincronizacao(dataAlteracao, dataInclusao, situacao) {
+    // Definição do filtro do Bling com base nos parâmetros passados
+    let filtros = [];
 
-    Procedimento:
-    1 - Listar produtos Ativos do Bling
-    2 - Listar produtos Inativos do Bling
-    3 - Concatenar resultados do Bling em um único pacote
-    4 - Listar produtos do banco de dados
-    5 - Cruzar pacote do Bling com o do banco de dados
-    6 - Atualizar produtos no banco de dados
+    let analiseCompleta = situacao ? false : true;
 
-    Situações possíveis no cruzamento de produtos:
-    a) Produto existe no bling e não existe no banco: Inserir
-    b) Produto existe no bling e também no banco: Atualizar
-    c) Produto não existe no bling, e existe no banco: Inativar (Corrigida, verificar abaixo)
+    if (situacao) {
+      filtros.push(`situacao[${situacao}]`);
+    } else {
+      filtros.push(`situacao[A]`);
+    }
 
-    Os casos "a" e "b" são resolvidos naturalmente com a função de update
-    Caso o produto exista, será atualizado, caso não, será inserido
-    Campos que devem ser atualizados: situação, preço de venda, nome, preço de custo, estoque
+    if (dataAlteracao && !dataInclusao) {
+      filtros.push(`dataAlteracao[${dataAlteracao}]`);
+    }
 
-    */
+    if (dataInclusao && !dataAlteracao) {
+      filtros.push(`dataInclusao[${dataInclusao}]`);
+    }
+
+    filtros = filtros.length > 1 ? filtros.join(";") : filtros[0];
 
     // Medida de tempo de execução
     let start = new Date();
 
     // Flags de busca
     let procurando = true;
-    let paginaAlvo = 1;
-
-    // Utilizar para debug, para restringir a quantidade de páginas buscadas
-    // let maximoPaginas = 5;
+    let pagina = 1;
 
     //Contadores
     let contadorInseridos = 0;
@@ -82,46 +59,42 @@ module.exports = {
     // Flags para controlar busca por produtos ativos/inativos
     let finalizadoAtivos = false;
 
-    // Inicia Busca
-    // while (procurando && paginaAlvo <= maximoPaginas) {
+    // Inicia busca
     while (procurando) {
-      console.log(
-        filename,
-        "Iniciando busca de produtos na página: ",
-        paginaAlvo
-      );
+      console.log(filename, "Iniciando busca de produtos na página: ", pagina);
 
-      // Verifica se finalizou ciclo de ativo para iniciar o de inativo
-      let produtos = await Bling.listaPaginaProdutos(
-        finalizadoAtivos ? "inativos" : "ativos",
-        paginaAlvo++
-      );
+      // Caso não tenha sido informado uma situação, a busca será realizada nas duas situações
+      // Então é necessário verificar o término de uma situação, para começar a outra
+      if (analiseCompleta) {
+        if (finalizadoAtivos) filtros = filtros.replace("[A]", "[I]");
+      }
 
-      // Ainda recebemos uma paǵina com produtos
+      let produtos = await Bling.listaPaginaProdutos(pagina++, filtros);
+
+      // Recebemos uma paǵina com produtos
       if (produtos.length > 0) {
-        // Tenta atualizar produto por produto dos listados no Bling
         for (const produto of produtos) {
-          // Transação de sincronização
-          const transacao = await this.produtoTransaction(produto);
-
-          if (transacao) {
-            contadorInseridos++;
-          } else {
-            contadorRejeitados++;
-          }
+          await this.produtoTransaction(produto)
+            .then(() => contadorInseridos++)
+            .catch(() => contadorRejeitados++);
         }
       } else {
         // Recebemos uma página sem produtos, chegamos ao final?
 
-        // Verifica primeiro se finalizou o ciclo de produtos ativos
-        if (finalizadoAtivos) {
-          procurando = false;
-        } else {
-          // Finaliza a busca por produtos ativos e inicia a busca por produtos inativos
-          finalizadoAtivos = true;
+        if (analiseCompleta) {
+          // Verificar se o ciclo de produtos "ativos" foi finalizado
+          if (finalizadoAtivos) {
+            procurando = false;
+          } else {
+            // Finaliza a busca por produtos "ativos" e inicia a busca por produtos "inativos"
+            finalizadoAtivos = true;
 
-          // Reseta o contador de target page
-          paginaAlvo = 1;
+            // Reseta o contador de target page
+            pagina = 1;
+          }
+        } else {
+          // Não está sendo feita a análise completa (ativos e inativos), podemos finalizar a busca
+          procurando = false;
         }
       }
     }
@@ -135,11 +108,48 @@ module.exports = {
     console.log(filename, "Tempo gasto no procedimento: ", elapsedTime);
     console.log(filename, "Total de produtos inseridos: ", contadorInseridos);
     console.log(filename, "Total de produtos recusados: ", contadorRejeitados);
-
-    console.log(filename, "Processo de atualização finalizado");
   },
 
-  // Callback de alteração de estoque de produtos
+  async produtoTransaction(produto) {
+    return new Promise((resolve, reject) => {
+      let { depositos, estrutura, ...dadosProduto } = produto;
+
+      (async () => {
+        await sequelize.transaction(async (t) => {
+          await Produto.upsert(dadosProduto, {
+            transaction: t,
+          });
+
+          await ProdutoDeposito.bulkCreate(depositos, {
+            updateOnDuplicate: ["quantidade"],
+            transaction: t,
+          });
+
+          if (estrutura) {
+            await Estrutura.destroy({
+              where: {
+                skupai: dadosProduto["idsku"].toString(),
+              },
+              transaction: t,
+            });
+
+            await Estrutura.bulkCreate(estrutura, {
+              updateOnDuplicate: ["quantidade"],
+              transaction: t,
+            });
+          }
+        });
+        resolve();
+      })().catch((error) => {
+        console.log(
+          filename,
+          `Produto ${produto.idsku} - Erro durante transação de produto: ${error.message}`
+        );
+        reject(error);
+      });
+    });
+  },
+
   async callbackProdutos(req) {
     try {
       console.log(filename, "Iniciando rotina de callback de produto");
@@ -233,58 +243,6 @@ module.exports = {
           "Erro durante processamento de callback de produto: " + error.message,
       });
     }
-  },
-
-  async produtoTransaction(produto) {
-    // Flag para guardar o status da sincronização de produto (sucesso ou falha)
-    let status = false;
-
-    // Realiza separação de dados do produto da array de depositos
-    let { depositos, estrutura, ...dadosProduto } = produto;
-
-    try {
-      await sequelize.transaction(async (t) => {
-        // Inserção de Produto
-
-        // O produto precisa existir na tabela de produtos
-        // Portanto, primeiro é necessário realizar o upsert na tabela de produtos
-
-        await Produto.upsert(dadosProduto, {
-          transaction: t,
-        });
-
-        // Inserção de Produto-Depósito
-        await ProdutoDeposito.bulkCreate(depositos, {
-          updateOnDuplicate: ["quantidade"],
-          transaction: t,
-        });
-
-        // Inserção de Estrutura
-        if (estrutura) {
-          await Estrutura.destroy({
-            where: {
-              skupai: dadosProduto["idsku"].toString(),
-            },
-            transaction: t,
-          });
-
-          await Estrutura.bulkCreate(estrutura, {
-            updateOnDuplicate: ["quantidade"],
-            transaction: t,
-          });
-        }
-
-        status = true;
-      });
-    } catch (error) {
-      console.log(
-        filename,
-        `Erro durante a transaction - ${dadosProduto["idsku"]}: `,
-        error.message
-      );
-    }
-
-    return status;
   },
 
   async buscarProdutos(req) {

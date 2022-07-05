@@ -4,7 +4,6 @@ const axios = require("axios");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 const { Op } = require("sequelize");
-const http = require("../utils/http");
 
 const frenetApi = axios.create({
   baseURL: "http://api.frenet.com.br",
@@ -16,7 +15,10 @@ module.exports = {
   // Foi criada para unificar o cálculo de frete para os metodos do FreteBot e do cálculo corporativo
   async calcularFrete(req) {
     try {
-      console.log(filename, "Iniciando cálculo de frete para proposta comercial");
+      console.log(
+        filename,
+        "Iniciando cálculo de frete para proposta comercial"
+      );
 
       if (req.params.proposta) {
         const proposta = await Bling.propostaComercial(req.params.proposta);
@@ -39,7 +41,6 @@ module.exports = {
   async calcularFreteVenda(venda) {
     // Modelo de função genérica, considerar que os dados foram desestruturados previamente
     try {
-      // Prosseguir com a chamada de pesos dos produtos do banco de dados
       const listaSkus = venda.itens.map((item) => item.idsku);
 
       let pesos = await Produto.findAll({
@@ -70,20 +71,12 @@ module.exports = {
         console.log(filename, "A soma total dos pesos obtidos é igual a zero.");
       }
 
-      // Os pesos obtidos do banco de dados não respeitam a mesma orden da lista de SKUs
+      // Os pesos obtidos do banco de dados não respeitam a mesma ordem da lista de SKUs
       // É necessário construir um "dicionario" em que a chave é o SKU, e o valor é o peso
       const dicionarioPesos = {};
 
       for (const peso of pesos) {
         dicionarioPesos[peso.idsku] = peso.peso;
-      }
-
-      // Verifica se a quantidade de pesos retornada do banco é igual a quantidade de SKUs
-      if (listaSkus.length != Object.keys(dicionarioPesos).length) {
-        console.log(
-          filename,
-          "A quantidade de pesos retornada do banco de dados não é a mesma que a quantidade de itens presentes na venda"
-        );
       }
 
       // Verificar por pesos com valor zerado
@@ -187,11 +180,20 @@ module.exports = {
 
           // Métodos que não retornaram erro
           if (!resultado["Error"]) {
+            // Adquirir o maior valor de frete
+            const OriginalShippingPrice = parseFloat(
+              resultado["OriginalShippingPrice"]
+            ).toFixed(2);
+
+            const ShippingPrice = parseFloat(
+              resultado["ShippingPrice"]
+            ).toFixed(2);
+
             metodosFrete.push({
               transportadora: resultado["Carrier"],
               servico: resultado["ServiceDescription"],
-              preco: parseFloat(resultado["OriginalShippingPrice"]).toFixed(2),
-              prazo: parseInt(resultado["DeliveryTime"]),
+              preco: Math.max(OriginalShippingPrice, ShippingPrice),
+              prazo: parseInt(resultado["OriginalDeliveryTime"]),
             });
           } else {
             // Métodos que retornaram com erro
@@ -204,7 +206,8 @@ module.exports = {
 
             // Verifica resposta de erro para simplificação - PAC
             if (respostaErro.includes("ERP-007")) {
-              respostaErro = "CEP de origem não pode postar para o CEP de destino";
+              respostaErro =
+                "CEP de origem não pode postar para o CEP de destino";
             }
 
             metodosFrete.push({
