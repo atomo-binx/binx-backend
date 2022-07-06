@@ -694,7 +694,7 @@ module.exports = {
     });
   },
 
-  async ultimoCusto() {
+  async relatorioUltimoCusto() {
     const query = (
       await fs.promises.readFile("src/queries/ultimo_custo.sql")
     ).toString();
@@ -704,6 +704,28 @@ module.exports = {
     });
 
     const nomeArquivo = "exports/relatorio-ultimo-custo-" + dateToFilename();
+
+    await this.exportToExcel(resultados, nomeArquivo);
+
+    return ok({
+      status: OkStatus,
+      response: {
+        filename: nomeArquivo + ".xlsx",
+      },
+    });
+  },
+
+  async relatorioSituacaoEstoque() {
+    const query = (
+      await fs.promises.readFile("src/queries/situacao_estoque.sql")
+    ).toString();
+
+    const resultados = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+    });
+
+    const nomeArquivo =
+      "exports/relatorio-situacao-estoque-" + dateToFilename();
 
     await this.exportToExcel(resultados, nomeArquivo);
 
