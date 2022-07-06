@@ -8,16 +8,16 @@ module.exports = {
     try {
       const { dataAlteracao, dataInclusao, situacao } = req.query;
 
-      const rules = [
-        [dataAlteracao, DataFilterValidator],
-        [dataInclusao, DataFilterValidator],
-      ];
+      // const rules = [
+      //   [dataAlteracao, DataFilterValidator],
+      //   [dataInclusao, DataFilterValidator],
+      // ];
 
-      const validationResult = validation.run(rules);
+      // const validationResult = validation.run(rules);
 
-      if (validationResult["status"] === "error") {
-        return res.status(400).json(validationResult);
-      }
+      // if (validationResult["status"] === "error") {
+      //   return res.status(400).json(validationResult);
+      // }
 
       const resposta = await ProdutoBusiness.iniciaSincronizacao(
         dataAlteracao,

@@ -28,7 +28,7 @@ module.exports = {
       await magento.endSession(client, sessionId);
 
       return ok({
-        resultados,
+        ...resultados,
       });
     } catch (error) {
       console.log(
@@ -36,7 +36,7 @@ module.exports = {
         "Não foi possível finalizar a sessão, retornando resultados."
       );
       return ok({
-        resultados,
+        ...resultados,
       });
     }
   },
@@ -53,6 +53,42 @@ module.exports = {
         sessionId,
         productId
       );
+    } catch (error) {
+      console.log(
+        filename,
+        `Erro durante chamada ao Magento: ${error.message}`
+      );
+
+      return failure({
+        message: `Erro durante chamada ao Magento: ${error.message}`,
+      });
+    }
+
+    try {
+      await magento.endSession(client, sessionId);
+
+      return ok({
+        ...resultados,
+      });
+    } catch (error) {
+      console.log(
+        filename,
+        "Não foi possível finalizar a sessão, retornando resultados."
+      );
+      return ok({
+        ...resultados,
+      });
+    }
+  },
+
+  async produtos() {
+    let resultados = [];
+
+    const client = await magento.createClient();
+    const sessionId = await magento.login(client);
+
+    try {
+      resultados = await magento.catalogProductList(client, sessionId);
     } catch (error) {
       console.log(
         filename,
@@ -132,6 +168,46 @@ module.exports = {
         client,
         sessionId,
         setId
+      );
+    } catch (error) {
+      console.log(
+        filename,
+        `Erro durante chamada ao Magento: ${error.message}`
+      );
+
+      return failure({
+        message: `Erro durante chamada ao Magento: ${error.message}`,
+      });
+    }
+
+    try {
+      await magento.endSession(client, sessionId);
+
+      return ok({
+        ...resultados,
+      });
+    } catch (error) {
+      console.log(
+        filename,
+        "Não foi possível finalizar a sessão, retornando resultados."
+      );
+      return ok({
+        ...resultados,
+      });
+    }
+  },
+
+  async pedidoVenda(orderIncrementId) {
+    let resultados = [];
+
+    const client = await magento.createClient();
+    const sessionId = await magento.login(client);
+
+    try {
+      resultados = await magento.salesOrderInfo(
+        client,
+        sessionId,
+        orderIncrementId
       );
     } catch (error) {
       console.log(
