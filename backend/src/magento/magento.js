@@ -181,6 +181,38 @@ module.exports = {
     });
   },
 
+  // Lista de Produtos
+  async catalogProductList(client, sessionId) {
+    return new Promise((resolve, reject) => {
+      const callArgs = {
+        sessionId,
+      };
+
+      client
+        .catalogProductListAsync(callArgs)
+        .then((result) => {
+          // Converter o resultado de XML para Json
+          var parser = new xml2js.Parser({
+            ignoreAttrs: true,
+            explicitRoot: false,
+            mergeAttrs: true,
+            explicitArray: false,
+          });
+
+          parser.parseStringPromise(result[1]).then((result) => {
+            resolve(result["SOAP-ENV:Body"]["ns1:catalogProductListResponse"]);
+          });
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            `Erro durante a chamada 'catalogProductInfo': ${error.message}`
+          );
+          reject(error);
+        });
+    });
+  },
+
   // Lista de Imagens de um Produto
   async catalogProductAttributeMediaList(client, sessionId, productId) {
     return new Promise((resolve, reject) => {
@@ -253,6 +285,39 @@ module.exports = {
           console.log(
             filename,
             "Erro durante a chamada 'catalogProductAttributeList':",
+            error.message
+          );
+          reject(error);
+        });
+    });
+  },
+
+  // Dados de um Pedido de Venda
+  async salesOrderInfo(client, sessionId, orderIncrementId) {
+    return new Promise((resolve, reject) => {
+      const callArgs = {
+        sessionId,
+        orderIncrementId: orderIncrementId,
+      };
+
+      client
+        .salesOrderInfoAsync(callArgs)
+        .then((result) => {
+          var parser = new xml2js.Parser({
+            ignoreAttrs: true,
+            explicitRoot: false,
+            mergeAttrs: true,
+            explicitArray: false,
+          });
+
+          parser.parseStringPromise(result[1]).then(function (result) {
+            resolve(result["SOAP-ENV:Body"]["ns1:salesOrderInfoResponse"]);
+          });
+        })
+        .catch((error) => {
+          console.log(
+            filename,
+            "Erro durante a chamada 'salesOrderInfo':",
             error.message
           );
           reject(error);

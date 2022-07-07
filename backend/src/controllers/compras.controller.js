@@ -42,9 +42,39 @@ module.exports = {
     }
   },
 
-  async ultimoCusto(req, res, next) {
+  async relatorioUltimoCusto(req, res, next) {
     try {
-      const resposta = await ComprasBusiness.ultimoCusto();
+      const resposta = await ComprasBusiness.relatorioUltimoCusto();
+
+      if (resposta.body.status === OkStatus) {
+        res.header("filename", resposta.body.response.filename);
+        return res.download(resposta.body.response.filename);
+      } else {
+        return res.status(resposta.statusCode).json(resposta.body);
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async relatorioSituacaoEstoque(req, res, next) {
+    try {
+      const resposta = await ComprasBusiness.relatorioSituacaoEstoque();
+
+      if (resposta.body.status === OkStatus) {
+        res.header("filename", resposta.body.response.filename);
+        return res.download(resposta.body.response.filename);
+      } else {
+        return res.status(resposta.statusCode).json(resposta.body);
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async relatorioCompraProduto(req, res, next) {
+    try {
+      const resposta = await ComprasBusiness.relatorioCompraProduto();
 
       if (resposta.body.status === OkStatus) {
         res.header("filename", resposta.body.response.filename);
