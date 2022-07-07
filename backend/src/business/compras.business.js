@@ -737,6 +737,27 @@ module.exports = {
     });
   },
 
+  async relatorioCompraProduto() {
+    const query = (
+      await fs.promises.readFile("src/queries/compra_produto.sql")
+    ).toString();
+
+    const resultados = await sequelize.query(query, {
+      type: QueryTypes.SELECT,
+    });
+
+    const nomeArquivo = "exports/relatorio-compra-produto-" + dateToFilename();
+
+    await this.exportToExcel(resultados, nomeArquivo);
+
+    return ok({
+      status: OkStatus,
+      response: {
+        filename: nomeArquivo + ".xlsx",
+      },
+    });
+  },
+
   async exportToExcel(lista, arquivo) {
     const workbook = new ExcelJS.Workbook();
 
