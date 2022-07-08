@@ -4,15 +4,13 @@ const QRCode = require("qrcode");
 const bling = require("../bling/bling");
 const { Op } = require("sequelize");
 const { ErrorStatus, OkStatus } = require("../modules/codes");
-const { ok, badRequest, notFound } = require("../modules/http");
+const { ok, notFound } = require("../modules/http");
 const { dictionary } = require("../utils/dict");
 const { ordenaPorChave } = require("../utils/sort");
-const htmlToPdf = require("html-pdf-node");
-const { randomUUID } = require("crypto");
+const { replaceAll } = require("../utils/replace");
 
 const Produto = require("../models/produto.model");
 const { NotFound } = require("@aws-sdk/client-s3");
-const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
   async generateQrCode(content) {
@@ -36,7 +34,7 @@ module.exports = {
     //   });
     // });
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       pdf.create(html, options).toFile((err, res) => {
         if (!err) {
           resolve(res.filename);
@@ -61,7 +59,7 @@ module.exports = {
       });
     }
 
-    // Desestrutura apenas os itens da venda, vira uma array de objetos, cada objeto é um item
+    // Desestrutura apenas os itens da venda
     const itens = dadosVenda["itens"];
 
     // Adquire as localizações dos itens no Binx
@@ -82,7 +80,12 @@ module.exports = {
     // Aplicar a mesma regra caso o item retornado não tenha localização
     for (const item of itens) {
       if (produtosBinx[item["idsku"]]) {
-        item["localizacao"] = produtosBinx[item["idsku"]]["localizacao"] || "";
+        // Remover todos os caracteres especiais da localização
+        // Necessário para manter a mesma ordem de produtos que a ordenação do Bling
+        const original = produtosBinx[item["idsku"]]["localizacao"] || "";
+        const removido = replaceAll(original, /[^A-Za-z\d]+/, "");
+
+        item["localizacao"] = removido;
       } else {
         item["localizacao"] = "";
       }
