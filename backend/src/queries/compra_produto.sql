@@ -6,7 +6,8 @@ SELECT
   tbcompraproduto.quantidade as "Quantidade",
   date_format(tbpedidocompra.datacriacao, "%d/%m/%Y") as "Data",
   tbstatuscompra.nome as "Situação",
-  tbfornecedor.nomefornecedor as "Fornecedor"
+  tbfornecedor.nomefornecedor as "Fornecedor",
+  tbcompraproduto.codigofornecedor as "Cód. Fornecedor"
 FROM
   bdBau.tbcompraproduto
   inner join tbpedidocompra on tbpedidocompra.idpedidocompra = tbcompraproduto.idpedidocompra

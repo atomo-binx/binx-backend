@@ -35,12 +35,10 @@ module.exports = {
   },
 
   // Inicia análise de pedidos de compra em segundo plano
-  async analisa(req) {
+  async analisa() {
     console.log(filename, "Análise de pedidos de compra iniciada.");
 
-    let retroagir = req.query.retroagir ? true : false;
-
-    this.analisaPedidosCompra(retroagir);
+    this.analisaPedidosCompra();
 
     return ok({
       status: OkStatus,
@@ -112,7 +110,7 @@ module.exports = {
       if (situacao) {
         // Foi passada uma situação por parâmetro
         if (situacao != "all") {
-          filtrosBling += `; situacao[${req.query.situacao}]`;
+          filtrosBling += `; situacao[${situacao}]`;
         }
       }
 
@@ -131,7 +129,7 @@ module.exports = {
   },
 
   // Rotina de análise de pedidos de compra
-  async analisaPedidosCompra(retroagir) {
+  async analisaPedidosCompra() {
     try {
       // Medida de tempo de execução
       let start = new Date();
@@ -142,10 +140,7 @@ module.exports = {
           idstatus: {
             [Op.or]: {
               [Op.is]: null,
-
-              // Define status que serão buscados conforme necessidade de retroação
-              // 0 - Am Aberto, 1 - Atendido, 2 - Cancelado, 3 - Em Andamento
-              [Op.or]: retroagir ? [0, 1, 2, 3] : [0, 3],
+              [Op.or]: [0, 3],
             },
           },
         },
@@ -219,14 +214,9 @@ module.exports = {
           // Novo Status -> "Cancelado" ou "Atendido"
           if (novoStatus == 2 || novoStatus == 1) {
             // Configurar data de conclusão
-            if (retroagir) {
-              // Válido para criação do banco
-              // pedidoBling["dataconclusao"] = pedidoBling["datacriacao"];
-            } else {
-              pedidoBling["dataconclusao"] = moment().format(
-                "YYYY-MM-DD HH:mm:ss"
-              );
-            }
+            pedidoBling["dataconclusao"] = moment().format(
+              "YYYY-MM-DD HH:mm:ss"
+            );
           }
 
           // Novo Status -> "Em Aberto" ou "Em Andamento"
@@ -269,20 +259,7 @@ module.exports = {
       let analisados = 0;
       let reprovados = [];
 
-      let i = 0;
       for (const pedido of pedidosAtualizar) {
-        // Executando em rotina de retroação
-        if (retroagir) {
-          // No modo de retroação, não precisamos reescrever todos os itens dos pedidos
-          // Essa rotina gastaria muito tempo, executar apenas as informações mais relevantes
-          pedido = {
-            idpedidocompra: pedido["idpedidocompra"],
-            idstatus: pedido["idstatus"],
-            dataconclusao: pedido["dataconclusao"],
-          };
-          console.log(`Iteração: ${i++} - Pedido: ${pedido["idpedidocompra"]}`);
-        }
-
         // Nessa etapa o pedido é alterado por completo
         // Isso inclui dados do pedido, do fornecedor e dos itens
         await this.compraTransaction(pedido)
@@ -487,7 +464,7 @@ module.exports = {
           .catch((error) => {
             console.log(
               filename,
-              `Pedido de Compra: ${dadosCompra.idpedidocompra} -`,
+              `Pedido de Compra: ${compra.idpedidocompra} -`,
               `Erro durante o commit da transaction para o pedido de compra:`,
               error.message
             );
@@ -505,7 +482,7 @@ module.exports = {
           .catch((error) => {
             console.log(
               filename,
-              `Pedido de Compra: ${dadosCompra.idpedidocompra} -`,
+              `Pedido de Compra: ${compra.idpedidocompra} -`,
               `Erro durante o rollback da transaction para o pedido de compra:`,
               error.message
             );

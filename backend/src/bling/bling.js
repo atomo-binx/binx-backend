@@ -275,6 +275,7 @@ module.exports = {
             produto: item["item"]["descricao"],
             quantidade: item["item"]["qtde"],
             valor: item["item"]["valor"],
+            codigofornecedor: item["item"]["codigofornecedor"],
           });
         }
       }
