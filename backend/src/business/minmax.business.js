@@ -463,8 +463,6 @@ module.exports = {
     let produtos = [];
     let produtosDepositos = [];
 
-    console.log(exportar.length);
-
     const idCurvas = {
       "Sem Curva": 1,
       "Curva A": 2,

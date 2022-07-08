@@ -7,7 +7,7 @@ const delay = require("../utils/delay").delay;
 
 const url = "https://bling.com.br/Api/v2";
 const api = axios.create({ baseURL: url });
-const { replaceAll, manterApenasNumeros } = require("../utils/replace");
+const { manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
 
@@ -371,6 +371,7 @@ module.exports = {
     try {
       let estrutura = [];
       let formato = "Simples";
+      let idProdutoLoja = "";
 
       // Realiza desestruturação dos depósitos para o produto
       const depositos = this.desestruturaDepositos(produto);
@@ -390,6 +391,11 @@ module.exports = {
         }
       }
 
+      // Verifica se foi retornado algum vínculo com loja
+      if (Object.prototype.hasOwnProperty.call(produto, "produtoLoja")) {
+        idProdutoLoja = produto["produtoLoja"]["idProdutoLoja"];
+      }
+
       // Monta produto desestruturado
       const produtoDesestruturado = {
         idsku: produto["codigo"] || "",
@@ -405,6 +411,7 @@ module.exports = {
 
         formato,
         estrutura,
+        idProdutoLoja,
       };
 
       // Retornar apenas produtos que não estejam com SKU vazios
@@ -603,11 +610,12 @@ module.exports = {
   },
 
   // Adquire dados de um produto da API do Bling
-  async produto(sku) {
+  async produto(sku, loja) {
     return new Promise((resolve, reject) => {
       this.blingRequest("GET", `/produto/${sku}/json/`, {
         params: {
           apikey: process.env.BLING_API_KEY,
+          loja: loja || "",
         },
       })
         .then((result) => {
