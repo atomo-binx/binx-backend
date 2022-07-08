@@ -387,7 +387,7 @@ module.exports = {
 
   // Realiza a sincronização de 1 pedido de compra
   async sincronizaPedido(compra) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       console.log(
         filename,
         `Pedido de Compra: ${compra.idpedidocompra} -`,
@@ -395,7 +395,7 @@ module.exports = {
       );
 
       // Tenta realizar transação de inserção no banco de dados
-      await this.compraTransaction(compra)
+      this.compraTransaction(compra)
         .then(() => {
           console.log(
             filename,
