@@ -7,7 +7,23 @@ const api = axios.create({
   },
 });
 
+const filename = __filename.slice(__dirname.length + 1) + " -";
+
 module.exports = {
+  async detalhesProduto(idProdutoLoja) {
+    return new Promise((resolve, reject) => {
+      api
+        .get(`/produto/${idProdutoLoja}`)
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((error) => {
+          console.log(filename, `${error.message}: ${error.response.data}`);
+          reject(error);
+        });
+    });
+  },
+
   async cadastrarImagens(imagem_url, vinculo, principal, posicao) {
     return new Promise((resolve, reject) => {
       // Expressão regular para extrair a extensão do arquivo
@@ -26,11 +42,10 @@ module.exports = {
       api
         .post("/produto_imagem", data)
         .then((res) => {
-          console.log(res.data);
-          resolve();
+          resolve(res.data);
         })
         .catch((error) => {
-          console.log(error.message);
+          console.log(filename, `${error.message}: ${error.response.data}`);
           reject(error);
         });
     });
@@ -38,17 +53,27 @@ module.exports = {
 
   async alterarProduto(vinculo, dados) {
     return new Promise((resolve, reject) => {
-      console.log({ dados });
-
       api
         .put(`/produto/${vinculo}`, dados)
         .then((res) => {
-          console.log(res.data);
-          resolve();
+          resolve(res.data);
         })
         .catch((error) => {
-          console.log(error);
-          console.log(error.message);
+          console.log(filename, `${error.message}: ${error.response.data}`);
+          reject(error);
+        });
+    });
+  },
+
+  async alterarSEO(vinculo, dados) {
+    return new Promise((resolve, reject) => {
+      api
+        .put(`/seo/${vinculo}`, dados)
+        .then((data) => {
+          resolve(data.res);
+        })
+        .catch((error) => {
+          console.log(filename, `${error.message}: ${error.response.data}`);
           reject(error);
         });
     });
