@@ -113,6 +113,7 @@ module.exports = {
     console.log(filename, "Exportando dados do produto");
 
     // Manter essas variáveis com os mesmos nomes de exportação para a Loja Integrada
+    let nome = produtoMagento.info.name;
     let ativo = produtoMagento.info.status === "1" ? true : false;
     let descricao_completa = produtoMagento.info.description;
 
@@ -139,11 +140,15 @@ module.exports = {
     }
 
     // Monta descrição
-    descricao_completa =
-      head + descricao_completa + tabelaEspecificacoes + tail;
+    // descricao_completa =
+    //   head + descricao_completa + tabelaEspecificacoes + tail;
+
+    // DEBUG
+    descricao_completa = descricao_completa + tabelaEspecificacoes;
 
     // Montar o objeto de exportação para a Loja Integrada
     const dadosLojaIntegrada = {
+      nome,
       ativo,
       descricao_completa,
       categorias: [],
@@ -181,13 +186,13 @@ module.exports = {
   montarTabelaEspecificacoes(textos) {
     const rowEven = `
       <tr class="even" style=" box-sizing: border-box; margin: 0px; padding: 0px; background-color: rgb(255, 255, 255);">
-          <td style="box-sizing: border-box; margin: 0px; padding: 10px; border: none">
-            <span style="color: rgb(0, 0, 0); font-family: Muli, sans-serif">
+          <td style="box-sizing: border-box; margin: 0px; padding: 10px; border: none;">
+            <span style="color: rgb(0, 0, 0); font-family: Muli, sans-serif;">
               #COLUNA_1
             </span>
           </td>
-          <td class="last" style="box-sizing: border-box; margin: 0px; padding: 10px; border: none">
-            <span style="color: rgb(0, 0, 0); font-family: Muli, sans-serif">
+          <td class="last" style="box-sizing: border-box; margin: 0px; padding: 10px; border: none;">
+            <span style="color: rgb(0, 0, 0); font-family: Muli, sans-serif;">
               #COLUNA_2
             </span>
           </td>
@@ -195,13 +200,13 @@ module.exports = {
     `;
 
     const rowOdd = `
-      <tr class="odd" style="box-sizing: border-box; margin: 0px; padding: 0px">
-        <td style="box-sizing: border-box; margin: 0px; padding: 10px; border: none">
+      <tr class="odd" style="box-sizing: border-box; margin: 0px; padding: 0px;">
+        <td style="box-sizing: border-box; margin: 0px; padding: 10px; border: none;">
           <span style=" color: rgb(0, 0, 0); font-family: Muli, sans-serif; background-color: rgb(244, 244, 244);">
             #COLUNA_1
           </span>
         </td>
-        <td class="last" style="box-sizing: border-box; margin: 0px; padding: 10px; border: none">
+        <td class="last" style="box-sizing: border-box; margin: 0px; padding: 10px; border: none;">
           <span style=" color: rgb(0, 0, 0); font-family: Muli, sans-serif; background-color: rgb(244, 244, 244);">
             #COLUNA_2
           </span>
@@ -212,7 +217,7 @@ module.exports = {
     const baseHtml = `
       <div>
         <table border="0" style=" margin: 0px; padding: 0px; border: 0px; border-collapse: collapse; border-spacing: 0px; empty-cells: show; color: rgb(0, 0, 0); font-family: Muli, sans-serif; background-color: rgb(244, 244, 244);">
-          <tbody style="box-sizing: border-box; margin: 0px; padding: 0px">
+          <tbody style="box-sizing: border-box; margin: 0px; padding: 0px;">
             #ROWS
           </tbody>
         </table>
@@ -222,15 +227,19 @@ module.exports = {
     let rows = "";
     let tamanho = textos.length;
 
+    let evenOddIterator = 0;
+
     for (let i = 0; i < tamanho; i += 2) {
       let row = "";
 
-      if (i % 2 === 0) {
+      if (evenOddIterator++ % 2 === 0) {
         // Par = Even
+        console.log("Even");
         row = rowEven.replace("#COLUNA_1", textos[i]);
         row = row.replace("#COLUNA_2", textos[i + 1]);
       } else {
         // Impar = Odd
+        console.log("Odd");
         row = rowOdd.replace("#COLUNA_1", textos[i]);
         row = row.replace("#COLUNA_2", textos[i + 1]);
       }
