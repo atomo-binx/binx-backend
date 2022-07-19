@@ -101,4 +101,19 @@ module.exports = {
       next(error);
     }
   },
+
+  async relatorioMontagemKits(req, res, next) {
+    try {
+      const resposta = await ComprasBusiness.relatorioMontagemKits();
+
+      if (resposta.body.status === OkStatus) {
+        res.header("filename", resposta.body.response.filename);
+        return res.download(resposta.body.response.filename);
+      } else {
+        return res.status(resposta.statusCode).json(resposta.body);
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
 };
