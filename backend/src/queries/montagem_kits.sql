@@ -7,7 +7,10 @@ SELECT
   replace(ultimocusto, '.', ',') as "Último Custo",
   replace(ultimocusto * tbkits.quantidade, ".", ",") as "Custo Total",
   tbprodutoestoque.quantidade as "Disponível",
-  floor(tbprodutoestoque.quantidade / tbkits.quantidade) as "Possíveis"
+  case
+    when floor(tbprodutoestoque.quantidade / tbkits.quantidade) > 0 then floor(tbprodutoestoque.quantidade / tbkits.quantidade)
+    when floor(tbprodutoestoque.quantidade / tbkits.quantidade) <= 0 then 0
+  end as "Possíveis"
 FROM
   bdBau.tbkits
   inner join tbproduto on tbkits.idskufilho = tbproduto.idsku
