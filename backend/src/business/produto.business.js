@@ -114,8 +114,6 @@ module.exports = {
     return new Promise((resolve, reject) => {
       let { depositos, estrutura, ...dadosProduto } = produto;
 
-      console.log(dadosProduto);
-
       (async () => {
         await sequelize.transaction(async (t) => {
           await Produto.upsert(dadosProduto, {

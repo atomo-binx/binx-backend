@@ -46,7 +46,7 @@ module.exports = {
     try {
       // Tenta iniciar uma nova instância do navegador
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
         defaultViewport: {
           width: 1024 + Math.floor(Math.random() * 100),

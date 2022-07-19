@@ -10,6 +10,8 @@ function load(routes) {
   routes.get("/compras/relatorio/ultimocusto", protectedRoute, controller.relatorioUltimoCusto);
   routes.get("/compras/relatorio/situacaoestoque", protectedRoute, controller.relatorioSituacaoEstoque);
   routes.get("/compras/relatorio/compraproduto", protectedRoute, controller.relatorioCompraProduto);
+  routes.get("/compras/relatorio/analiseestoque", protectedRoute, controller.relatorioTransferencia);
+  routes.get("/compras/relatorio/montagemkits", protectedRoute, controller.relatorioMontagemKits);
 }
 
 module.exports = load;

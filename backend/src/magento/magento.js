@@ -233,9 +233,6 @@ module.exports = {
           });
 
           parser.parseStringPromise(result[1]).then(function (result) {
-            console.dir(result);
-            console.log("Done");
-
             resolve(
               result["SOAP-ENV:Body"][
                 "ns1:catalogProductAttributeMediaListResponse"

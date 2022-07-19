@@ -26,6 +26,10 @@ const CompraProduto = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    codigofornecedor: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
   },
   {
     tableName: "tbcompraproduto",

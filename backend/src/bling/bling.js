@@ -275,6 +275,7 @@ module.exports = {
             produto: item["item"]["descricao"],
             quantidade: item["item"]["qtde"],
             valor: item["item"]["valor"],
+            codigofornecedor: item["item"]["codigofornecedor"],
           });
         }
       }
@@ -619,14 +620,14 @@ module.exports = {
         },
       })
         .then((result) => {
-          if (result["retorno"]["erros"]) {
+          if (result["data"]["retorno"]["erros"]) {
             reject({
               message: "Produto não encontrado.",
             });
           } else {
             // Produto encontrado, desestruturar os dados
             let produto = this.desestruturaProduto(
-              result["retorno"]["produtos"][0]["produto"]
+              result["data"]["retorno"]["produtos"][0]["produto"]
             );
 
             // Retornar o produto desestruturado

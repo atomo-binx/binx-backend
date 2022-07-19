@@ -300,7 +300,7 @@ module.exports = {
     html = html.replace("#LINHAS", linha);
 
     // Carrega imagem
-    var bitmap = fs.readFileSync("../backend/src/etiquetas/imagens/bordas.png");
+    var bitmap = fs.readFileSync("../backend/src/etiquetas/imagens/mike.png");
     const imgBuffer =
       "data:image/png;base64," + new Buffer.from(bitmap).toString("base64");
     html = html.replace("#IMG_1", imgBuffer);
