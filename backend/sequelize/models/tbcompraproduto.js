@@ -30,6 +30,10 @@ module.exports = function(sequelize, DataTypes) {
     quantidade: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    codigofornecedor: {
+      type: DataTypes.STRING(45),
+      allowNull: true
     }
   }, {
     sequelize,

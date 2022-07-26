@@ -12,6 +12,8 @@ const { Op } = require("sequelize");
 const http = require("../utils/http");
 const { ok } = require("../modules/http");
 
+const { models } = require("../modules/sequelize");
+
 module.exports = {
   async iniciaSincronizacao(dataAlteracao, dataInclusao, situacao) {
     console.log(filename, "Iniciando sincronização de produtos.");
@@ -206,27 +208,28 @@ module.exports = {
         // Gera objeto referente aos depósitos
         const depositos = Bling.desestruturaDepositos(dadosProduto);
 
-        // Analisar ocorrências de produtos que estão ficando zerados
-        // ...
-
         // Monta objeto compatível com a transação de produto existe
         produto["depositos"] = depositos;
 
-        const transaction = await this.produtoTransaction(produto);
+        // Analisar ocorrências de produtos que estão ficando zerados
+        await this.verificaProdutoZerado(produto);
 
-        if (transaction) {
-          console.log(
-            filename,
-            "Transação de callback de deposito realizada com sucesso"
-          );
-        } else {
-          console.log(
-            filename,
-            "Falha na realização de transação de callback de estoque"
-          );
+        // Executa transação de produto via callback
+        await this.produtoTransaction(produto)
+          .then(() => {
+            console.log(
+              filename,
+              "Transação de callback de deposito realizada com sucesso"
+            );
+          })
+          .catch(() => {
+            console.log(
+              filename,
+              "Falha na realização de transação de callback de estoque"
+            );
 
-          console.log(filename, "Dados do produto:");
-        }
+            console.log(filename, "Dados do produto:");
+          });
       }
       // Procedimento de callback finalizado
       return http.ok({
@@ -291,6 +294,59 @@ module.exports = {
       return http.failure({
         message: `Erro ao buscar produtos: ${error.message}`,
       });
+    }
+  },
+
+  async verificaProdutoZerado(callback) {
+    try {
+      // Adquirir quantidade atual do callback em estoque
+      const produtoDeposito = await models.tbprodutoestoque.findOne({
+        attributes: ["quantidade"],
+        where: {
+          idestoque: "7141524213",
+          idsku: callback["idsku"],
+        },
+        raw: true,
+      });
+
+      const quantidadeAtual = produtoDeposito.quantidade;
+
+      const depositoGeral = callback.depositos.filter(
+        (deposito) => deposito.idestoque === "7141524213"
+      );
+
+      const novaQuantidade = depositoGeral[0].quantidade;
+
+      if (novaQuantidade <= 0 && quantidadeAtual >= 1) {
+        // Produto acabou de zerar
+        await models.tbprodutoszerados.create({
+          idsku: callback.idsku,
+          quantidadeanterior: quantidadeAtual,
+          quantidade: novaQuantidade,
+        });
+      }
+
+      if (novaQuantidade !== quantidadeAtual) {
+        console.log(
+          filename,
+          callback.idsku,
+          "Nova quantidade:",
+          novaQuantidade,
+          "Quantidade atual:",
+          quantidadeAtual
+        );
+      } else {
+        console.log(
+          filename,
+          "Movimentação de callback sem diferença de quantidades"
+        );
+      }
+    } catch (error) {
+      console.log(
+        filename,
+        "Falha durante procedimento de verificação de itens zerados:",
+        error.message
+      );
     }
   },
 };
