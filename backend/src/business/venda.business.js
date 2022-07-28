@@ -31,10 +31,6 @@ module.exports = {
 
   // Inicia procedimento de sincronização
   async iniciaSincronizacao(req) {
-    // Para os pedidos de sincronização disparados pelo frontend ou pelo lambda
-    // Chamamos internamente a sincronização, mas não aguardamos o resultado
-    // Devolvemos ao frontend/lambda a informação de que a sincronização foi iniciada
-
     try {
       console.log(
         filename,
@@ -599,13 +595,6 @@ module.exports = {
   // Rotina para a sincronização de pedidos, executada periodicamente
   async rotinaSincronizacao(req) {
     try {
-      // Montar dicionários que são necessários para a função de sincronização
-
-      // Dicionario de situações
-      // O dicionário de situações é utilizado para verificar se foi passado um ID de situação válido
-      // eslint-disable-next-line no-unused-vars
-      const situacoes = await this.dicionarioSituacoes();
-
       // A nova função de sincronização irá buscar apenas pedidos com situação em aberto
       // Os itens da compra são inseridos neste momento, quando a compra é criada
 
@@ -704,28 +693,21 @@ module.exports = {
 
         const vendas = await Bling.listaPaginaVendas(pagina++, filtros);
 
-        // Verifica se a chamada retornou pedidos de venda ou chegamos ao final dos resultados
-        if (vendas.length > 0) {
-          // Passa por cada um dos resultados de pedidos de vendas
-          for (const venda of vendas) {
-            // Sincronizar o pedido
-            const status = await this.sincronizaPedido(venda);
+        if (vendas.length === 0) procurando = false;
 
-            // Verifica saúde da sincronização para este pedido
-            if (status) {
-              inseridos++;
-            } else {
-              rejeitados++;
-              pedidosRejeitados.push(venda.idpedidovenda);
-            }
-          }
+        for (const venda of vendas) {
+          const status = await this.sincronizaPedido(venda);
 
-          // Adiantar a verificação de corte do próximo ciclo
-          if (vendas.length < 100) {
-            procurando = false;
+          if (status) {
+            inseridos++;
+          } else {
+            rejeitados++;
+            pedidosRejeitados.push(venda.idpedidovenda);
           }
-        } else {
-          // Chegamos ao fim das páginas de pedidos de vendas
+        }
+
+        // Adiantar a verificação de corte do próximo ciclo
+        if (vendas.length > 0 && vendas.length < 100) {
           procurando = false;
         }
       }
@@ -739,9 +721,9 @@ module.exports = {
       let end = new Date();
       let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
 
-      console.log(filename, "Tempo gasto no procedimento: ", elapsedTime);
-      console.log(filename, "Total de pedidos inseridos: ", inseridos);
-      console.log(filename, "Total de pedidos recusados: ", rejeitados);
+      console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
+      console.log(filename, "Total de pedidos inseridos:", inseridos);
+      console.log(filename, "Total de pedidos recusados:", rejeitados);
 
       return true;
     } catch (error) {

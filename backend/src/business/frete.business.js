@@ -140,7 +140,7 @@ module.exports = {
 
         let pesoMinimoPorItem = 0.3 / quantidadeDeItens;
 
-        pesoMinimoPorItem = parseFloat(pesoMinimoPorItem.toFixed(3));
+        pesoMinimoPorItem = parseFloat(pesoMinimoPorItem.toFixed(4));
 
         console.log({ quantidadeDeItens, pesoMinimoPorItem });
 
@@ -148,7 +148,9 @@ module.exports = {
         venda.itens.forEach((item) => {
           let hold = item;
           hold.peso = pesoMinimoPorItem;
-          hold.pesoTotal = item.quantidade * pesoMinimoPorItem;
+          hold.pesoTotal = parseFloat(
+            parseFloat(item.quantidade * pesoMinimoPorItem).toFixed(4)
+          );
           item = hold;
         });
 
