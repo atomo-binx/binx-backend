@@ -301,7 +301,7 @@ module.exports = {
     try {
       // Adquirir quantidade atual do callback em estoque
       const produtoDeposito = await models.tbprodutoestoque.findOne({
-        attributes: ["quantidade"],
+        attributes: ["quantidade", "minimo"],
         where: {
           idestoque: "7141524213",
           idsku: callback["idsku"],
@@ -323,22 +323,19 @@ module.exports = {
           idsku: callback.idsku,
           quantidadeanterior: quantidadeAtual,
           quantidade: novaQuantidade,
+          minimo: produtoDeposito.minimo,
         });
       }
 
       if (novaQuantidade !== quantidadeAtual) {
         console.log(
           filename,
+          "SKU:",
           callback.idsku,
           "Nova quantidade:",
           novaQuantidade,
           "Quantidade atual:",
           quantidadeAtual
-        );
-      } else {
-        console.log(
-          filename,
-          "Movimentação de callback sem diferença de quantidades"
         );
       }
     } catch (error) {
