@@ -7,9 +7,6 @@ const { models } = require("../modules/sequelize");
 const FreteBusiness = require("./frete.business");
 const EmailBusiness = require("./email.business");
 
-// Models
-const Situacao = require("../models/status.model");
-
 // Módulos
 const Bling = require("../bling/bling");
 const moment = require("moment");
@@ -21,6 +18,7 @@ const puppetter = require("../puppeteer/puppeteer");
 const http = require("../utils/http");
 
 const axios = require("axios");
+const { ok } = require("../modules/http");
 const url = "https://bling.com.br/Api/v2";
 const blingApi = axios.create({ baseURL: url });
 
@@ -32,24 +30,15 @@ module.exports = {
   // Inicia procedimento de sincronização
   async iniciaSincronizacao(req) {
     try {
-      console.log(
-        filename,
-        "Iniciando nova rotina de sincronização de pedidos de venda."
-      );
+      console.log(filename, "Iniciando nova rotina de sincronização de pedidos de venda.");
 
-      // Disparar chamada de sincronização, será executa em modo assíncrono
       this.rotinaSincronizacao(req);
 
-      // Devolver ao frontend/lambda status de sincronização
       return http.ok({
         message: "Rotina de sincronização de pedidos de venda iniciada.",
       });
     } catch (error) {
-      console.log(
-        filename,
-        "Erro no início de sincronização de pedidos de venda:",
-        error.message
-      );
+      console.log(filename, "Erro no início de sincronização de pedidos de venda:", error.message);
       return http.failure({
         message: `Erro no início de sincronização de pedidos de venda: ${error.message}`,
       });
@@ -63,20 +52,13 @@ module.exports = {
 
       for (const pedido of pedidos) {
         try {
-          // Adquire os dados do pedido de venda do Bling
           const venda = await Bling.pedidoVenda(pedido);
 
-          // Executa rotina de sincronização para este pedido
           await this.sincronizaPedido(venda);
         } catch (error) {
-          console.log(
-            filename,
-            "Erro durante a sincronização de pedido de venda:",
-            error.message
-          );
+          console.log(filename, "Erro durante a sincronização de pedido de venda:", error.message);
         }
       }
-      // Procedimento de sincronização finalizado
       return true;
     } else {
       return false;
@@ -123,30 +105,19 @@ module.exports = {
               pedido = result.data.retorno.pedidos[0].pedido;
             })
             .catch((error) => {
-              console.log(
-                filename,
-                "Erro ao realizar chamada de pedido ao Bling:",
-                error.message
-              );
+              console.log(filename, "Erro ao realizar chamada de pedido ao Bling:", error.message);
             });
         } else {
           // Não foi recebido um parâmetro válido nem via 'data', nem via 'pedido'
           // Portanto, não é um modo de execução em produção, nem em debug
-          console.log(
-            filename,
-            "Não foram recebidos dados de um pedido de venda válido."
-          );
+          console.log(filename, "Não foram recebidos dados de um pedido de venda válido.");
           return http.badRequest({
             message: "Não foram recebidos dados de um pedido de venda válido.",
           });
         }
       }
 
-      console.log(
-        filename,
-        `Pedido de Venda: ${pedido.numero} -`,
-        "Iniciando callback de vendas"
-      );
+      console.log(filename, `Pedido de Venda: ${pedido.numero} -`, "Iniciando callback de vendas");
 
       // Desestrutura pedido de venda
       const venda = Bling.desestruturaPedidoVenda(pedido);
@@ -164,9 +135,7 @@ module.exports = {
         error.message
       );
       return http.failure({
-        message:
-          "Erro durante o processamento de callback de pedido de venda: " +
-          error.message,
+        message: "Erro durante o processamento de callback de pedido de venda: " + error.message,
       });
     }
   },
@@ -196,10 +165,7 @@ module.exports = {
       // Alterar a transportadora apenas se rodando localmente
       let port = process.env.PORT;
       if (port == "" || port == null) {
-        console.log(
-          filename,
-          "Rodando localmente, tentando alterar transportadora"
-        );
+        console.log(filename, "Rodando localmente, tentando alterar transportadora");
         // Realizar chamada de alteração de transportadora
         const transportadora = await this.alterarTransportadora(pedido);
 
@@ -209,10 +175,7 @@ module.exports = {
           pedido["fretetransportadora"] = transportadora.fretetransportadora;
         }
       } else {
-        console.log(
-          filename,
-          "Rodando na AWS, pulando alterando de transportadora"
-        );
+        console.log(filename, "Rodando na AWS, pulando alterando de transportadora");
 
         // console.log(
         //   filename,
@@ -562,36 +525,6 @@ module.exports = {
     }
   },
 
-  // Monta dicionário de sistuações de pedidos de venda existentes
-  async dicionarioSituacoes() {
-    try {
-      const situacoes = await Situacao.findAll({ raw: true });
-
-      if (situacoes.length > 0) {
-        const dicionarioSituacoes = {};
-
-        for (const registro of situacoes) {
-          dicionarioSituacoes[registro.idstatus] = registro.nome;
-        }
-
-        return dicionarioSituacoes;
-      } else {
-        console.log(
-          filename,
-          "Nenhum registro de situação recuperado do banco de dados"
-        );
-        return false;
-      }
-    } catch (error) {
-      console.log(
-        filename,
-        "Erro durante a montagem de dicionário de situações:",
-        error.message
-      );
-      return false;
-    }
-  },
-
   // Rotina para a sincronização de pedidos, executada periodicamente
   async rotinaSincronizacao(req) {
     try {
@@ -635,18 +568,12 @@ module.exports = {
       if (req.query.all) {
         if (req.query.all == "true") filtros = "";
 
-        console.log(
-          filename,
-          "Sincronizando todo o período de pedidos de vendas."
-        );
+        console.log(filename, "Sincronizando todo o período de pedidos de vendas.");
       }
 
       // Nenhum parâmetro de periodo informado, informar sincronização padrão de 1 dia
       if (!req.query.period && !req.query.start && !req.query.all) {
-        console.log(
-          filename,
-          "Sincronizando pedidos de venda para o período padrão de 1 dia."
-        );
+        console.log(filename, "Sincronizando pedidos de venda para o período padrão de 1 dia.");
       }
 
       // Cláusula de situação do pedido de venda
@@ -696,14 +623,12 @@ module.exports = {
         if (vendas.length === 0) procurando = false;
 
         for (const venda of vendas) {
-          const status = await this.sincronizaPedido(venda);
-
-          if (status) {
-            inseridos++;
-          } else {
-            rejeitados++;
-            pedidosRejeitados.push(venda.idpedidovenda);
-          }
+          await this.sincronizaPedido(venda)
+            .then(() => inseridos++)
+            .catch(() => {
+              rejeitados++;
+              pedidosRejeitados.push(venda.idpedidovenda);
+            });
         }
 
         // Adiantar a verificação de corte do próximo ciclo
@@ -712,10 +637,7 @@ module.exports = {
         }
       }
 
-      console.log(
-        filename,
-        "Finalizando procedimento de sincronização de pedidos de vendas."
-      );
+      console.log(filename, "Finalizando procedimento de sincronização de pedidos de vendas.");
 
       // Cálculo do tempo gasto na execução da tarefa
       let end = new Date();
@@ -767,6 +689,167 @@ module.exports = {
         `Pedido de Venda: ${venda.idpedidovenda} - Transação de pedido de venda não foi realizada`
       );
       return false;
+    }
+  },
+
+  // Funções novas
+
+  async novaIniciaSincronizacao(all, periodo, situacao, unidade, tempo, pedidos) {
+    console.log(filename, "Iniciando sincronização de pedidos de venda.");
+
+    this.novaRotinaSincronizacao(all, periodo, situacao, unidade, tempo, pedidos);
+
+    return http.ok({
+      message: "Rotina de sincronização de pedidos de venda iniciada.",
+    });
+  },
+
+  async novaRotinaSincronizacao(all, periodo, situacao, unidade, tempo, pedidos) {
+    let filtros = [];
+
+    let dataHoje = moment().format("DD/MM/YYYY");
+    let dataAnterior = moment().subtract(1, "days").format("DD/MM/YYYY");
+
+    // Por padrão, sincronizar período de 1 dia
+    let filtroEmissao = `dataEmissao[${dataAnterior} TO ${dataHoje}]`;
+
+    // Sincronizar por unidade de tempo + valor
+    if (unidade && tempo) {
+      let dataAnterior = moment().subtract(unidade, tempo).format("DD/MM/YYYY");
+      filtroEmissao = `dataEmissao[${dataAnterior} TO ${dataHoje}]`;
+    }
+
+    // Sincronizar por período definido
+    if (periodo) filtroEmissao = `dataEmissao[${periodo}]`;
+
+    // Sincronizar todo o período
+    if (all) filtroEmissao = "";
+
+    // Cláusula de situação
+    if (situacao) filtros.push(`idSituacao[${situacao}]`);
+
+    // Concatenar e montar o filtro final
+    filtros.push(filtroEmissao);
+    filtros = filtros.length > 1 ? filtros.join(";") : filtros[0];
+
+    // Sincronizar uma lista específica de pedidos
+    if (pedidos) {
+      for (const pedido of pedidos) {
+        const venda = await Bling.pedidoVenda(pedido);
+        await this.novaSincronizaPedido(venda);
+      }
+    } else {
+      // Sincronizar através de paginação no Bling
+      console.log(filename, "Filtro final para sincronização:", filtros);
+
+      await this.novaSincronizaPaginasPedidos(filtros);
+    }
+  },
+
+  async novaSincronizaPaginasPedidos(filtros) {
+    // Medida de tempo de execução
+    let start = new Date();
+
+    // Procedimento de Busca
+    let procurando = true;
+    let pagina = 1;
+
+    while (procurando) {
+      console.log(filename, "Iniciando busca na página:", pagina);
+
+      const vendas = await Bling.listaPaginaVendas(pagina++, filtros);
+
+      if (vendas.length === 0) procurando = false;
+
+      for (const venda of vendas) {
+        await this.sincronizaPedido(venda);
+      }
+
+      // Adiantar a verificação de corte do próximo ciclo
+      if (vendas.length > 0 && vendas.length < 100) {
+        procurando = false;
+      }
+    }
+
+    console.log(filename, "Finalizando procedimento de sincronização de pedidos de vendas.");
+
+    // Cálculo do tempo gasto na execução da tarefa
+    let end = new Date();
+    let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
+
+    console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
+  },
+
+  async novaVendaTransaction(venda) {
+    // Realiza separação de dados de venda e lista de itens
+    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = venda;
+
+    // Transação dos dados no banco de dados
+    return sequelize.transaction(async (t) => {
+      // Atualiza entidade de forma de pagamento no banco de dados
+      if (objFormaPagamento) {
+        await models.tbformapagamento.upsert(objFormaPagamento, {
+          transaction: t,
+        });
+      }
+
+      // Tenta inserir dados do pedido de venda
+      await models.tbpedidovenda.upsert(dadosVenda, { transaction: t });
+
+      // Tenta inserir relacionamento de venda-produto
+      if (itens) {
+        await models.tbvendaproduto.destroy({
+          where: {
+            idpedidovenda: dadosVenda["idpedidovenda"],
+          },
+          transaction: t,
+        });
+
+        for (const relacionamento of itens) {
+          await models.tbvendaproduto.upsert(relacionamento, {
+            transaction: t,
+          });
+        }
+      }
+
+      // Tenta inserir relacionamentos de ocorrencias
+      if (ocorrencias) {
+        await models.tbocorrenciavenda.destroy({
+          where: {
+            idpedidovenda: dadosVenda["idpedidovenda"],
+          },
+          transaction: t,
+        });
+
+        for (const ocorrencia of ocorrencias) {
+          await models.tbocorrenciavenda.create(
+            {
+              idocorrencia: "default",
+              ...ocorrencia,
+            },
+            {
+              transaction: t,
+            }
+          );
+        }
+      }
+    });
+  },
+
+  async novaSincronizaPedido(pedido) {
+    try {
+      // Realizar transação do objeto de pedido de venda
+      await this.novaVendaTransaction(pedido);
+
+      // Realizar rotina de disparo de emails
+      await EmailBusiness.rotinaEmail(pedido);
+
+      console.log(filename, `Pedido de Venda: ${pedido.idpedidovenda} - Pedido sincronizado.`);
+    } catch (error) {
+      console.log(
+        filename,
+        `Pedido de Venda: ${pedido.idpedidovenda} - Erro durante sincronização: ${error.message}`
+      );
     }
   },
 };

@@ -89,20 +89,14 @@ module.exports = {
       if (inicio && fim) {
         filtrosBling = `dataEmissao[${inicio} TO ${fim}]`;
 
-        console.log(
-          filename,
-          `Sincronizando pedidos de compra de ${inicio} até ${fim}.`
-        );
+        console.log(filename, `Sincronizando pedidos de compra de ${inicio} até ${fim}.`);
       }
 
       // Sincronização de todo o período
       if (tudo) {
         if (tudo == "true") {
           filtrosBling = "";
-          console.log(
-            filename,
-            "Sincronizando todo o período de pedidos de vendas."
-          );
+          console.log(filename, "Sincronizando todo o período de pedidos de vendas.");
         }
       }
 
@@ -163,9 +157,7 @@ module.exports = {
       );
 
       // Gerar as datas de intervalo: data mais antiga e data mais nova
-      let dataInicial = moment
-        .utc(pedidosBinx[0]["datacriacao"])
-        .format("DD/MM/YYYY");
+      let dataInicial = moment.utc(pedidosBinx[0]["datacriacao"]).format("DD/MM/YYYY");
       let dataFinal = moment
         .utc(pedidosBinx[pedidosBinx.length - 1]["datacriacao"])
         .format("DD/MM/YYYY");
@@ -180,11 +172,7 @@ module.exports = {
       });
 
       for (const status of statusCompra) {
-        let pedidos = await this.listaPedidosCompra(
-          dataInicial,
-          dataFinal,
-          status.idstatus
-        );
+        let pedidos = await this.listaPedidosCompra(dataInicial, dataFinal, status.idstatus);
 
         // Concatena a lista de pedidos do bling com os resultados dessa situação
         pedidosBling = [...pedidosBling, ...pedidos];
@@ -202,45 +190,45 @@ module.exports = {
       //Percorremos o dicionário de pedidos do Binx para trabalhar as alterações de status
       // Verificar quais pedidos precisam ser atualizados
       for (const chave in dicPedidosBinx) {
-        let pedidoBling = dicPedidosBling[chave];
-        let pedidoBinx = dicPedidosBinx[chave];
+        try {
+          let pedidoBling = dicPedidosBling[chave];
+          let pedidoBinx = dicPedidosBinx[chave];
 
-        // O novo status é o status que foi localizado no Bling
-        let novoStatus = pedidoBling["idstatus"];
-        let statusAtual = pedidoBinx["idstatus"];
+          // O novo status é o status que foi localizado no Bling
+          let novoStatus = pedidoBling["idstatus"];
 
-        // Verifica por alterações no status
-        if (novoStatus != statusAtual) {
-          // Novo Status -> "Cancelado" ou "Atendido"
-          if (novoStatus == 2 || novoStatus == 1) {
-            // Configurar data de conclusão
-            pedidoBling["dataconclusao"] = moment().format(
-              "YYYY-MM-DD HH:mm:ss"
-            );
+          let statusAtual = pedidoBinx["idstatus"];
+
+          // Verifica por alterações no status
+          if (novoStatus != statusAtual) {
+            // Novo Status -> "Cancelado" ou "Atendido"
+            if (novoStatus == 2 || novoStatus == 1) {
+              // Configurar data de conclusão
+              pedidoBling["dataconclusao"] = moment().format("YYYY-MM-DD HH:mm:ss");
+            }
+
+            // Novo Status -> "Em Aberto" ou "Em Andamento"
+            if (novoStatus == 0 || novoStatus == 3) {
+              pedidoBling["dataconclusao"] = null;
+            }
+
+            let ignorarFornecedores = [
+              "7401278638", // Baú da Eletrônica
+              "9172761844", // Loja Física
+              "10733118103", // Transferência
+            ];
+
+            // Novo Status -> "Atendido"
+            if (novoStatus == 1 && !ignorarFornecedores.includes(pedidoBling["idfornecedor"])) {
+              // Alterar custos dos produtos
+              pedidosAtendidos.push(pedidoBling);
+            }
+
+            // Por fim, acrescenta o objeto do pedido em uma lista de atualização
+            pedidosAtualizar.push(pedidoBling);
           }
-
-          // Novo Status -> "Em Aberto" ou "Em Andamento"
-          if (novoStatus == 0 || novoStatus == 3) {
-            pedidoBling["dataconclusao"] = null;
-          }
-
-          let ignorarFornecedores = [
-            "7401278638", // Baú da Eletrônica
-            "9172761844", // Loja Física
-            "10733118103", // Transferência
-          ];
-
-          // Novo Status -> "Atendido"
-          if (
-            novoStatus == 1 &&
-            !ignorarFornecedores.includes(pedidoBling["idfornecedor"])
-          ) {
-            // Alterar custos dos produtos
-            pedidosAtendidos.push(pedidoBling);
-          }
-
-          // Por fim, acrescenta o objeto do pedido em uma lista de atualização
-          pedidosAtualizar.push(pedidoBling);
+        } catch (error) {
+          console.log(filename, "Falha no pedido:", chave);
         }
       }
 
@@ -293,21 +281,9 @@ module.exports = {
       // Debug
       console.log(filename, "Atualização de pedidos de compra finalizada");
       console.log(filename, "Tempo gasto no procedimento: ", elapsedTime);
-      console.log(
-        filename,
-        "Quantidade de pedidos de compra analisados:",
-        analisados
-      );
-      console.log(
-        filename,
-        "Quantidade de pedidos rejeitados:",
-        reprovados.length
-      );
-      console.log(
-        filename,
-        "Pedidos reprovados durante a análise:",
-        reprovados
-      );
+      console.log(filename, "Quantidade de pedidos de compra analisados:", analisados);
+      console.log(filename, "Quantidade de pedidos rejeitados:", reprovados.length);
+      console.log(filename, "Pedidos reprovados durante a análise:", reprovados);
 
       return http.ok({
         message: "Ok",
@@ -369,10 +345,7 @@ module.exports = {
       }
     }
 
-    console.log(
-      filename,
-      "Finalizando procedimento de sincronização de pedidos de compras."
-    );
+    console.log(filename, "Finalizando procedimento de sincronização de pedidos de compras.");
 
     // Cálculo do tempo gasto na execução da tarefa
     let end = new Date();
@@ -540,11 +513,7 @@ module.exports = {
 
       return compras;
     } catch (error) {
-      console.log(
-        filename,
-        "Erro ao listar página de pedidos de compra:",
-        error.message
-      );
+      console.log(filename, "Erro ao listar página de pedidos de compra:", error.message);
       return [];
     }
   },

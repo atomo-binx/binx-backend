@@ -13,11 +13,7 @@ const http = require("../utils/http");
 // Funções auxiliares para manuseio de valores monetários
 const BRL = (value, precision) => currency(value, { precision });
 const formatBRL = (currency) =>
-  currency
-    .format({ symbol: "" })
-    .replace(",", "+")
-    .replace(".", ",")
-    .replace("+", ".");
+  currency.format({ symbol: "" }).replace(",", "+").replace(".", ",").replace("+", ".");
 
 module.exports = {
   // Rotina para envio de email em ambiente de Debug (informando o destinarário)
@@ -52,11 +48,7 @@ module.exports = {
         message: "Rotina de email de debug executada",
       });
     } catch (error) {
-      console.log(
-        filename,
-        "Falha na execução de rotina de email de Debug:",
-        error.message
-      );
+      console.log(filename, "Falha na execução de rotina de email de Debug:", error.message);
 
       return http.failure({
         message: "Falha no procedimento de rotina de email",
@@ -81,12 +73,7 @@ module.exports = {
           email["destinatario"]
         );
 
-        await SES.enviar(
-          remetente,
-          [email["destinatario"]],
-          email["assunto"],
-          email["html"]
-        );
+        await SES.enviar(remetente, [email["destinatario"]], email["assunto"], email["html"]);
 
         return true;
       }
@@ -115,9 +102,7 @@ module.exports = {
             assunto = `Recebemos o seu pedido ${venda["idpedidoloja"]}!`;
 
             // Carrega arquivo base
-            html = (
-              await fs.readFile("src/emails/html/1_pedido_criado.html")
-            ).toString();
+            html = (await fs.readFile("src/emails/html/1_pedido_criado.html")).toString();
 
             // Realiza substituições
             html = await this.replaceCliente(html, venda);
@@ -134,9 +119,7 @@ module.exports = {
           {
             assunto = `O pagamento para o pedido ${venda["idpedidoloja"]} foi aprovado!`;
 
-            html = (
-              await fs.readFile("src/emails/html/2_pedido_aprovado.html")
-            ).toString();
+            html = (await fs.readFile("src/emails/html/2_pedido_aprovado.html")).toString();
 
             // Substituções
             html = await this.replacePedido(html, venda);
@@ -153,9 +136,7 @@ module.exports = {
           {
             assunto = `Seu pedido ${venda["idpedidoloja"]} foi cancelado`;
 
-            html = (
-              await fs.readFile("src/emails/html/3_pedido_cancelado.html")
-            ).toString();
+            html = (await fs.readFile("src/emails/html/3_pedido_cancelado.html")).toString();
 
             html = await this.replaceCliente(html, venda);
             html = await this.replacePedido(html, venda);
@@ -171,9 +152,7 @@ module.exports = {
           {
             assunto = `Pedido ${venda["idpedidoloja"]} em separação!`;
 
-            html = (
-              await fs.readFile("src/emails/html/4_pedido_em_separacao.html")
-            ).toString();
+            html = (await fs.readFile("src/emails/html/4_pedido_em_separacao.html")).toString();
 
             html = await this.replacePedido(html, venda);
             html = await this.replaceSeparacao(html, venda);
@@ -185,9 +164,7 @@ module.exports = {
           {
             assunto = `O seu pedido ${venda["idpedidoloja"]} foi enviado!`;
 
-            html = (
-              await fs.readFile("src/emails/html/5_pedido_enviado.html")
-            ).toString();
+            html = (await fs.readFile("src/emails/html/5_pedido_enviado.html")).toString();
 
             html = await this.replacePedido(html, venda);
             html = await this.replacePrazo(html, venda);
@@ -201,9 +178,7 @@ module.exports = {
           {
             assunto = `O seu pedido ${venda["idpedidoloja"]} está aguardando a retirada!`;
 
-            html = (
-              await fs.readFile("src/emails/html/6_aguardando_retirada.html")
-            ).toString();
+            html = (await fs.readFile("src/emails/html/6_aguardando_retirada.html")).toString();
 
             html = await this.replaceCliente(html, venda);
             html = await this.replacePedido(html, venda);
@@ -238,21 +213,13 @@ module.exports = {
   },
 
   async replaceValores(html, venda) {
-    html = html.replace(
-      "#VALOR_PRODUTOS",
-      formatBRL(BRL(venda["totalprodutos"], 2))
-    );
-    html = html.replace(
-      "#VALOR_FRETE",
-      formatBRL(BRL(venda["fretecliente"], 2))
-    );
+    html = html.replace("#VALOR_PRODUTOS", formatBRL(BRL(venda["totalprodutos"], 2)));
+    html = html.replace("#VALOR_FRETE", formatBRL(BRL(venda["fretecliente"], 2)));
     html = html.replace("#VALOR_TOTAL", formatBRL(BRL(venda["totalvenda"], 2)));
 
     // Verifica se existe desconto neste pedido
     if (venda["desconto"] !== "0,00") {
-      let linhaDesconto = (
-        await fs.readFile("src/emails/html/row_desconto.html")
-      ).toString();
+      let linhaDesconto = (await fs.readFile("src/emails/html/row_desconto.html")).toString();
 
       // Diferente dos demais campos, o valor de desconto vem com "," na casa decimal
       // Substituir antes a "," por "." para realizar a formatação em moeda
@@ -300,10 +267,7 @@ module.exports = {
     // Definir qual prazo deve ser utilizado
     // Definir desta maneira o prazo que será enviado pois os valores não são traduzidos
     // Sedex, PAC, DLog etc, nos alias constam como "Economico", "Normal", etc
-    if (
-      prazoQuery["servico"] === "Motoboy" ||
-      prazoQuery["servico"] === "Retirada na Loja"
-    ) {
+    if (prazoQuery["servico"] === "Motoboy" || prazoQuery["servico"] === "Retirada na Loja") {
       // Utilizar como prazo o valor armazenado em serviço
       prazo = prazoQuery["servico"];
     } else {
@@ -350,18 +314,13 @@ module.exports = {
             "https://storage.googleapis.com/baudaeletronicadatasheet/email_logo_bau.png";
 
         // URL do produto não encontrada, aplicar URL da homepage do site
-        if (!urls["urlproduto"])
-          urls["urlproduto"] = "https://www.baudaeletronica.com.br/";
+        if (!urls["urlproduto"]) urls["urlproduto"] = "https://www.baudaeletronica.com.br/";
 
         // Valor do item atual para inserir na tabela
-        let valorItem = BRL(item["valorunidade"], 2).multiply(
-          parseInt(item["quantidade"])
-        );
+        let valorItem = BRL(item["valorunidade"], 2).multiply(parseInt(item["quantidade"]));
 
         // Carrega o arquivo de linha de tabela de produtos
-        let linha = (
-          await fs.readFile("src/emails/html/row_tabela_produtos.html")
-        ).toString();
+        let linha = (await fs.readFile("src/emails/html/row_tabela_produtos.html")).toString();
 
         // Realiza substituições nesta linha da tabela
         linha = linha.replace("#PRODUTO_NOME", item["nome"]);
@@ -381,9 +340,7 @@ module.exports = {
       let resto = qntItens - 3;
 
       // Carregar linha da quantidade de itens restantes
-      let linhaResto = (
-        await fs.readFile("src/emails/html/row_outros_itens.html")
-      ).toString();
+      let linhaResto = (await fs.readFile("src/emails/html/row_outros_itens.html")).toString();
 
       // Troca o dado dentro da linha de resto
       linhaResto = linhaResto.replace("#ITENS_RESTO", resto);
@@ -415,23 +372,17 @@ module.exports = {
     switch (prazoQuery["servico"]) {
       case "Retirada na Loja":
         infoRow = (
-          await fs.readFile(
-            "src/emails/html/row_pagamento_aprovado_retira.html"
-          )
+          await fs.readFile("src/emails/html/row_pagamento_aprovado_retira.html")
         ).toString();
         break;
       case "Motoboy":
         infoRow = (
-          await fs.readFile(
-            "src/emails/html/row_pagamento_aprovado_motoboy.html"
-          )
+          await fs.readFile("src/emails/html/row_pagamento_aprovado_motoboy.html")
         ).toString();
         break;
       default:
         infoRow = (
-          await fs.readFile(
-            "src/emails/html/row_pagamento_aprovado_transportadora.html"
-          )
+          await fs.readFile("src/emails/html/row_pagamento_aprovado_transportadora.html")
         ).toString();
         break;
     }
@@ -441,9 +392,7 @@ module.exports = {
   },
 
   async replaceSeparacao(html, venda) {
-    let infoRow = (
-      await fs.readFile("src/emails/html/row_pedido_em_separacao.html")
-    ).toString();
+    let infoRow = (await fs.readFile("src/emails/html/row_pedido_em_separacao.html")).toString();
 
     return html.replace("#INFORMACAO", infoRow);
   },
@@ -453,30 +402,20 @@ module.exports = {
       where: {
         idpedidovenda: venda["idpedidovenda"],
       },
-      attributes: [
-        "transportadora",
-        "servico",
-        "rastreio",
-        "cpfcnpj",
-        "numeronota",
-      ],
+      attributes: ["transportadora", "servico", "rastreio", "cpfcnpj", "numeronota"],
       raw: true,
     });
 
     let infoRow = "";
 
-    let botaoRastreio = (
-      await fs.readFile("src/emails/html/row_botao_rastreio.html")
-    ).toString();
+    let botaoRastreio = (await fs.readFile("src/emails/html/row_botao_rastreio.html")).toString();
 
     // Entrega via Correios
     if (query["transportadora"].includes("Correios")) {
       // Entrega correios possui botão de rastreio
       html = html.replace("#BOTAO_RASTREIO", botaoRastreio);
 
-      infoRow = (
-        await fs.readFile("src/emails/html/row_pedido_enviado_correios.html")
-      ).toString();
+      infoRow = (await fs.readFile("src/emails/html/row_pedido_enviado_correios.html")).toString();
 
       if (query["servico"].includes("SEDEX")) {
         infoRow = infoRow.replace("#SERVIÇO", "Sedex");
@@ -490,10 +429,7 @@ module.exports = {
         infoRow = infoRow.replace("#CODIGO", query["rastreio"]);
       }
 
-      html = html.replace(
-        "#LINK_RASTREIO",
-        "https://rastreamento.correios.com.br/app/index.php"
-      );
+      html = html.replace("#LINK_RASTREIO", "https://rastreamento.correios.com.br/app/index.php");
     }
 
     // Entrega via DLog
@@ -501,9 +437,7 @@ module.exports = {
       // Entrega DLog possui botão de rastreio
       html = html.replace("#BOTAO_RASTREIO", botaoRastreio);
 
-      infoRow = (
-        await fs.readFile("src/emails/html/row_pedido_enviado_dlog.html")
-      ).toString();
+      infoRow = (await fs.readFile("src/emails/html/row_pedido_enviado_dlog.html")).toString();
 
       let linkRastreio = "";
 
@@ -521,9 +455,7 @@ module.exports = {
       // Entrega Motoboy não possui botão de rastreio
       html = html.replace("#BOTAO_RASTREIO", "");
 
-      infoRow = (
-        await fs.readFile("src/emails/html/row_pedido_enviado_motoboy.html")
-      ).toString();
+      infoRow = (await fs.readFile("src/emails/html/row_pedido_enviado_motoboy.html")).toString();
     }
 
     html = html.replace("#RASTREIO", infoRow);
@@ -534,10 +466,7 @@ module.exports = {
   // Rotina de Email
   async rotinaEmail(venda) {
     try {
-      console.log(
-        filename,
-        `Pedido de Venda: ${venda.idpedidovenda} - Iniciando rotina de email`
-      );
+      console.log(filename, `Pedido de Venda: ${venda.idpedidovenda} - Iniciando rotina de email`);
 
       // Verifica necessidade de envio de email
       let lojaEnviarEmail = ["203382852"]; //Bisbis
@@ -546,6 +475,7 @@ module.exports = {
       // A sintaxe para a biblioteca Date é (AAAA, MM, DD)
       // A sintaxa de data do banco de dados é AAAA-MM-DD
 
+      // Dia de início de envio dos emails
       const dataInicial = new Date(2021, 12, 29);
 
       // Separa a data de venda do banco de dados
@@ -554,11 +484,12 @@ module.exports = {
       // Monta a data no formato Date()
       const dataPedido = new Date(dataVenda[0], dataVenda[1], dataVenda[2]);
 
+      // Pedidos anteriores a data de início do envio de emails não devem receber emails
       if (dataPedido < dataInicial) {
         console.log(
           filename,
           `Pedido de Venda: ${venda.idpedidovenda} -`,
-          "Não é necessário disparar email para este pedido (Data anterior a inicial)."
+          "Não é necessário enviar email para este pedido: Data anterior a inicial."
         );
         return;
       }
@@ -566,7 +497,8 @@ module.exports = {
       if (!lojaEnviarEmail.includes(venda.idloja)) {
         console.log(
           filename,
-          `Pedido de Venda: ${venda.idpedidovenda} - Não é necessário disparar email para este pedido.`
+          `Pedido de Venda: ${venda.idpedidovenda} -`,
+          `Não é necessário enviar email para este pedido: Loja não necessita de email`
         );
         return;
       }
@@ -612,10 +544,7 @@ module.exports = {
         // Aguardando Retirada
         22679: [1, 2, 4, 6],
         // Atendido - Verificação de método de entrega necessária
-        9:
-          venda.transportadora == "Retirada na Loja"
-            ? [1, 2, 4, 6]
-            : [1, 2, 4, 5],
+        9: venda.transportadora == "Retirada na Loja" ? [1, 2, 4, 6] : [1, 2, 4, 5],
       };
 
       // Recuperar lista de emails necessários a partir do status
@@ -628,7 +557,7 @@ module.exports = {
       // Conseguimos recuperar emails necessários de serem enviados para este pedido de venda
       if (emailsNecessarios) {
         // Verifica se o email necessário nessa trilha já foi enviado
-        for (necessario of emailsNecessarios) {
+        for (const necessario of emailsNecessarios) {
           // Caso o email necessário não tenha sido enviado, acrescentar a lista de emails a serem enviados
           if (!emailsEnviados.includes(necessario)) {
             dispararEmails.push(necessario);
@@ -637,7 +566,16 @@ module.exports = {
       } else {
         // Encontramos um id de status não previsto na tabela de dependencia
         console.log(
-          `Pedido de Venda: ${venda.idpedidovenda} - Status do pedido de de venda (ID Status: ${venda.idstatusvenda}) não previsto na tabela de dependência de emails`
+          `Pedido de Venda: ${venda.idpedidovenda} -`,
+          `Status do pedido de de venda (ID Status: ${venda.idstatusvenda}) não previsto na tabela de dependência de emails`
+        );
+      }
+
+      if (dispararEmails.length === 0) {
+        console.log(
+          filename,
+          `Pedido de Venda: ${venda.idpedidovenda} -`,
+          `Não é necessário enviar email para este pedido: Nenhum email necessário.`
         );
       }
 
@@ -654,24 +592,15 @@ module.exports = {
           venda.idpedidovenda
         );
 
-        // Verificação temporária antes de realizar o release do módulo de emails
-        // if (process.env.PORT == "" || process.env.PORT == null) {
-        if (true) {
-          // console.log(filename, "Business de email rodando localmente");
+        // Realiza envio do email
+        const emailEnviado = await this.enviarEmail(idEmail, venda);
 
-          // Forçar email para debug
-          // venda["email"] = "suporte@baudaeletronica.com.br";
-
-          // Realiza envio do email
-          const emailEnviado = await this.enviarEmail(idEmail, venda);
-
-          // Verificar se o email foi enviado com sucesso e guardar no banco
-          if (emailEnviado) {
-            emailsEnviadosSucesso.push({
-              idpedidovenda: venda.idpedidovenda,
-              idemail: idEmail,
-            });
-          }
+        // Verificar se o email foi enviado com sucesso e guardar no banco
+        if (emailEnviado) {
+          emailsEnviadosSucesso.push({
+            idpedidovenda: venda.idpedidovenda,
+            idemail: idEmail,
+          });
         }
       }
 

@@ -51,4 +51,33 @@ module.exports = {
 
     res.status(resposta.statusCode).json(resposta.body);
   },
+
+  async novaSincronizacao(req, res, next) {
+    try {
+      // const rules = [[userId, UserIdValidator]];
+
+      // const validationResult = validation.run(rules);
+
+      // if (validationResult["status"] === "error") {
+      //   return res.status(400).json(validationResult);
+      // }
+
+      const { all, periodo, situacao, unidade, tempo, pedidos } = req.query;
+
+      const arrayPedidos = pedidos ? pedidos.split(",").map((element) => element.trim()) : null;
+
+      const response = await VendaBusiness.novaIniciaSincronizacao(
+        all,
+        periodo,
+        situacao,
+        unidade,
+        tempo,
+        arrayPedidos
+      );
+
+      return res.status(response.statusCode).json(response.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
