@@ -4,6 +4,9 @@ const fs = require("fs");
 const Produto = require("../models/produto.model");
 
 const http = require("../utils/http");
+const { ok } = require("../utils/http");
+
+const quicksight = require("../aws/quicksight");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
@@ -39,6 +42,22 @@ module.exports = {
 
     return http.ok({
       message: "ok",
+    });
+  },
+
+  async listarDashboards() {
+    const dashboards = await quicksight.listarDashboards();
+
+    return ok({
+      dashboards,
+    });
+  },
+
+  async adquirirDashboardUrl(dashboardId) {
+    const dashboard = await quicksight.adquirirDashboardUrl(dashboardId);
+
+    return ok({
+      dashboard,
     });
   },
 };

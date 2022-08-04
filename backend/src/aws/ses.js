@@ -8,8 +8,6 @@ const client = new SESClient({
   region: process.env.COGNITO_REGION,
 });
 
-const filename = __filename.slice(__dirname.length + 1) + " -";
-
 module.exports = {
   async enviar(remetente, destinatario, assunto, html) {
     return new Promise((resolve, reject) => {
@@ -44,13 +42,8 @@ module.exports = {
       // Envia o comando de email
       client
         .send(command)
-        .then((response) => {
-          resolve();
-        })
-        .catch((error) => {
-          console.log(filename, "Não foi possível realizar o envio do email:", error.message);
-          reject(error);
-        });
+        .then(() => resolve())
+        .catch((error) => reject(error));
     });
   },
 };

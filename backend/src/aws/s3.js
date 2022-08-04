@@ -1,7 +1,5 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const dotenv = require("dotenv");
-const fs = require("fs");
-const path = require("path");
 
 dotenv.config({ path: "../../.env" });
 
@@ -19,7 +17,7 @@ module.exports = {
   async enviarObjeto(fileStream) {
     return new Promise((resolve, reject) => {
       console.log(filename, "Iniciando rotina de envio de imagem para o S3");
-      
+
       // const file = "./placeholder.jpg";
       // const fileStream = fs.createReadStream(file);
 
@@ -37,7 +35,7 @@ module.exports = {
 
       client
         .send(command)
-        .then((response) => {
+        .then(() => {
           console.log("Sucesso ao enviar objeto");
           resolve();
         })
