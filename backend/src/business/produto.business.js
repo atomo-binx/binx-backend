@@ -217,16 +217,10 @@ module.exports = {
         // Executa transação de produto via callback
         await this.produtoTransaction(produto)
           .then(() => {
-            console.log(
-              filename,
-              "Transação de callback de deposito realizada com sucesso"
-            );
+            console.log(filename, "Transação de callback de deposito realizada com sucesso");
           })
           .catch(() => {
-            console.log(
-              filename,
-              "Falha na realização de transação de callback de estoque"
-            );
+            console.log(filename, "Falha na realização de transação de callback de estoque");
 
             console.log(filename, "Dados do produto:");
           });
@@ -236,14 +230,9 @@ module.exports = {
         message: "Callback de produto processado",
       });
     } catch (error) {
-      console.log(
-        filename,
-        "Erro durante processamento de callback de produto:",
-        error.message
-      );
+      console.log(filename, "Erro durante processamento de callback de produto:", error.message);
       return http.failure({
-        message:
-          "Erro durante processamento de callback de produto: " + error.message,
+        message: "Erro durante processamento de callback de produto: " + error.message,
       });
     }
   },

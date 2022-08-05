@@ -671,9 +671,7 @@ module.exports = {
 
             resolve(vendas);
           } else {
-            reject({
-              message: "A página de pedido de vendas informada não foi encontrada.",
-            });
+            resolve([]);
           }
         })
         .catch((error) => {
@@ -705,10 +703,6 @@ module.exports = {
             resolve(compras);
           } else {
             resolve([]);
-
-            // reject({
-            //   message: "A página de pedido de compras informada não foi encontrada.",
-            // });
           }
         })
         .catch((error) => {
@@ -742,20 +736,40 @@ module.exports = {
 
             resolve(produtos);
           } else {
-            const erroBling = res.data.retorno.erros[0].erro.cod;
-
-            if (erroBling == 14) {
-              console.log(filename, "Última página de produtos encontrada:", pagina - 1);
-            } else {
-              console.log(filename, `Erro inesperado encontrado: ${erroBling}`);
-            }
-
             resolve([]);
           }
         })
         .catch((error) => {
           console.log(filename, "Erro durante requisição na API do Bling:", error.message);
           reject(error);
+        });
+    });
+  },
+
+  async listaPaginaContatos(filtros, pagina = 1) {
+    return new Promise((resolve, reject) => {
+      this.blingRequest("GET", `/contatos/page=${pagina}/json/`, {
+        params: {
+          apikey: process.env.BLING_API_KEY,
+        },
+        filters: filtros,
+      })
+        .then((res) => {
+          if (res.data.retorno.contatos) {
+            const contatos = res.data.retorno.contatos.map((contato) =>
+              this.desestruturaContato(contato.contato)
+            );
+
+            console.log(filename, "Total de contatos encontrados:", contatos.length);
+
+            resolve(contatos);
+          } else {
+            resolve([]);
+          }
+        })
+        .catch((error) => {
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
+          reject(error.message);
         });
     });
   },
@@ -797,36 +811,6 @@ module.exports = {
           } else {
             reject({
               message: "A proposta comercial informada não foi encontrada.",
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error.message);
-        });
-    });
-  },
-
-  async listaPaginaContatos(filtros, pagina = 1) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/contatos/page=${pagina}/json/`, {
-        params: {
-          apikey: process.env.BLING_API_KEY,
-        },
-        filters: filtros,
-      })
-        .then((res) => {
-          if (res.data.retorno.contatos) {
-            const contatos = res.data.retorno.contatos.map((contato) =>
-              this.desestruturaContato(contato.contato)
-            );
-
-            console.log(filename, "Total de contatos encontrados:", contatos.length);
-
-            resolve(contatos);
-          } else {
-            reject({
-              message: "A página de contatos informada não foi encontrada.",
             });
           }
         })
