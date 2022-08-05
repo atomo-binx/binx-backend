@@ -52,8 +52,10 @@ module.exports = {
     res.status(resposta.statusCode).json(resposta.body);
   },
 
-  async novaSincronizacao(req, res, next) {
+  async sincronizaPedidosVenda(req, res, next) {
     try {
+      const { all, periodo, situacao, unidade, tempo, pedidos } = req.query;
+
       // const rules = [[userId, UserIdValidator]];
 
       // const validationResult = validation.run(rules);
@@ -62,20 +64,13 @@ module.exports = {
       //   return res.status(400).json(validationResult);
       // }
 
-      const { all, periodo, situacao, unidade, tempo, pedidos } = req.query;
-
       const arrayPedidos = pedidos ? pedidos.split(",").map((element) => element.trim()) : null;
 
-      const response = await VendaBusiness.novaIniciaSincronizacao(
-        all,
-        periodo,
-        situacao,
-        unidade,
-        tempo,
-        arrayPedidos
-      );
+      VendaBusiness.sincronizaPedidosVenda(all, periodo, situacao, unidade, tempo, arrayPedidos);
 
-      return res.status(response.statusCode).json(response.body);
+      return res.status(200).json({
+        message: "A sincronização de pedidos de venda foi iniciada em segundo plano.",
+      });
     } catch (error) {
       next(error);
     }

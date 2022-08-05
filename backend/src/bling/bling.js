@@ -43,7 +43,7 @@ const categorias = {
 };
 
 module.exports = {
-  // Desestrutura os dados importantes de um pedido de venda
+  // Desestrutura os dados de um pedido de venda
   desestruturaPedidoVenda(venda) {
     try {
       // Variáveis que dependem de lógica e regras para serem desestruturadas
@@ -107,19 +107,13 @@ module.exports = {
 
         // Caso exista um volume, existe um código de rastreio e um serviço de entrega
         if (Object.prototype.hasOwnProperty.call(venda.transporte, "volumes")) {
-          rastreio =
-            venda["transporte"]["volumes"][0]["volume"]["codigoRastreamento"];
+          rastreio = venda["transporte"]["volumes"][0]["volume"]["codigoRastreamento"];
 
           servico = venda["transporte"]["volumes"][0]["volume"]["servico"];
         }
 
         // Caso exista um endereço de entrega, podemos acessa-lo
-        if (
-          Object.prototype.hasOwnProperty.call(
-            venda.transporte,
-            "enderecoEntrega"
-          )
-        ) {
+        if (Object.prototype.hasOwnProperty.call(venda.transporte, "enderecoEntrega")) {
           // Salva o Endereço de Entrega
           rua = venda["transporte"]["enderecoEntrega"]["endereco"];
           numero = venda["transporte"]["enderecoEntrega"]["numero"];
@@ -160,10 +154,7 @@ module.exports = {
         for (const item of venda["itens"]) {
           // Verificar se o item está retornando do Bling com SKU válido
           // Caso o item retorne com SKU "null" por algum motivo do Bling, ignorar
-          if (
-            item["item"]["codigo"] !== "null" &&
-            item["item"]["codigo"] != null
-          ) {
+          if (item["item"]["codigo"] !== "null" && item["item"]["codigo"] != null) {
             itens.push({
               idsku: item["item"]["codigo"],
               idpedidovenda: venda["numero"],
@@ -177,14 +168,8 @@ module.exports = {
 
       // Verifica se o pedido possui um número de proposta comercial associado
       if (Object.prototype.hasOwnProperty.call(venda, "origem")) {
-        if (
-          Object.prototype.hasOwnProperty.call(
-            venda.origem,
-            "propostaComercial"
-          )
-        ) {
-          numeroproposta =
-            venda["origem"]["propostaComercial"]["numeroProposta"];
+        if (Object.prototype.hasOwnProperty.call(venda.origem, "propostaComercial")) {
+          numeroproposta = venda["origem"]["propostaComercial"]["numeroProposta"];
         }
       }
 
@@ -208,8 +193,7 @@ module.exports = {
         idpedidovenda: venda["numero"],
         datavenda: venda["data"],
         idloja: venda["loja"],
-        idstatusvenda:
-          situacoes[venda["situacao"]] || situacoes["Situação Não Encontrada"],
+        idstatusvenda: situacoes[venda["situacao"]] || situacoes["Situação Não Encontrada"],
         cliente: venda["cliente"]["nome"],
         totalprodutos: venda["totalprodutos"],
         totalvenda: venda["totalvenda"],
@@ -243,10 +227,7 @@ module.exports = {
       // Retorna o objeto final que representa o pedido de venda
       return dadosVenda;
     } catch (error) {
-      console.log(
-        filename,
-        `Erro ao desestruturar o pedido: ${venda["numero"]}`
-      );
+      console.log(filename, `Erro ao desestruturar o pedido: ${venda["numero"]}`);
 
       if (error.message) {
         console.log(filename, "Mensagem de erro:", error.message);
@@ -256,7 +237,7 @@ module.exports = {
     }
   },
 
-  // Desestrutura os dados importantes de um pedido de compra
+  // Desestrutura os dados de um pedido de compra
   desestruturaPedidoCompra(compra) {
     try {
       // Realiza desestruturação dos itens presentes no pedido de compra
@@ -265,10 +246,7 @@ module.exports = {
       for (const item of compra["itens"]) {
         // Verificar se o item está retornando do Bling com SKU válido
         // Caso o item retorne com SKU "null" por algum motivo do Bling, ignorar
-        if (
-          item["item"]["codigo"] !== "null" &&
-          item["item"]["codigo"] != null
-        ) {
+        if (item["item"]["codigo"] !== "null" && item["item"]["codigo"] != null) {
           itens.push({
             idpedidocompra: compra["numeropedido"],
             idsku: item["item"]["codigo"],
@@ -305,10 +283,7 @@ module.exports = {
       // Retorna o objeto final que representa o pedido de venda
       return dadosCompra;
     } catch (error) {
-      console.log(
-        filename,
-        `Erro ao desestruturar o pedido: ${compra["numeropedido"]}`
-      );
+      console.log(filename, `Erro ao desestruturar o pedido: ${compra["numeropedido"]}`);
 
       if (error.message) {
         console.log(filename, "Mensagem de erro:", error.message);
@@ -318,7 +293,7 @@ module.exports = {
     }
   },
 
-  // Desestrutura os dados importantes de uma proposta comercial
+  // Desestrutura os dados de uma proposta comercial
   desestruturaProposta(proposta) {
     try {
       // Desestrutura itens da proposta comercial
@@ -367,7 +342,7 @@ module.exports = {
     }
   },
 
-  // Desestrutura dados importantes de um produto
+  // Desestrutura dados de um produto
   desestruturaProduto(produto) {
     try {
       let estrutura = [];
@@ -403,8 +378,7 @@ module.exports = {
         nome: produto["descricao"] || "",
         precovenda: produto["preco"] || 0,
         situacao: produto["situacao"] == "Ativo" ? true : false,
-        idcategoria:
-          categorias[produto["observacoes"]] || categorias["Sem Categoria"],
+        idcategoria: categorias[produto["observacoes"]] || categorias["Sem Categoria"],
         depositos: depositos,
         peso: produto["pesoBruto"] || 0,
         localizacao: produto["localizacao"] || "",
@@ -423,11 +397,7 @@ module.exports = {
         return null;
       }
     } catch (error) {
-      console.log(
-        filename,
-        `Erro ao desestruturar o produto ${produto["codigo"]}:`,
-        error.message
-      );
+      console.log(filename, `Erro ao desestruturar o produto ${produto["codigo"]}:`, error.message);
 
       return null;
     }
@@ -455,6 +425,7 @@ module.exports = {
     return objetoDepositos;
   },
 
+  // Desestrutura os dados de um contato
   desestruturaContato(contato) {
     // Dados que necessitam de lógica para extração
     let cpfcnpj = "";
@@ -515,7 +486,7 @@ module.exports = {
     };
   },
 
-  // Rotina para política de tentativa de chamada ao Bling
+  // Rotina para política de tentativa e erro durante chamada ao Bling
   async blingRequest(metodo, caminho, params) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -527,19 +498,13 @@ module.exports = {
 
         // Gerar um hash aleatório para facilitar a identificação da rotina em debug
         let hash = crypto.randomBytes(3).toString("hex");
-        console.log(
-          filename,
-          `Hash: ${hash} - ${metodo} - Caminho: ${caminho}`
-        );
+        console.log(filename, `Hash: ${hash} - ${metodo} - Caminho: ${caminho}`);
 
         // Função para a tratativa dos códigos de erro
         const statusCodeError = (codigo, hash, tentativa) => {
           // Too Many Requests
           if (codigo === 429) {
-            console.log(
-              filename,
-              `Hash: ${hash} - Too Many Requests - Tentativa ${tentativa}`
-            );
+            console.log(filename, `Hash: ${hash} - Too Many Requests - Tentativa ${tentativa}`);
           }
         };
 
@@ -595,10 +560,7 @@ module.exports = {
 
           // Verificação por tentativas excedidas
           if (tentativa >= maxTentativas) {
-            console.log(
-              filename,
-              `Panic - Hash: ${hash} - Número máximo de tentativas excedido`
-            );
+            console.log(filename, `Panic - Hash: ${hash} - Número máximo de tentativas excedido`);
             rodando = false;
           }
           // Tentativas excedidas ou obteve sucesso na execução
@@ -610,7 +572,7 @@ module.exports = {
     });
   },
 
-  // Adquire dados de um produto da API do Bling
+  // Adquire dados de um produto
   async produto(sku, loja) {
     return new Promise((resolve, reject) => {
       this.blingRequest("GET", `/produto/${sku}/json/`, {
@@ -620,32 +582,23 @@ module.exports = {
         },
       })
         .then((result) => {
-          if (result["data"]["retorno"]["erros"]) {
-            reject({
-              message: "Produto não encontrado.",
-            });
-          } else {
-            // Produto encontrado, desestruturar os dados
-            let produto = this.desestruturaProduto(
-              result["data"]["retorno"]["produtos"][0]["produto"]
-            );
-
-            // Retornar o produto desestruturado
+          if (result.data.retorno.produtos) {
+            const produto = this.desestruturaProduto(result.data.retorno.produtos[0].produto);
             resolve(produto);
+          } else {
+            reject({
+              message: "O produto informado não foi encontrado.",
+            });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de produto na na API do Bling:",
-            error.message
-          );
-          reject();
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
+          reject(error);
         });
     });
   },
 
-  // Busca pedido de venda no Bling
+  // Adquire dados de um pedido de venda
   async pedidoVenda(pedido) {
     return new Promise((resolve, reject) => {
       this.blingRequest("GET", `/pedido/${pedido}/json/`, {
@@ -654,55 +607,24 @@ module.exports = {
           historico: "true",
         },
       })
-        .then(async (res) => {
-          try {
-            // A API do Bling retornou um erro, o pedido especificado não foi encontrado
-            const erroBling = res.data.retorno.erros[0].erro.cod;
-
-            console.log(
-              filename,
-              "Erro do Bling encontrado durante a aquisição de pedido de venda:",
-              erroBling
-            );
-
-            if (erroBling == 14) {
-              console.log(
-                filename,
-                "Nenhum pedido encontrado para o número:",
-                pedido
-              );
-            } else {
-              console.log(
-                filename,
-                "Erro inesperado, para mais informações consultar a documentação da API do Bling."
-              );
-            }
-
-            reject({
-              message: "Falha na aquisição de pedido de venda na API do Bling",
-            });
-          } catch (error) {
-            // A API do Bling retornou um pedido válido
-            const dadosVenda = res.data.retorno.pedidos[0].pedido;
-
-            // Desestrutura um pedido recebido do bling
-            const venda = this.desestruturaPedidoVenda(dadosVenda);
-
+        .then((res) => {
+          if (res.data.retorno.pedidos) {
+            const venda = this.desestruturaPedidoVenda(res.data.retorno.pedidos[0].pedido);
             resolve(venda);
+          } else {
+            reject({
+              message: "O pedido de venda informado não foi encontrado.",
+            });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de pedido de venda na API do Bling"
-          );
-          console.log(filename, error.message);
-          reject();
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
+          reject(error);
         });
     });
   },
 
-  // Busca pedido de compra no Bling
+  // Adquire dados de um pedido de compra
   async pedidoCompra(pedido) {
     return new Promise((resolve, reject) => {
       this.blingRequest("GET", `/pedidocompra/${pedido}/json/`, {
@@ -711,58 +633,27 @@ module.exports = {
         },
       })
         .then(async (res) => {
-          try {
-            // A API do Bling retornou um erro, o pedido especificado não foi encontrado
-            const erroBling = res.data.retorno.erros[0].erro.cod;
-
-            console.log(
-              filename,
-              "Erro do Bling encontrado durante a aquisição de pedido de compra:",
-              erroBling
+          if (res.data.retorno.pedidoscompra) {
+            const compra = this.desestruturaPedidoCompra(
+              res.data.retorno.pedidoscompra[0].pedidocompra
             );
-
-            if (erroBling == 14) {
-              console.log(
-                filename,
-                "Nenhum pedido de compra encontrado para o número:",
-                pedido
-              );
-            } else {
-              console.log(
-                filename,
-                "Erro inesperado, para mais informações consultar a documentação da API do Bling."
-              );
-            }
-
-            reject({
-              message: "Falha na aquisição de pedido de compra na API do Bling",
-            });
-          } catch (error) {
-            // A API do Bling retornou um pedido válido
-            const dadosCompra = res.data.retorno.pedidoscompra[0].pedidocompra;
-
-            // Desestrutura um pedido recebido do bling
-            const compra = this.desestruturaPedidoCompra(dadosCompra);
-
             resolve(compra);
+          } else {
+            reject({
+              message: "O pedido de compra informado não foi encontrado.",
+            });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de pedido de compra na API do Bling:",
-            error.message
-          );
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
           reject();
         });
     });
   },
 
-  // Busca uma única página de pedidos de venda do Bling
+  // Busca uma única página de pedidos de venda
   async listaPaginaVendas(pagina, filtros) {
     return new Promise((resolve, reject) => {
-      let vendas = [];
-
       this.blingRequest("GET", `/pedidos/page=${pagina}/json/`, {
         params: {
           filters: filtros,
@@ -771,59 +662,30 @@ module.exports = {
         },
       })
         .then((res) => {
-          try {
-            // A API do Bling retornou um erro, ou chegamos no fim da página ou algo deu errado
-            const erroBling = res.data.retorno.erros[0].erro.cod;
+          if (res.data.retorno.pedidos) {
+            console.log(filename, "Página de pedidos de venda encontrada:", pagina);
 
-            console.log(filename, "Erro Bling Encontrado:", erroBling);
-
-            if (erroBling == 14) {
-              console.log(
-                filename,
-                "Última página de vendas encontrada:",
-                pagina - 1
-              );
-            } else {
-              console.log(
-                filename,
-                "Erro inesperado encontrado, verifique a documentação da API do Bling para mais detalhes."
-              );
-            }
-          } catch (error) {
-            // A API do Bling retornou uma página válida, continuar a busca
-            console.log(
-              filename,
-              "Página de pedidos de venda encontrada:",
-              pagina
+            const vendas = res.data.retorno.pedidos.map((pedido) =>
+              this.desestruturaPedidoVenda(pedido["pedido"])
             );
 
-            // Desestrutura um pedido recebido do bling
-            for (const pedido of res.data.retorno.pedidos) {
-              const venda = this.desestruturaPedidoVenda(pedido["pedido"]);
-              vendas.push(venda);
-            }
-
             resolve(vendas);
+          } else {
+            reject({
+              message: "A página de pedido de vendas informada não foi encontrada.",
+            });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de pedidos de venda na api do Bling"
-          );
-          console.log(filename, error.message);
-          reject({
-            message: error.message,
-          });
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
+          reject(error);
         });
     });
   },
 
-  // Busca uma única página de pedidos de venda do Bling
+  // Busca uma única página de pedidos de compra
   async listaPaginaCompras(pagina, filtros) {
     return new Promise((resolve, reject) => {
-      let compras = [];
-
       this.blingRequest("GET", `/pedidoscompra/page=${pagina}/json/`, {
         params: {
           filters: filtros,
@@ -831,54 +693,27 @@ module.exports = {
         },
       })
         .then((res) => {
-          try {
-            // A API do Bling retornou um erro, ou chegamos no fim da página ou algo deu errado
-            const erroBling = res.data.retorno.erros[0].erro.cod;
+          if (res.data.retorno.pedidoscompra) {
+            console.log(filename, "Página de pedidos de compra encontrada:", pagina);
 
-            console.log(filename, "Erro Bling Encontrado:", erroBling);
-
-            if (erroBling == 14) {
-              console.log(
-                filename,
-                "Última página de compras encontrada:",
-                pagina - 1
-              );
-            } else {
-              console.log(
-                filename,
-                "Erro inesperado encontrado, verifique a documentação da API do Bling para mais detalhes."
-              );
-            }
-          } catch (error) {
-            // A API do Bling retornou uma página válida, continuar a busca
-            console.log(
-              filename,
-              "Página de pedidos de compra encontrada:",
-              pagina
+            // O retorno dos pedidos de compra é diferente da rotina para outras chamadas
+            // Na rota de pedidos de compra, é retornada uma Array a mais, por isso o "[0]"
+            const compras = res.data.retorno.pedidoscompra[0].map((pedido) =>
+              this.desestruturaPedidoCompra(pedido["pedidocompra"])
             );
 
-            // Desestrutura um pedido recebido do bling
-            // OBS: O retorno dos pedidos de compra é diferente da rotina para pedidos de venda
-            // Na rota de pedidos de compra, é retornada uma Array a mais
-            for (const pedido of res.data.retorno.pedidoscompra[0]) {
-              const compra = this.desestruturaPedidoCompra(
-                pedido["pedidocompra"]
-              );
-              compras.push(compra);
-            }
-
             resolve(compras);
+          } else {
+            resolve([]);
+
+            // reject({
+            //   message: "A página de pedido de compras informada não foi encontrada.",
+            // });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de pedidos de compra na api do Bling"
-          );
-          console.log(filename, error.message);
-          reject({
-            message: error.message,
-          });
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
+          reject(error);
         });
     });
   },
@@ -886,8 +721,6 @@ module.exports = {
   // Lista uma única página de produtos do Bling
   async listaPaginaProdutos(pagina, filtros) {
     return new Promise((resolve, reject) => {
-      let produtos = [];
-
       let params = {
         apikey: process.env.BLING_API_KEY,
         estoque: "S",
@@ -898,61 +731,36 @@ module.exports = {
         params: params,
       })
         .then((res) => {
-          try {
-            // A API do Bling retornou um erro, ou chegamos no fim da página ou algo deu errado
-            const erroBling = res.data.retorno.erros[0].erro.cod;
-            console.log(filename, "Erro Bling Encontrado:", erroBling);
-
-            if (erroBling == 14) {
-              console.log(
-                filename,
-                "Última página de produtos encontrada:",
-                pagina - 1
-              );
-
-              resolve(produtos);
-            } else {
-              console.log(filename, "Erro inesperado retornado do Bling");
-              reject();
-            }
-          } catch (error) {
-            // A API do Bling retornou uma página válida, continuar a busca
-            console.log(filename, `Página de produtos encontrada:`, pagina);
-
-            const paginaProdutos = res.data.retorno.produtos;
-
-            // Desestrutura cada um dos produtos retornados da página e insere na lista de produtos
-            for (const produto of paginaProdutos) {
-              const produtoDesestruturado = this.desestruturaProduto(
-                produto["produto"]
-              );
-
-              if (produto) {
-                produtos.push(produtoDesestruturado);
-              }
-            }
-
-            console.log(
-              filename,
-              "Total de produtos encontrados:",
-              produtos.length
+          if (res.data.retorno.produtos) {
+            const produtos = res.data.retorno.produtos.map((produto) =>
+              this.desestruturaProduto(produto["produto"])
             );
 
+            console.log(filename, `Página de produtos encontrada:`, pagina);
+
+            console.log(filename, "Total de produtos encontrados:", produtos.length);
+
             resolve(produtos);
+          } else {
+            const erroBling = res.data.retorno.erros[0].erro.cod;
+
+            if (erroBling == 14) {
+              console.log(filename, "Última página de produtos encontrada:", pagina - 1);
+            } else {
+              console.log(filename, `Erro inesperado encontrado: ${erroBling}`);
+            }
+
+            resolve([]);
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de produtos na api do Bling:",
-            error.message
-          );
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
           reject(error);
         });
     });
   },
 
-  // Atualiza o status de um pedido no Bling
+  // Atualiza o status (situação) de um pedido
   async atualizaStatusPedido(pedido, status) {
     return new Promise((resolve, reject) => {
       let xml = `
@@ -968,16 +776,12 @@ module.exports = {
       };
 
       this.blingRequest("PUT", `/pedido/${pedido}`, new URLSearchParams(params))
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
+        .then(() => resolve())
+        .catch((error) => reject(error));
     });
   },
 
-  // Busca dados de uma proposta comercial
+  // Adquire dados de uma proposta comercial
   async propostaComercial(proposta) {
     return new Promise((resolve, reject) => {
       this.blingRequest("GET", `/propostacomercial/${proposta}/json/`, {
@@ -986,40 +790,18 @@ module.exports = {
         },
       })
         .then((res) => {
-          try {
-            // A API do Bling retornou um erro, a proposta comercial especificada não foi encontrada
-            const erroBling = res.data.retorno.erros[0].erro.cod;
-            console.log(filename, "Erro Bling Encontrado:", erroBling);
-
-            if (erroBling == 14) {
-              console.log(
-                filename,
-                "Nenhuma proposta comercial encontrada para o número:",
-                proposta
-              );
-              reject(res.data.retorno.erros[0].erro.msg);
-            } else {
-              console.log(filename, "Erro inesperado encontrado ...");
-              reject(res.data.retorno.erros[0].erro.msg);
-            }
-          } catch (error) {
-            // A API do Bling retornou uma proposta válida
-            const propostaAtual =
-              res.data.retorno.propostascomerciais[0].propostacomercial;
-
-            // Desestrutura uma proposta comercial do bling
-            const propostaDesestruturada =
-              this.desestruturaProposta(propostaAtual);
-
+          if (res.data.retorno.propostascomerciais) {
+            const propostaAtual = res.data.retorno.propostascomerciais[0].propostacomercial;
+            const propostaDesestruturada = this.desestruturaProposta(propostaAtual);
             resolve(propostaDesestruturada);
+          } else {
+            reject({
+              message: "A proposta comercial informada não foi encontrada.",
+            });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de proposta comercial na api do Bling"
-          );
-          console.log(filename, error.message);
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
           reject(error.message);
         });
     });
@@ -1034,41 +816,22 @@ module.exports = {
         filters: filtros,
       })
         .then((res) => {
-          try {
-            const erroBling = res.data.retorno.erros[0].erro.cod;
-            console.log(filename, "Erro Bling Encontrado:", erroBling);
-
-            if (erroBling == 14) {
-              console.log(filename, "Falha na listagem de contatos");
-              reject(res.data.retorno.erros[0].erro.msg);
-            } else {
-              console.log(filename, "Erro inesperado encontrado ...");
-              reject(res.data.retorno.erros[0].erro.msg);
-            }
-          } catch (error) {
-            let resultados = [];
-
-            const contatos = res.data.retorno.contatos;
-
-            for (const contato of contatos) {
-              resultados.push(this.desestruturaContato(contato.contato));
-            }
-
-            console.log(
-              filename,
-              "Total de contatos encontrados:",
-              resultados.length
+          if (res.data.retorno.contatos) {
+            const contatos = res.data.retorno.contatos.map((contato) =>
+              this.desestruturaContato(contato.contato)
             );
 
-            resolve(resultados);
+            console.log(filename, "Total de contatos encontrados:", contatos.length);
+
+            resolve(contatos);
+          } else {
+            reject({
+              message: "A página de contatos informada não foi encontrada.",
+            });
           }
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro na requisição de proposta comercial na api do Bling"
-          );
-          console.log(filename, error.message);
+          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
           reject(error.message);
         });
     });

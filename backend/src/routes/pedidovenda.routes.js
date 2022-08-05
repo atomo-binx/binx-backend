@@ -6,7 +6,7 @@ function load(routes) {
   routes.get("/sincroniza/pedidosvendalista", controller.sincronizaPedidos);
   routes.post("/pedidovenda/callback", controller.callbackVendas);
 
-  routes.post("/pedidovenda/sincroniza", protectedRoute, controller.novaSincronizacao);
+  routes.post("/pedidovenda/sincroniza", protectedRoute, controller.sincronizaPedidosVenda);
 }
 
 module.exports = load;

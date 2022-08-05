@@ -18,7 +18,7 @@ module.exports = {
           resolve(res.data);
         })
         .catch((error) => {
-          console.log(filename, `${error.message}: ${error.response.data}`);
+          console.log(filename, `${error.message}:`, error.response.data);
           reject(error);
         });
     });
@@ -45,7 +45,7 @@ module.exports = {
           resolve(res.data);
         })
         .catch((error) => {
-          console.log(filename, `${error.message}: ${error.response.data}`);
+          console.log(filename, `${error.message}:`, error.response.data);
           reject(error);
         });
     });
@@ -59,7 +59,7 @@ module.exports = {
           resolve(res.data);
         })
         .catch((error) => {
-          console.log(filename, `${error.message}: ${error.response.data}`);
+          console.log(filename, `${error.message}:`, error.response.data);
           reject(error);
         });
     });
@@ -73,7 +73,7 @@ module.exports = {
           resolve(data.res);
         })
         .catch((error) => {
-          console.log(filename, `${error.message}: ${error.response.data}`);
+          console.log(filename, `${error.message}:`, error.response.data);
           reject(error);
         });
     });

@@ -692,19 +692,9 @@ module.exports = {
     }
   },
 
+  // ================================================================================
   // Funções novas
-
-  async novaIniciaSincronizacao(all, periodo, situacao, unidade, tempo, pedidos) {
-    console.log(filename, "Iniciando sincronização de pedidos de venda.");
-
-    this.novaRotinaSincronizacao(all, periodo, situacao, unidade, tempo, pedidos);
-
-    return http.ok({
-      message: "Rotina de sincronização de pedidos de venda iniciada.",
-    });
-  },
-
-  async novaRotinaSincronizacao(all, periodo, situacao, unidade, tempo, pedidos) {
+  async sincronizaPedidosVenda(all, periodo, situacao, unidade, tempo, pedidos) {
     let filtros = [];
 
     let dataHoje = moment().format("DD/MM/YYYY");
