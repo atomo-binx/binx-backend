@@ -577,6 +577,7 @@ module.exports = {
           `Pedido de Venda: ${venda.idpedidovenda} -`,
           `Não é necessário enviar email para este pedido: Nenhum email necessário.`
         );
+        return;
       }
 
       // Disparar Emails necessários

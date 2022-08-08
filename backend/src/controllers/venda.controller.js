@@ -17,19 +17,6 @@ module.exports = {
     }
   },
 
-  // Lista pedidos de venda do banco de dados
-  async listaPedidosVenda(req, res) {
-    const { status, vendas } = await VendaBusiness.listaPedidosVenda(req);
-
-    if (status) {
-      res.status(200).send(JSON.stringify(vendas));
-    } else {
-      res.status(500).send({
-        message: "Falha na aquisição de pedidos de vendas.",
-      });
-    }
-  },
-
   // Sincroniza um pedido de venda específico (ou uma lista de pedidos de venda)
   async sincronizaPedidos(req, res) {
     const status = await VendaBusiness.sincronizaPedidos(req);
@@ -52,6 +39,7 @@ module.exports = {
     res.status(resposta.statusCode).json(resposta.body);
   },
 
+  // Novas funções
   async sincronizaPedidosVenda(req, res, next) {
     try {
       const { all, periodo, situacao, unidade, tempo, pedidos } = req.query;
@@ -71,6 +59,18 @@ module.exports = {
       return res.status(200).json({
         message: "A sincronização de pedidos de venda foi iniciada em segundo plano.",
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async novaCallbackVendas(req, res, next) {
+    try {
+      const pedido = JSON.parse(req.body.data).retorno.pedidos[0].pedido;
+
+      const resposta = await VendaBusiness.novaCallbackVendas(pedido);
+
+      res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
       next(error);
     }

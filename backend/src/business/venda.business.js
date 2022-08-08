@@ -3,24 +3,18 @@ const FreteForcado = require("../models/freteForcado.model");
 
 const { models } = require("../modules/sequelize");
 
-// Business
 const FreteBusiness = require("./frete.business");
 const EmailBusiness = require("./email.business");
 
-// Módulos
 const Bling = require("../bling/bling");
 const moment = require("moment");
 const sequelize = require("../services/sequelize");
 
-// Helpers
 const filename = __filename.slice(__dirname.length + 1) + " -";
 const puppetter = require("../puppeteer/puppeteer");
 const http = require("../utils/http");
 
-const axios = require("axios");
-const { ok } = require("../modules/http");
-const url = "https://bling.com.br/Api/v2";
-const blingApi = axios.create({ baseURL: url });
+const { ok, failure } = require("../modules/http");
 
 module.exports = {
   // ==================================================================================================
@@ -693,7 +687,6 @@ module.exports = {
   },
 
   // ================================================================================
-  // Funções novas
   async sincronizaPedidosVenda(all, periodo, situacao, unidade, tempo, pedidos) {
     let filtros = [];
 
@@ -722,25 +715,20 @@ module.exports = {
     filtros.push(filtroEmissao);
     filtros = filtros.length > 1 ? filtros.join(";") : filtros[0];
 
-    // Sincronizar uma lista específica de pedidos
     if (pedidos) {
-      for (const pedido of pedidos) {
-        const venda = await Bling.pedidoVenda(pedido);
-        await this.novaSincronizaPedido(venda);
-      }
+      console.log(filename, "Sincronizando uma lista de pedidos de venda.");
+      await this.novaSincronizaListaPedidos(pedidos);
     } else {
-      // Sincronizar através de paginação no Bling
-      console.log(filename, "Filtro final para sincronização:", filtros);
-
+      console.log(filename, "Sincronizando através de filtros:", filtros);
       await this.novaSincronizaPaginasPedidos(filtros);
     }
   },
 
   async novaSincronizaPaginasPedidos(filtros) {
-    // Medida de tempo de execução
+    let inseridos = 0;
+
     let start = new Date();
 
-    // Procedimento de Busca
     let procurando = true;
     let pagina = 1;
 
@@ -749,30 +737,65 @@ module.exports = {
 
       const vendas = await Bling.listaPaginaVendas(pagina++, filtros);
 
-      if (vendas.length === 0) procurando = false;
+      if (vendas.length > 0) {
+        for (const venda of vendas) {
+          try {
+            await this.novaSincronizaPedido(venda);
+            inseridos++;
+          } catch (error) {
+            console.log(
+              filename,
+              `Pedido de Venda: ${venda.idpedidovenda} -`,
+              `Falha durante sincronização: ${error.message}`
+            );
+          }
+        }
 
-      for (const venda of vendas) {
-        await this.sincronizaPedido(venda);
-      }
-
-      // Adiantar a verificação de corte do próximo ciclo
-      if (vendas.length > 0 && vendas.length < 100) {
+        // Adiantar a verificação de corte do próximo ciclo
+        if (vendas.length < 100) {
+          procurando = false;
+        }
+      } else {
         procurando = false;
       }
     }
 
     console.log(filename, "Finalizando procedimento de sincronização de pedidos de vendas.");
 
-    // Cálculo do tempo gasto na execução da tarefa
     let end = new Date();
     let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
 
     console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
+    console.log(filename, "Total de pedidos sincronizados:", inseridos);
   },
 
-  async novaVendaTransaction(venda) {
+  async novaSincronizaListaPedidos(pedidos) {
+    let inseridos = 0;
+
+    let start = new Date();
+
+    for (const pedido of pedidos) {
+      try {
+        const venda = await Bling.pedidoVenda(pedido);
+
+        await this.novaSincronizaPedido(venda);
+
+        inseridos++;
+      } catch (error) {
+        console.log(filename, `Pedido de Venda: ${pedido} -`, error.message);
+      }
+    }
+
+    let end = new Date();
+    let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
+
+    console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
+    console.log(filename, "Total de pedidos sincronizados:", inseridos);
+  },
+
+  async novaVendaTransaction(pedido) {
     // Realiza separação de dados de venda e lista de itens
-    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = venda;
+    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = pedido;
 
     // Transação dos dados no banco de dados
     return sequelize.transaction(async (t) => {
@@ -826,20 +849,36 @@ module.exports = {
     });
   },
 
-  async novaSincronizaPedido(pedido) {
+  async novaCallbackVendas(pedido) {
     try {
-      // Realizar transação do objeto de pedido de venda
-      await this.novaVendaTransaction(pedido);
+      const venda = Bling.desestruturaPedidoVenda(pedido);
 
-      // Realizar rotina de disparo de emails
-      await EmailBusiness.rotinaEmail(pedido);
+      console.log(filename, `Pedido de Venda: ${venda.idpedidovenda} - Iniciando callback`);
 
-      console.log(filename, `Pedido de Venda: ${pedido.idpedidovenda} - Pedido sincronizado.`);
+      await this.novaSincronizaPedido(venda);
+
+      return ok({
+        message: `Callback de pedido de venda processado com sucesso.`,
+      });
     } catch (error) {
-      console.log(
-        filename,
-        `Pedido de Venda: ${pedido.idpedidovenda} - Erro durante sincronização: ${error.message}`
-      );
+      console.log(filename, `Falha durante callback de pedido de venda: ${error.message}`);
+      return failure({
+        message: `Falha durante callback de pedido de venda: ${error.message}`,
+      });
     }
+  },
+
+  async novaSincronizaPedido(pedido) {
+    console.log(filename, `Pedido de Venda: ${pedido.idpedidovenda} - Iniciando sincronização.`);
+
+    // Caso a transportadora ainda seja "Binx", o pedido está sendo inserido
+    // Para essas situações, precisamos salvar o alias original do pedido
+    if (pedido.transportadora === "Binx") {
+      pedido["alias"] = pedido.servico;
+    }
+
+    return this.novaVendaTransaction(pedido).then(() => {
+      return EmailBusiness.rotinaEmail(pedido);
+    });
   },
 };

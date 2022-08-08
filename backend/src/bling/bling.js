@@ -574,204 +574,165 @@ module.exports = {
 
   // Adquire dados de um produto
   async produto(sku, loja) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/produto/${sku}/json/`, {
-        params: {
-          apikey: process.env.BLING_API_KEY,
-          loja: loja || "",
-        },
+    return this.blingRequest("GET", `/produto/${sku}/json/`, {
+      params: {
+        apikey: process.env.BLING_API_KEY,
+        loja: loja || "",
+      },
+    })
+      .then((result) => {
+        if (result.data.retorno.produtos) {
+          return this.desestruturaProduto(result.data.retorno.produtos[0].produto);
+        } else {
+          throw Error("O produto informado não foi encontrado.");
+        }
       })
-        .then((result) => {
-          if (result.data.retorno.produtos) {
-            const produto = this.desestruturaProduto(result.data.retorno.produtos[0].produto);
-            resolve(produto);
-          } else {
-            reject({
-              message: "O produto informado não foi encontrado.",
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   // Adquire dados de um pedido de venda
   async pedidoVenda(pedido) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/pedido/${pedido}/json/`, {
-        params: {
-          apikey: process.env.BLING_API_KEY,
-          historico: "true",
-        },
+    return this.blingRequest("GET", `/pedido/${pedido}/json/`, {
+      params: {
+        apikey: process.env.BLING_API_KEY,
+        historico: "true",
+      },
+    })
+      .then((res) => {
+        if (res.data.retorno.pedidos) {
+          return this.desestruturaPedidoVenda(res.data.retorno.pedidos[0].pedido);
+        } else {
+          throw Error("O pedido de venda informado não foi encontrado.");
+        }
       })
-        .then((res) => {
-          if (res.data.retorno.pedidos) {
-            const venda = this.desestruturaPedidoVenda(res.data.retorno.pedidos[0].pedido);
-            resolve(venda);
-          } else {
-            reject({
-              message: "O pedido de venda informado não foi encontrado.",
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, "Erro durante requisição na API do Bling:", error.message);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   // Adquire dados de um pedido de compra
   async pedidoCompra(pedido) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/pedidocompra/${pedido}/json/`, {
-        params: {
-          apikey: process.env.BLING_API_KEY,
-        },
+    return this.blingRequest("GET", `/pedidocompra/${pedido}/json/`, {
+      params: {
+        apikey: process.env.BLING_API_KEY,
+      },
+    })
+      .then((res) => {
+        if (res.data.retorno.pedidoscompra) {
+          return this.desestruturaPedidoCompra(res.data.retorno.pedidoscompra[0].pedidocompra);
+        } else {
+          throw Error("O pedido de compra informado não foi encontrado.");
+        }
       })
-        .then(async (res) => {
-          if (res.data.retorno.pedidoscompra) {
-            const compra = this.desestruturaPedidoCompra(
-              res.data.retorno.pedidoscompra[0].pedidocompra
-            );
-            resolve(compra);
-          } else {
-            reject({
-              message: "O pedido de compra informado não foi encontrado.",
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject();
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   // Busca uma única página de pedidos de venda
   async listaPaginaVendas(pagina, filtros) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/pedidos/page=${pagina}/json/`, {
-        params: {
-          filters: filtros,
-          apikey: process.env.BLING_API_KEY,
-          historico: "true",
-        },
+    return this.blingRequest("GET", `/pedidos/page=${pagina}/json/`, {
+      params: {
+        filters: filtros,
+        apikey: process.env.BLING_API_KEY,
+        historico: "true",
+      },
+    })
+      .then((res) => {
+        if (res.data.retorno.pedidos) {
+          console.log(filename, "Página de pedidos de venda encontrada:", pagina);
+
+          return res.data.retorno.pedidos.map((pedido) =>
+            this.desestruturaPedidoVenda(pedido["pedido"])
+          );
+        } else {
+          return [];
+        }
       })
-        .then((res) => {
-          if (res.data.retorno.pedidos) {
-            console.log(filename, "Página de pedidos de venda encontrada:", pagina);
-
-            const vendas = res.data.retorno.pedidos.map((pedido) =>
-              this.desestruturaPedidoVenda(pedido["pedido"])
-            );
-
-            resolve(vendas);
-          } else {
-            resolve([]);
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   // Busca uma única página de pedidos de compra
   async listaPaginaCompras(pagina, filtros) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/pedidoscompra/page=${pagina}/json/`, {
-        params: {
-          filters: filtros,
-          apikey: process.env.BLING_API_KEY,
-        },
+    return this.blingRequest("GET", `/pedidoscompra/page=${pagina}/json/`, {
+      params: {
+        filters: filtros,
+        apikey: process.env.BLING_API_KEY,
+      },
+    })
+      .then((res) => {
+        if (res.data.retorno.pedidoscompra) {
+          console.log(filename, "Página de pedidos de compra encontrada:", pagina);
+
+          // O retorno dos pedidos de compra é diferente da rotina para outras chamadas
+          // Na rota de pedidos de compra, é retornada uma Array a mais, por isso o "[0]"
+          return res.data.retorno.pedidoscompra[0].map((pedido) =>
+            this.desestruturaPedidoCompra(pedido["pedidocompra"])
+          );
+        } else {
+          return [];
+        }
       })
-        .then((res) => {
-          if (res.data.retorno.pedidoscompra) {
-            console.log(filename, "Página de pedidos de compra encontrada:", pagina);
-
-            // O retorno dos pedidos de compra é diferente da rotina para outras chamadas
-            // Na rota de pedidos de compra, é retornada uma Array a mais, por isso o "[0]"
-            const compras = res.data.retorno.pedidoscompra[0].map((pedido) =>
-              this.desestruturaPedidoCompra(pedido["pedidocompra"])
-            );
-
-            resolve(compras);
-          } else {
-            resolve([]);
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   // Lista uma única página de produtos do Bling
   async listaPaginaProdutos(pagina, filtros) {
-    return new Promise((resolve, reject) => {
-      let params = {
+    return this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
+      params: {
         apikey: process.env.BLING_API_KEY,
         estoque: "S",
         filters: filtros,
-      };
+      },
+    })
+      .then((res) => {
+        if (res.data.retorno.produtos) {
+          console.log(filename, `Página de produtos encontrada:`, pagina);
 
-      this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
-        params: params,
+          return res.data.retorno.produtos.map((produto) =>
+            this.desestruturaProduto(produto["produto"])
+          );
+        } else {
+          return [];
+        }
       })
-        .then((res) => {
-          if (res.data.retorno.produtos) {
-            const produtos = res.data.retorno.produtos.map((produto) =>
-              this.desestruturaProduto(produto["produto"])
-            );
-
-            console.log(filename, `Página de produtos encontrada:`, pagina);
-
-            console.log(filename, "Total de produtos encontrados:", produtos.length);
-
-            resolve(produtos);
-          } else {
-            resolve([]);
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   async listaPaginaContatos(filtros, pagina = 1) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/contatos/page=${pagina}/json/`, {
-        params: {
-          apikey: process.env.BLING_API_KEY,
-        },
-        filters: filtros,
+    return this.blingRequest("GET", `/contatos/page=${pagina}/json/`, {
+      params: {
+        apikey: process.env.BLING_API_KEY,
+      },
+      filters: filtros,
+    })
+      .then((res) => {
+        if (res.data.retorno.contatos) {
+          return res.data.retorno.contatos.map((contato) =>
+            this.desestruturaContato(contato.contato)
+          );
+        } else {
+          return [];
+        }
       })
-        .then((res) => {
-          if (res.data.retorno.contatos) {
-            const contatos = res.data.retorno.contatos.map((contato) =>
-              this.desestruturaContato(contato.contato)
-            );
-
-            console.log(filename, "Total de contatos encontrados:", contatos.length);
-
-            resolve(contatos);
-          } else {
-            resolve([]);
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error.message);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 
   // Atualiza o status (situação) de um pedido
@@ -797,27 +758,22 @@ module.exports = {
 
   // Adquire dados de uma proposta comercial
   async propostaComercial(proposta) {
-    return new Promise((resolve, reject) => {
-      this.blingRequest("GET", `/propostacomercial/${proposta}/json/`, {
-        params: {
-          apikey: process.env.BLING_API_KEY,
-        },
+    return this.blingRequest("GET", `/propostacomercial/${proposta}/json/`, {
+      params: {
+        apikey: process.env.BLING_API_KEY,
+      },
+    })
+      .then((res) => {
+        if (res.data.retorno.propostascomerciais) {
+          const propostaAtual = res.data.retorno.propostascomerciais[0].propostacomercial;
+          return this.desestruturaProposta(propostaAtual);
+        } else {
+          return [];
+        }
       })
-        .then((res) => {
-          if (res.data.retorno.propostascomerciais) {
-            const propostaAtual = res.data.retorno.propostascomerciais[0].propostacomercial;
-            const propostaDesestruturada = this.desestruturaProposta(propostaAtual);
-            resolve(propostaDesestruturada);
-          } else {
-            reject({
-              message: "A proposta comercial informada não foi encontrada.",
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(filename, "Erro durante requisição na API do Bling:", error.message);
-          reject(error.message);
-        });
-    });
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
   },
 };
