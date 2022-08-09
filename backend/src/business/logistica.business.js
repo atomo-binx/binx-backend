@@ -1,11 +1,12 @@
 const Bling = require("../bling/bling");
-const { IncorrectParameter, NotFound } = require("../modules/codes");
-const { ok, badRequest, notFound, failure } = require("../modules/http");
+const { NotFound } = require("../modules/codes");
+const { ok, notFound } = require("../modules/http");
 const { models } = require("../modules/sequelize");
 const { Op } = require("sequelize");
-const filename = __filename.slice(__dirname.length + 1) + " -";
 const { dictionary } = require("../utils/dict");
+const Decimal = require("decimal.js");
 const axios = require("axios");
+// const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
   async calcularFrete(numero, tipo, venda) {
@@ -21,6 +22,34 @@ module.exports = {
       });
     }
 
+    // Adquirir os métodos de frete e relação de itens e pesos
+    const { metodosFrete, itens } = await this.adquirirMetodosFrete(venda);
+
+    // Calcular peso total
+    const pesoTotal = itens.reduce((acc, item) => new Decimal(acc).plus(item.pesoTotal), 0);
+
+    // Flag de produto com peso zerado
+    const possuiPesoZero = itens.map((item) => parseFloat(item.peso)).includes(0);
+
+    // Montar resposta final para o retorno da API
+    delete venda.itens;
+
+    const resposta = {
+      venda,
+      itens,
+      pesoTotal,
+      possuiPesoZero,
+      metodosFrete,
+    };
+
+    return ok({
+      response: {
+        logistica: resposta,
+      },
+    });
+  },
+
+  async adquirirMetodosFrete(venda) {
     // Adquirir os produtos no Binx
     let itens = await models.tbproduto.findAll({
       attributes: ["idsku", "peso"],
@@ -42,33 +71,22 @@ module.exports = {
       return {
         idsku: item.idsku,
         nome: item.nome,
-        quantidade: item.quantidade,
-        peso: parseFloat(peso),
-        pesoTotal: parseInt(item.quantidade) * peso || 0,
+        quantidade: new Decimal(item.quantidade),
+        peso: new Decimal(peso),
+        pesoTotal: new Decimal(item.quantidade).times(peso) || 0,
       };
     });
 
-    // Flag de produto com peso zerado
-    const possuiPesoZero = itens.map((item) => parseFloat(item.peso)).includes(0);
-
     // Adquire métodos disponíveis de entrega para essa venda/proposta
-    const metodosFrete = await this.calcularFreteFrenet(itens, venda.cep, venda.totalprodutos);
+    let metodosFrete = await this.calcularFreteFrenet(itens, venda.cep, venda.totalprodutos);
 
-    // Montar resposta final para o retorno da API
-    delete venda.itens;
+    // Realizar tradução dos métodos de ferete
+    metodosFrete = await this.traduzirMetodosFrete(metodosFrete);
 
-    const resposta = {
-      dados: venda,
+    return {
       itens,
-      possuiPesoZero,
       metodosFrete,
     };
-
-    return ok({
-      response: {
-        logistica: resposta,
-      },
-    });
   },
 
   async calcularFreteFrenet(itens, cep, valor) {
@@ -136,5 +154,43 @@ module.exports = {
     } else {
       return [];
     }
+  },
+
+  async traduzirMetodosFrete(metodos) {
+    let correios = [];
+    let metodosFrete = [...metodos];
+
+    for (const metodo of metodosFrete) {
+      if (!metodo.erro) {
+        switch (metodo.transportadora) {
+          // Para Dlog, traduzir e inserir na lista de métodos traduzidos
+          case "DLog":
+            metodo.servicoTraduzido = "DLog";
+            break;
+
+          // Para Correios, inserir na lista de ocorrências de correios
+          case "Correios":
+            correios.push(metodo);
+            break;
+        }
+      }
+    }
+
+    // Verifica quantidade de ocorrências para transportadora Correios
+    if (correios.length == 2) {
+      // A ocorrência com menor prazo vira sedex
+      if (correios[0].prazo < correios[1].prazo) {
+        correios[0].servicoTraduzido = "SEDEX";
+        correios[1].servicoTraduzido = "PAC";
+      } else {
+        correios[0].servicoTraduzido = "PAC";
+        correios[1].servicoTraduzido = "SEDEX";
+      }
+    } else if (correios.length == 1) {
+      // Apenas uma ocorrência de correios é identificada como sedex
+      correios[0].servicoTraduzido = "SEDEX";
+    }
+
+    return metodosFrete;
   },
 };

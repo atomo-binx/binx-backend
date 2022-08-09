@@ -10,8 +10,6 @@ const frenetApi = axios.create({
   headers: { token: process.env.FRENET_TOKEN },
 });
 
-const { models } = require("../modules/sequelize");
-
 module.exports = {
   // Rotina de emergência, atualizar com cuidado
   // Foi criada para unificar o cálculo de frete para os metodos do FreteBot e do cálculo corporativo
@@ -278,40 +276,5 @@ module.exports = {
     } catch (error) {
       console.log(filename, "Erro ao processar pedido de cálculo de frete:", error.message);
     }
-  },
-
-  // Funções Novas
-  async novaCalcularFrete(itens, cep) {
-    return new Promise((resolve, reject) => {
-      const listaSkus = itens.map((item) => item.idsku);
-
-      let pesos = models.tbproduto.findAll({
-        attributes: ["idsku", "peso"],
-        where: {
-          idsku: {
-            [Op.in]: listaSkus,
-          },
-        },
-        raw: true,
-      });
-
-      // Verifica se algum peso foi retornado, não podemos prosseguir sem nenhum peso
-      if (pesos.length === 0) {
-        console.log(filename, "Nenhum peso encontrado no banco de dados.");
-      }
-
-      // A somatória dos pesos retornados não podem ser 0.0000 ou nulos
-      let somatoriaPesos = 0;
-
-      for (const item of pesos) {
-        if (item.peso) {
-          somatoriaPesos += parseFloat(item.peso);
-        }
-      }
-
-      if (somatoriaPesos == 0) {
-        console.log(filename, "A soma total dos pesos obtidos é igual a zero.");
-      }
-    });
   },
 };

@@ -1,4 +1,3 @@
-// Modelos
 const FreteForcado = require("../models/freteForcado.model");
 
 const { models } = require("../modules/sequelize");
@@ -15,6 +14,10 @@ const puppetter = require("../puppeteer/puppeteer");
 const http = require("../utils/http");
 
 const { ok, failure } = require("../modules/http");
+
+const axios = require("axios");
+const url = "https://bling.com.br/Api/v2";
+const blingApi = axios.create({ baseURL: url });
 
 module.exports = {
   // ==================================================================================================
