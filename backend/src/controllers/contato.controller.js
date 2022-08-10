@@ -1,11 +1,15 @@
 const ContatoBusiness = require("../business/contato.business.js");
 
 module.exports = {
-  async sincronizaContatos(req, res, next) {
+  async sincronizarContatos(req, res, next) {
     try {
-      const response = await ContatoBusiness.sincronizaContatos();
+      const { dataAlteracao, dataInclusao, tipoPessoa } = req.query;
 
-      return res.status(response.statusCode).json(response.body);
+      ContatoBusiness.sincronizarContatos(dataAlteracao, dataInclusao, tipoPessoa);
+
+      return res.status(200).json({
+        message: "A sincronização de contatos foi iniciada em segundo plano.",
+      });
     } catch (error) {
       next(error);
     }

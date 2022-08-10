@@ -1,10 +1,7 @@
 const ProdutoBusiness = require("../business/produto.business");
-const DataFilterValidator = require("../validators/bling/dataFilter.rules");
-const validation = require("../modules/validation");
 
 module.exports = {
-  // Inicia a sincronização de produtos, pelo frontend ou por chamada lambda
-  async iniciaSincronizacao(req, res, next) {
+  async sincronizaProdutos(req, res, next) {
     try {
       const { dataAlteracao, dataInclusao, situacao } = req.query;
 
@@ -19,19 +16,16 @@ module.exports = {
       //   return res.status(400).json(validationResult);
       // }
 
-      const resposta = await ProdutoBusiness.iniciaSincronizacao(
-        dataAlteracao,
-        dataInclusao,
-        situacao
-      );
+      ProdutoBusiness.sincronizaProdutos(dataAlteracao, dataInclusao, situacao);
 
-      return res.status(resposta.statusCode).json(resposta.body);
+      return res.status(200).json({
+        message: "A sincronização de produtos foi iniciada em segundo plano.",
+      });
     } catch (error) {
       next(error);
     }
   },
 
-  // Rota para recebe ro Callback de alteração de estoque de produtos
   async callbackProdutos(req, res) {
     const resposta = await ProdutoBusiness.callbackProdutos(req);
 

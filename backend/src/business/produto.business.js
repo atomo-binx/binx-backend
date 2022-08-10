@@ -10,22 +10,11 @@ const sequelize = require("../services/sequelize");
 const { Op } = require("sequelize");
 
 const http = require("../utils/http");
-const { ok } = require("../modules/http");
 
 const { models } = require("../modules/sequelize");
 
 module.exports = {
-  async iniciaSincronizacao(dataAlteracao, dataInclusao, situacao) {
-    console.log(filename, "Iniciando sincronização de produtos.");
-
-    this.rotinaSincronizacao(dataAlteracao, dataInclusao, situacao);
-
-    return ok({
-      message: "Rotina de sincronização de produtos iniciada.",
-    });
-  },
-
-  async rotinaSincronizacao(dataAlteracao, dataInclusao, situacao) {
+  async sincronizaProdutos(dataAlteracao, dataInclusao, situacao) {
     // Definição do filtro do Bling com base nos parâmetros passados
     let filtros = [];
 
