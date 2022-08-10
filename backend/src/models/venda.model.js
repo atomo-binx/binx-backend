@@ -111,6 +111,10 @@ const Venda = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
+    idcontato: {
+      type: DataTypes.STRING(16),
+      allowNull: true,
+    },
   },
   {
     tableName: "tbpedidovenda",

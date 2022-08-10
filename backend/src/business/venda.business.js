@@ -453,7 +453,7 @@ module.exports = {
   // Realiza a transção de pedido de venda e de venda-produto, com os itens
   async vendaTransaction(venda) {
     // Realiza separação de dados de venda e lista de itens
-    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = venda;
+    let { itens, ocorrencias, objFormaPagamento, objContato, ...dadosVenda } = venda;
 
     // Transação dos dados no banco de dados
     try {
@@ -461,6 +461,13 @@ module.exports = {
         // Atualiza entidade de forma de pagamento no banco de dados
         if (objFormaPagamento) {
           await models.tbformapagamento.upsert(objFormaPagamento, {
+            transaction: t,
+          });
+        }
+
+        // Atualiza entidade de contato no banco de dados
+        if (objContato) {
+          await models.tbcontato.upsert(objContato, {
             transaction: t,
           });
         }
@@ -610,7 +617,6 @@ module.exports = {
       // Contadores de total de vendas inseridas e rejeitadas
       let inseridos = 0;
       let rejeitados = 0;
-      let pedidosRejeitados = [];
 
       while (procurando) {
         console.log(filename, "Iniciando busca na página:", pagina);
@@ -624,7 +630,6 @@ module.exports = {
             .then(() => inseridos++)
             .catch(() => {
               rejeitados++;
-              pedidosRejeitados.push(venda.idpedidovenda);
             });
         }
 

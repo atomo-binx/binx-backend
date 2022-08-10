@@ -94,6 +94,8 @@ function initModels(sequelize) {
   tbcategoria.hasMany(tbconfigvalidadeprecificacao, { foreignKey: "idcategoria"});
   tbproduto.belongsTo(tbcategoria, { foreignKey: "idcategoria"});
   tbcategoria.hasMany(tbproduto, { foreignKey: "idcategoria"});
+  tbpedidovenda.belongsTo(tbcontato, { foreignKey: "idcontato"});
+  tbcontato.hasMany(tbpedidovenda, { foreignKey: "idcontato"});
   tbconfigvalidadeprecificacao.belongsTo(tbcurva, { foreignKey: "idcurva"});
   tbcurva.hasMany(tbconfigvalidadeprecificacao, { foreignKey: "idcurva"});
   tbproduto.belongsTo(tbcurva, { foreignKey: "idcurva"});

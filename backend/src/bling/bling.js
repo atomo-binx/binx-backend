@@ -10,6 +10,7 @@ const api = axios.create({ baseURL: url });
 const { manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
+const { GetIdentityMailFromDomainAttributesCommand } = require("@aws-sdk/client-ses");
 
 const situacoes = {
   "Em aberto": 6,
@@ -49,7 +50,6 @@ module.exports = {
       // Variáveis que dependem de lógica e regras para serem desestruturadas
       let idformapagamento = null;
       let formapagamento = "";
-      let objFormaPagamento = null;
       let transportadora = "";
       let rastreio = "";
       let servico = "";
@@ -68,6 +68,9 @@ module.exports = {
       let cidade = "";
       let uf = "";
       let itens = [];
+
+      let objFormaPagamento = null;
+      let objContato = null;
 
       // Verifica se o pedido possui um vendedor
       if (Object.prototype.hasOwnProperty.call(venda, "vendedor")) {
@@ -188,12 +191,30 @@ module.exports = {
         }
       }
 
+      // Monta objeto de cliente(contato)
+      objContato = {
+        idcontato: venda.cliente.id,
+        nome: venda.cliente.nome,
+        cpfcnpj: manterApenasNumeros(venda.cliente.cnpj),
+        endereco: venda.cliente.endereco,
+        numero: venda.cliente.numero,
+        bairro: venda.cliente.bairro,
+        cep: manterApenasNumeros(venda.cliente.cep),
+        cidade: venda.cliente.cidade,
+        complemento: venda.cliente.complemento,
+        uf: venda.cliente.uf,
+        telefone: manterApenasNumeros(venda.cliente.fone),
+        celular: manterApenasNumeros(venda.cliente.celular),
+        email: venda.cliente.email,
+      };
+
       // Monta um objeto que representa o pedido de venda
       const dadosVenda = {
         idpedidovenda: venda["numero"],
         datavenda: venda["data"],
         idloja: venda["loja"],
         idstatusvenda: situacoes[venda["situacao"]] || situacoes["Situação Não Encontrada"],
+        idcontato: venda["cliente"]["id"],
         cliente: venda["cliente"]["nome"],
         totalprodutos: venda["totalprodutos"],
         totalvenda: venda["totalvenda"],
@@ -221,7 +242,9 @@ module.exports = {
         uf,
         numeroproposta,
         ocorrencias,
+
         objFormaPagamento,
+        objContato,
       };
 
       // Retorna o objeto final que representa o pedido de venda
