@@ -10,20 +10,11 @@ const sequelize = require("../services/sequelize");
 const { Op } = require("sequelize");
 
 const http = require("../utils/http");
-const { ok } = require("../modules/http");
+
+const { models } = require("../modules/sequelize");
 
 module.exports = {
-  async iniciaSincronizacao(dataAlteracao, dataInclusao, situacao) {
-    console.log(filename, "Iniciando sincronização de produtos.");
-
-    this.rotinaSincronizacao(dataAlteracao, dataInclusao, situacao);
-
-    return ok({
-      message: "Rotina de sincronização de produtos iniciada.",
-    });
-  },
-
-  async rotinaSincronizacao(dataAlteracao, dataInclusao, situacao) {
+  async sincronizaProdutos(dataAlteracao, dataInclusao, situacao) {
     // Definição do filtro do Bling com base nos parâmetros passados
     let filtros = [];
 
@@ -206,41 +197,31 @@ module.exports = {
         // Gera objeto referente aos depósitos
         const depositos = Bling.desestruturaDepositos(dadosProduto);
 
-        // Analisar ocorrências de produtos que estão ficando zerados
-        // ...
-
         // Monta objeto compatível com a transação de produto existe
         produto["depositos"] = depositos;
 
-        const transaction = await this.produtoTransaction(produto);
+        // Analisar ocorrências de produtos que estão ficando zerados
+        await this.verificaProdutoZerado(produto);
 
-        if (transaction) {
-          console.log(
-            filename,
-            "Transação de callback de deposito realizada com sucesso"
-          );
-        } else {
-          console.log(
-            filename,
-            "Falha na realização de transação de callback de estoque"
-          );
+        // Executa transação de produto via callback
+        await this.produtoTransaction(produto)
+          .then(() => {
+            console.log(filename, "Transação de callback de deposito realizada com sucesso");
+          })
+          .catch(() => {
+            console.log(filename, "Falha na realização de transação de callback de estoque");
 
-          console.log(filename, "Dados do produto:");
-        }
+            console.log(filename, "Dados do produto:");
+          });
       }
       // Procedimento de callback finalizado
       return http.ok({
         message: "Callback de produto processado",
       });
     } catch (error) {
-      console.log(
-        filename,
-        "Erro durante processamento de callback de produto:",
-        error.message
-      );
+      console.log(filename, "Erro durante processamento de callback de produto:", error.message);
       return http.failure({
-        message:
-          "Erro durante processamento de callback de produto: " + error.message,
+        message: "Erro durante processamento de callback de produto: " + error.message,
       });
     }
   },
@@ -291,6 +272,56 @@ module.exports = {
       return http.failure({
         message: `Erro ao buscar produtos: ${error.message}`,
       });
+    }
+  },
+
+  async verificaProdutoZerado(callback) {
+    try {
+      // Adquirir quantidade atual do callback em estoque
+      const produtoDeposito = await models.tbprodutoestoque.findOne({
+        attributes: ["quantidade", "minimo"],
+        where: {
+          idestoque: "7141524213",
+          idsku: callback["idsku"],
+        },
+        raw: true,
+      });
+
+      const quantidadeAtual = produtoDeposito.quantidade;
+
+      const depositoGeral = callback.depositos.filter(
+        (deposito) => deposito.idestoque === "7141524213"
+      );
+
+      const novaQuantidade = depositoGeral[0].quantidade;
+
+      if (novaQuantidade <= 0 && quantidadeAtual >= 1) {
+        // Produto acabou de zerar
+        await models.tbprodutoszerados.create({
+          idsku: callback.idsku,
+          quantidadeanterior: quantidadeAtual,
+          quantidade: novaQuantidade,
+          minimo: produtoDeposito.minimo,
+        });
+      }
+
+      if (novaQuantidade !== quantidadeAtual) {
+        console.log(
+          filename,
+          "SKU:",
+          callback.idsku,
+          "Nova quantidade:",
+          novaQuantidade,
+          "Quantidade atual:",
+          quantidadeAtual
+        );
+      }
+    } catch (error) {
+      console.log(
+        filename,
+        "Falha durante procedimento de verificação de itens zerados:",
+        error.message
+      );
     }
   },
 };

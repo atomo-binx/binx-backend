@@ -6,8 +6,6 @@ const {
 } = require("@aws-sdk/client-eventbridge");
 
 const dotenv = require("dotenv");
-const fs = require("fs");
-const path = require("path");
 
 dotenv.config({ path: "../../.env" });
 

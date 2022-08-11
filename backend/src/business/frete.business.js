@@ -15,10 +15,7 @@ module.exports = {
   // Foi criada para unificar o cálculo de frete para os metodos do FreteBot e do cálculo corporativo
   async calcularFrete(req) {
     try {
-      console.log(
-        filename,
-        "Iniciando cálculo de frete para proposta comercial"
-      );
+      console.log(filename, "Iniciando cálculo de frete para proposta comercial");
 
       if (req.params.proposta) {
         const proposta = await Bling.propostaComercial(req.params.proposta);
@@ -125,10 +122,45 @@ module.exports = {
         pesoTotalProposta += item["pesoTotal"];
       }
 
-      pesoTotalProposta = pesoTotalProposta.toFixed(4);
+      pesoTotalProposta = parseFloat(pesoTotalProposta.toFixed(4));
 
       // Inserir o peso total na resposta
       venda["pesoTotalProposta"] = pesoTotalProposta;
+
+      // Define um peso mínimo por item caso o peso total da proposta seja inferior a 300g
+      if (parseFloat(pesoTotalProposta) < 0.3) {
+        let quantidadeDeItens = venda.itens.reduce(
+          (quantidadeDeItens, item) => parseInt(quantidadeDeItens) + parseInt(item.quantidade),
+          0
+        );
+
+        let pesoMinimoPorItem = 0.3 / quantidadeDeItens;
+
+        pesoMinimoPorItem = parseFloat(pesoMinimoPorItem.toFixed(4));
+
+        console.log({ quantidadeDeItens, pesoMinimoPorItem });
+
+        // Agora com o peso mínimo, vamos redistribuir o peso de 300g entre os itens
+        venda.itens.forEach((item) => {
+          let hold = item;
+          hold.peso = pesoMinimoPorItem;
+          hold.pesoTotal = parseFloat(parseFloat(item.quantidade * pesoMinimoPorItem).toFixed(4));
+          item = hold;
+        });
+
+        console.log(venda.itens);
+
+        // Recalcular também o peso total da proposta
+        pesoTotalProposta = 0;
+
+        for (const item of venda.itens) {
+          pesoTotalProposta += item["pesoTotal"];
+        }
+
+        pesoTotalProposta = parseFloat(pesoTotalProposta.toFixed(4));
+
+        venda["pesoTotalProposta"] = pesoTotalProposta;
+      }
 
       // Próxima etapa, calcular o frete na API da Frenet
 
@@ -143,6 +175,8 @@ module.exports = {
             Weight: item.peso,
           };
         });
+
+      console.log({ ShippingItemArray });
 
       // Filtrar dígitos do cep para deixar apenas números
       let cepLimpo = venda.cep.replace(/[^0-9]/g, "");
@@ -181,13 +215,9 @@ module.exports = {
           // Métodos que não retornaram erro
           if (!resultado["Error"]) {
             // Adquirir o maior valor de frete
-            const OriginalShippingPrice = parseFloat(
-              resultado["OriginalShippingPrice"]
-            ).toFixed(2);
+            const OriginalShippingPrice = parseFloat(resultado["OriginalShippingPrice"]).toFixed(2);
 
-            const ShippingPrice = parseFloat(
-              resultado["ShippingPrice"]
-            ).toFixed(2);
+            const ShippingPrice = parseFloat(resultado["ShippingPrice"]).toFixed(2);
 
             metodosFrete.push({
               transportadora: resultado["Carrier"],
@@ -206,8 +236,7 @@ module.exports = {
 
             // Verifica resposta de erro para simplificação - PAC
             if (respostaErro.includes("ERP-007")) {
-              respostaErro =
-                "CEP de origem não pode postar para o CEP de destino";
+              respostaErro = "CEP de origem não pode postar para o CEP de destino";
             }
 
             metodosFrete.push({
@@ -245,11 +274,7 @@ module.exports = {
         };
       }
     } catch (error) {
-      console.log(
-        filename,
-        "Erro ao processar pedido de cálculo de frete:",
-        error.message
-      );
+      console.log(filename, "Erro ao processar pedido de cálculo de frete:", error.message);
     }
   },
 };

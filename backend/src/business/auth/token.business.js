@@ -4,7 +4,6 @@ const {
   ErrorStatus,
   IncorrectParameter,
   JWTFailure,
-  JWTExpired,
 } = require("../../modules/codes");
 
 const verifier = CognitoJwtVerifier.create({

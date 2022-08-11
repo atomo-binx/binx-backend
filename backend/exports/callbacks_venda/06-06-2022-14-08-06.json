@@ -1,1 +1,95 @@
-{"retorno":{"pedidos":[{"pedido":{"desconto":"0,00","observacoes":"","observacaointerna":"","data":"2022-06-06","numero":"132254","numeroOrdemCompra":"","vendedor":"","valorfrete":"7.60","outrasdespesas":"0.00","totalprodutos":"49.90","totalvenda":"57.50","situacao":"Atendido","dataSaida":"2022-06-06","loja":"203588067","numeroPedidoLoja":"2000003674617126","tipoIntegracao":"MercadoLivre","cliente":{"id":"15738382973","nome":"Felipe Rodrigues (rofe5116221)","cnpj":"47224244899","ie":"","rg":"","endereco":"Rua Treze De Maio","numero":"520","complemento":"","cidade":"S\u00e3o Vicente","bairro":"Centro","cep":"11310330","uf":"SP","email":"frodrig.7hhhg5+2-ogiydambqgaztmnzugyytomjwhe======@mail.mercadolivre.com","celular":"","fone":""},"transporte":{"enderecoEntrega":{"nome":"Felipe Rodrigues Santos Oliveira","endereco":"Rua Treze De Maio","numero":"520","complemento":"","cidade":"S\u00e3o Vicente","bairro":"Centro","cep":"11.310-330","uf":"SP"}},"intermediador":{"cnpj":"03.007.331\/0001-41","nomeUsuario":"COMPONEX BR"},"itens":[{"item":{"codigo":"VIR-1173-ML","descricao":"Kit c\/ 10 Unidades Circuito Integrado CD4040 - Controlador Bin\u00e1rio","quantidade":"1.0000","valorunidade":"49.9000000000","precocusto":"0.8740000000","descontoItem":"0.00","un":"UN","pesoBruto":"0.00010","largura":"0","altura":"0","profundidade":"0","descricaoDetalhada":"","unidadeMedida":"cm","gtin":""}}],"parcelas":[{"parcela":{"idLancamento":"0","valor":"57.50","dataVencimento":"2022-07-06 00:00:00","obs":"M\u00e9todo de pagamento: visa","destino":"3","forma_pagamento":{"id":"871396","descricao":"Dinheiro","codigoFiscal":"1"}}}]}}]}}
+{
+  "retorno": {
+    "pedidos": [
+      {
+        "pedido": {
+          "desconto": "0,00",
+          "observacoes": "",
+          "observacaointerna": "",
+          "data": "2022-06-06",
+          "numero": "132254",
+          "numeroOrdemCompra": "",
+          "vendedor": "",
+          "valorfrete": "7.60",
+          "outrasdespesas": "0.00",
+          "totalprodutos": "49.90",
+          "totalvenda": "57.50",
+          "situacao": "Atendido",
+          "dataSaida": "2022-06-06",
+          "loja": "203588067",
+          "numeroPedidoLoja": "2000003674617126",
+          "tipoIntegracao": "MercadoLivre",
+          "cliente": {
+            "id": "15738382973",
+            "nome": "Felipe Rodrigues (rofe5116221)",
+            "cnpj": "47224244899",
+            "ie": "",
+            "rg": "",
+            "endereco": "Rua Treze De Maio",
+            "numero": "520",
+            "complemento": "",
+            "cidade": "S\u00e3o Vicente",
+            "bairro": "Centro",
+            "cep": "11310330",
+            "uf": "SP",
+            "email": "frodrig.7hhhg5+2-ogiydambqgaztmnzugyytomjwhe======@mail.mercadolivre.com",
+            "celular": "",
+            "fone": ""
+          },
+          "transporte": {
+            "enderecoEntrega": {
+              "nome": "Felipe Rodrigues Santos Oliveira",
+              "endereco": "Rua Treze De Maio",
+              "numero": "520",
+              "complemento": "",
+              "cidade": "S\u00e3o Vicente",
+              "bairro": "Centro",
+              "cep": "11.310-330",
+              "uf": "SP"
+            }
+          },
+          "intermediador": {
+            "cnpj": "03.007.331/0001-41",
+            "nomeUsuario": "COMPONEX BR"
+          },
+          "itens": [
+            {
+              "item": {
+                "codigo": "VIR-1173-ML",
+                "descricao": "Kit c/ 10 Unidades Circuito Integrado CD4040 - Controlador Bin\u00e1rio",
+                "quantidade": "1.0000",
+                "valorunidade": "49.9000000000",
+                "precocusto": "0.8740000000",
+                "descontoItem": "0.00",
+                "un": "UN",
+                "pesoBruto": "0.00010",
+                "largura": "0",
+                "altura": "0",
+                "profundidade": "0",
+                "descricaoDetalhada": "",
+                "unidadeMedida": "cm",
+                "gtin": ""
+              }
+            }
+          ],
+          "parcelas": [
+            {
+              "parcela": {
+                "idLancamento": "0",
+                "valor": "57.50",
+                "dataVencimento": "2022-07-06 00:00:00",
+                "obs": "M\u00e9todo de pagamento: visa",
+                "destino": "3",
+                "forma_pagamento": {
+                  "id": "871396",
+                  "descricao": "Dinheiro",
+                  "codigoFiscal": "1"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

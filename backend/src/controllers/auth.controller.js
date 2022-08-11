@@ -8,7 +8,6 @@ const PasswordValidator = require("../validators/usuario/password.rules");
 module.exports = {
   async login(req, res, next) {
     try {
-      // Aquisição e validação dos parâmetros
       const { email, password } = req.body;
 
       const rules = [

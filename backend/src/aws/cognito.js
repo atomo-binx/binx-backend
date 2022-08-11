@@ -5,7 +5,6 @@ const {
   ListUsersCommand,
   InitiateAuthCommand,
 } = require("@aws-sdk/client-cognito-identity-provider");
-const { ErrorStatus, OkStatus, UserNotFound } = require("../modules/codes");
 
 const client = new CognitoIdentityProviderClient({
   credentials: {
@@ -80,7 +79,7 @@ module.exports = {
   },
 
   async lerUsuario(sub) {
-    params = {
+    const params = {
       UserPoolId: process.env.COGNITO_USER_POOL_ID,
       Username: sub,
     };
@@ -112,10 +111,7 @@ module.exports = {
         await client
           .send(command)
           .then((result) => {
-            const usuariosRetornados = this.desestruturaUsuarios(
-              result["Users"],
-              "Attributes"
-            );
+            const usuariosRetornados = this.desestruturaUsuarios(result["Users"], "Attributes");
 
             usuarios.push(...usuariosRetornados);
 
@@ -133,7 +129,7 @@ module.exports = {
       }
 
       if (error) {
-        reject(err);
+        reject(error);
       } else {
         resolve(usuarios);
       }
@@ -168,10 +164,7 @@ module.exports = {
       client
         .send(command)
         .then((result) => {
-          const usuario = this.desestruturaUsuario(
-            result["User"],
-            "Attributes"
-          );
+          const usuario = this.desestruturaUsuario(result["User"], "Attributes");
           resolve(usuario);
         })
         .catch((error) => {

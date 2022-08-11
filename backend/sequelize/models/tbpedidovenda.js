@@ -125,6 +125,14 @@ module.exports = function(sequelize, DataTypes) {
     numeroproposta: {
       type: DataTypes.STRING(20),
       allowNull: true
+    },
+    idcontato: {
+      type: DataTypes.STRING(16),
+      allowNull: true,
+      references: {
+        model: 'tbcontato',
+        key: 'idcontato'
+      }
     }
   }, {
     sequelize,
@@ -158,6 +166,13 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "idformapagamento" },
+        ]
+      },
+      {
+        name: "idcontato_idx",
+        using: "BTREE",
+        fields: [
+          { name: "idcontato" },
         ]
       },
     ]

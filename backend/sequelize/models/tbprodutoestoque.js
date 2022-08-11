@@ -23,6 +23,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    mediames: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     maximo: {
       type: DataTypes.INTEGER,
       allowNull: true
