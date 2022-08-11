@@ -510,78 +510,88 @@ module.exports = {
 
   // Rotina para política de tentativa e erro durante chamada ao Bling
   async blingRequest(metodo, caminho, params) {
-    try {
-      // Parâmetros para a política de try/catch
-      let tentativa = 1;
-      let maxTentativas = 10;
-      let rodando = true;
-      let tempo = 1000;
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Parâmetros para a política de try/catch
+        let tentativa = 1;
+        let maxTentativas = 10;
+        let rodando = true;
+        let tempo = 1000;
 
-      // Gerar um hash aleatório para facilitar a identificação da rotina em debug
-      let hash = crypto.randomBytes(3).toString("hex");
-      console.log(filename, `Hash: ${hash} - ${metodo} - Caminho: ${caminho}`);
+        // Gerar um hash aleatório para facilitar a identificação da rotina em debug
+        let hash = crypto.randomBytes(3).toString("hex");
+        console.log(filename, `Hash: ${hash} - ${metodo} - Caminho: ${caminho}`);
 
-      // Função para a tratativa dos códigos de erro
-      const statusCodeError = (codigo, hash, tentativa) => {
-        // Too Many Requests
-        if (codigo === 429) {
-          console.log(filename, `Hash: ${hash} - Too Many Requests - Tentativa ${tentativa}`);
-        }
-      };
-
-      do {
-        // Número de tentativas dentro do permitido
-        if (tentativa < maxTentativas && rodando) {
-          switch (metodo) {
-            case "GET":
-              return api
-                .get(caminho, params)
-                .then((result) => {
-                  return result;
-                })
-                .catch((error) => {
-                  statusCodeError(error.response.status, hash, tentativa);
-                });
-            case "POST":
-              return api
-                .post(caminho, params)
-                .then((result) => {
-                  return result;
-                })
-                .catch((error) => {
-                  statusCodeError(error.response.status, hash, tentativa);
-                });
-            case "PUT":
-              return api
-                .put(caminho, params)
-                .then((result) => {
-                  return result;
-                })
-                .catch((error) => {
-                  statusCodeError(error.response.status, hash, tentativa);
-                });
-            default:
-              console.log(filename, "O método HTTP informado é inválido.");
-              throw Error(`O método HTTP informado é inválido.`);
+        // Função para a tratativa dos códigos de erro
+        const statusCodeError = (codigo, hash, tentativa) => {
+          // Too Many Requests
+          if (codigo === 429) {
+            console.log(filename, `Hash: ${hash} - Too Many Requests - Tentativa ${tentativa}`);
           }
-        }
+        };
 
-        // Iniciar uma nova tentativa
-        if (tentativa++ < maxTentativas) {
-          await delay(tempo);
-        }
+        do {
+          // Número de tentativas dentro do permitido
+          if (tentativa < maxTentativas && rodando) {
+            switch (metodo) {
+              case "GET":
+                await api
+                  .get(caminho, params)
+                  .then((result) => {
+                    resolve(result);
+                    rodando = false;
+                  })
+                  .catch((error) => {
+                    statusCodeError(error.response.status, hash, tentativa);
+                  });
+                break;
+              case "POST":
+                await api
+                  .post(caminho, params)
+                  .then((result) => {
+                    resolve(result);
+                    rodando = false;
+                  })
+                  .catch((error) => {
+                    statusCodeError(error.response.status, hash, tentativa);
+                  });
+                break;
+              case "PUT":
+                await api
+                  .put(caminho, params)
+                  .then((result) => {
+                    resolve(result);
+                    rodando = false;
+                  })
+                  .catch((error) => {
+                    statusCodeError(error.response.status, hash, tentativa);
+                  });
+                break;
+              default:
+                console.log(filename, "O método HTTP informado é inválido");
+                rodando = false;
+                reject();
+                break;
+            }
+          }
 
-        // Verificação por tentativas excedidas
-        if (tentativa >= maxTentativas) {
-          console.log(filename, `Panic - Hash: ${hash} - Número máximo de tentativas excedido`);
-          rodando = false;
-        }
-        // Tentativas excedidas ou obteve sucesso na execução
-      } while (rodando);
-    } catch (error) {
-      console.log(filename, `Erro durante rotina de tentativas: ${error.message}`);
-      throw Error(`Erro durante rotina de tentativas: ${error.message}`);
-    }
+          // Iniciar uma nova tentativa
+          if (tentativa++ < maxTentativas) {
+            await delay(tempo);
+          }
+
+          // Verificação por tentativas excedidas
+          if (tentativa >= maxTentativas) {
+            console.log(filename, `Panic - Hash: ${hash} - Número máximo de tentativas excedido`);
+            rodando = false;
+          }
+          // Tentativas excedidas ou obteve sucesso na execução
+        } while (rodando);
+      } catch (error) {
+        console.log(error.message);
+        reject(error);
+      }
+    });
   },
 
   // Adquire dados de um produto
