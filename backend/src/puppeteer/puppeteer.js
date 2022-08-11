@@ -47,7 +47,6 @@ module.exports = {
       timeout: 15000,
     });
 
-    console.log("clicando");
     await page.waitForTimeout(1000);
     const popUpButton = await page.$x(`//span[text()='Em aberto']/following-sibling::span`);
     await popUpButton[0].click();
@@ -186,7 +185,6 @@ module.exports = {
         await page.waitForSelector("#integracaoLogistica", { visible: true });
         await page.waitForXPath("//select[@id='integracaoLogistica']//option[@value='-1']");
         await page.mainFrame().hover("#integracaoLogistica");
-        // await this.delay(500);
 
         switch (metodo) {
           case "dlog":
@@ -194,7 +192,7 @@ module.exports = {
             // Caso 1 - DLOG
             console.log(filename, `Pedido de Venda: ${pedido} -`, "Alterando para: DLOG");
             await page.select("select#integracaoLogistica", options.dlog);
-            await this.delay(500);
+            await page.waitForTimeout(500);
             break;
           }
 
@@ -203,7 +201,7 @@ module.exports = {
             // Caso 2 - Correios PAC
             console.log(filename, `Pedido de Venda: ${pedido} -`, "Alterando para: Correios PAC");
             await page.select("select#integracaoLogistica", options.correios);
-            await this.delay(500);
+            await page.waitForTimeout(500);
 
             // Aguarda e posiciona no novo select que será renderizado
             await page.waitForXPath("//select[@name='servicosLogistica[]']//option[@value='-1']");
@@ -212,7 +210,8 @@ module.exports = {
 
             // Seleciona o serviço
             await page.select("select[name='servicosLogistica[]']", options.pac);
-            await this.delay(500);
+            await page.waitForTimeout(500);
+
             break;
           }
           case "sedex":
@@ -220,7 +219,7 @@ module.exports = {
             // Caso 2 - Correios sedex
             console.log(filename, `Pedido de Venda: ${pedido} -`, "Alterando para: Correios sedex");
             await page.select("select#integracaoLogistica", options.correios);
-            await this.delay(500);
+            await page.waitForTimeout(500);
 
             // Aguarda e posiciona no novo select que será renderizado
             await page.waitForXPath("//select[@name='servicosLogistica[]']//option[@value='-1']");
@@ -231,7 +230,7 @@ module.exports = {
 
             // Seleciona o serviço
             await page.select("select[name='servicosLogistica[]']", options.sedex);
-            await this.delay(500);
+            await page.waitForTimeout(500);
 
             break;
           }
@@ -298,11 +297,5 @@ module.exports = {
       );
       return false;
     }
-  },
-
-  async delay(tempo) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, tempo);
-    });
   },
 };
