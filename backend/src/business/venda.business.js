@@ -803,13 +803,20 @@ module.exports = {
 
   async novaVendaTransaction(pedido) {
     // Realiza separação de dados de venda e lista de itens
-    let { itens, ocorrencias, objFormaPagamento, ...dadosVenda } = pedido;
+    let { itens, ocorrencias, objFormaPagamento, objContato, ...dadosVenda } = pedido;
 
     // Transação dos dados no banco de dados
     return sequelize.transaction(async (t) => {
       // Atualiza entidade de forma de pagamento no banco de dados
       if (objFormaPagamento) {
         await models.tbformapagamento.upsert(objFormaPagamento, {
+          transaction: t,
+        });
+      }
+
+      // Atualiza entidade de contato no banco de dados
+      if (objContato) {
+        await models.tbcontato.upsert(objContato, {
           transaction: t,
         });
       }

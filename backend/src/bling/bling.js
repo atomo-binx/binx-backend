@@ -10,7 +10,6 @@ const api = axios.create({ baseURL: url });
 const { manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
-const { GetIdentityMailFromDomainAttributesCommand } = require("@aws-sdk/client-ses");
 
 const situacoes = {
   "Em aberto": 6,
