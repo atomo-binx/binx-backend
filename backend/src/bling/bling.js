@@ -627,7 +627,7 @@ module.exports = {
         if (res.data.retorno.pedidos) {
           return this.desestruturaPedidoVenda(res.data.retorno.pedidos[0].pedido);
         } else {
-          return [];
+          throw Error(`O pedido ${pedido} não foi encontrado.`);
         }
       })
       .catch((error) => {
