@@ -62,7 +62,7 @@ module.exports = {
   async alterarTransportadora(pedido, metodo) {
     try {
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
         defaultViewport: {
           width: 1024 + Math.floor(Math.random() * 100),
@@ -113,7 +113,7 @@ module.exports = {
 
         // No dia 28/06/2022 o Bling alterou a tela de pedidos e passou a exibir um popup
         // É necessário clicar no botão de "Não mostrar novamente" para não exibi-lo definitivamente
-        await this.removePopUp(page);
+        // await this.removePopUp(page);
 
         // Aguarda pela barra de pesquisa
         await page.waitForSelector("#pesquisa-mini", { visible: true });

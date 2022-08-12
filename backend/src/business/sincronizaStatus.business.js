@@ -44,12 +44,7 @@ module.exports = {
 
     // Realiza leitura dos pedidos do banco de dados do Binx
     const pedidosBancoBruto = await Vendas.findAll({
-      attributes: [
-        "idpedidovenda",
-        "idstatusvenda",
-        "idpedidoloja",
-        "formapagamento",
-      ],
+      attributes: ["idpedidovenda", "idstatusvenda", "idpedidoloja", "formapagamento"],
       where: {
         datavenda: {
           [Op.gt]: moment().subtract(15, "days"),
@@ -90,10 +85,7 @@ module.exports = {
         let idPedidoBling = pedidosBling[idPedidoLoja]["idpedidovenda"];
         let formaPagamento = pedidosBling[idPedidoLoja]["formapagamento"];
 
-        let dataPedido = moment(
-          pedidosMagento[idPedidoLoja]["data"],
-          "DD/MM/YYYY"
-        ).startOf("day");
+        let dataPedido = moment(pedidosMagento[idPedidoLoja]["data"], "DD/MM/YYYY").startOf("day");
         let dataHoje = moment().startOf("day");
         let diasCorridos = moment(dataHoje).diff(dataPedido, "days");
 
@@ -260,10 +252,7 @@ module.exports = {
       fs.unlinkSync(caminho);
       console.log(filename, "Arquivo final de pedidos de venda removido");
     } catch (error) {
-      console.log(
-        filename,
-        "Não foi encontrado nenhum arquivo de pedido de venda para remoção"
-      );
+      console.log(filename, "Não foi encontrado nenhum arquivo de pedido de venda para remoção");
     }
 
     // Verifica resultado da análise e retorna a chamada original da API
@@ -284,12 +273,7 @@ module.exports = {
   async listaPedidosBinx() {
     // Realiza leitura dos pedidos do banco de dados do Binx
     const pedidos = await Vendas.findAll({
-      attributes: [
-        "idpedidovenda",
-        "idstatusvenda",
-        "idpedidoloja",
-        "formapagamento",
-      ],
+      attributes: ["idpedidovenda", "idstatusvenda", "idpedidoloja", "formapagamento"],
       where: {
         datavenda: {
           // Obs: nesta função, chamar 15 dias, um dia a mais do que o do Magento
@@ -323,11 +307,7 @@ module.exports = {
           console.log(filename, `Status do pedido ${pedido} alterado`);
         })
         .catch((error) => {
-          console.log(
-            filename,
-            `Erro ao alterar status do pedido ${pedido}:`,
-            error.message
-          );
+          console.log(filename, `Erro ao alterar status do pedido ${pedido}:`, error.message);
         });
     }
   },
@@ -363,8 +343,7 @@ module.exports = {
 
         // Pedido aprovado no Magento, aprovar no Bling
         if (
-          (statusMagento == "Pagamento Aprovado" ||
-            statusMagento == "processing") &&
+          (statusMagento == "Pagamento Aprovado" || statusMagento == "processing") &&
           statusBling == 6
         ) {
           pedidosAprovar.push({
@@ -377,8 +356,7 @@ module.exports = {
         if (
           diasCorridos >= 7 &&
           statusBling == 6 &&
-          (statusMagento == "Aguardando aprovação de pagamento" ||
-            statusMagento == "pending")
+          (statusMagento == "Aguardando aprovação de pagamento" || statusMagento == "pending")
         ) {
           pedidosCancelar.push({
             bling: idPedidoBling,
@@ -392,8 +370,7 @@ module.exports = {
         if (
           diasCorridos >= 2 &&
           formaPagamento === "Site Pix" &&
-          (statusMagento == "Aguardando aprovação de pagamento" ||
-            statusMagento == "pending") &&
+          (statusMagento == "Aguardando aprovação de pagamento" || statusMagento == "pending") &&
           statusBling == 6
         ) {
           pedidosCancelar.push({
@@ -405,10 +382,7 @@ module.exports = {
         }
 
         // Pedido foi cancelado no Magento, cancelar no Bling
-        if (
-          (statusMagento == "Cancelado" || statusMagento == "canceled") &&
-          statusBling == 6
-        ) {
+        if ((statusMagento == "Cancelado" || statusMagento == "canceled") && statusBling == 6) {
           pedidosCancelar.push({
             bling: pedidosBinx[idPedidoLoja]["idpedidovenda"],
             magento: idPedidoLoja,
@@ -441,10 +415,7 @@ module.exports = {
       const pedidosBinx = await this.listaPedidosBinx();
 
       // Monta dicionários
-      const dicionarioMagento = this.montarDicionario(
-        pedidosMagento,
-        "idpedido"
-      );
+      const dicionarioMagento = this.montarDicionario(pedidosMagento, "idpedido");
 
       const dicionarioBinx = this.montarDicionario(pedidosBinx, "idpedidoloja");
 
@@ -456,16 +427,8 @@ module.exports = {
         dicionarioBinx
       );
 
-      console.log(
-        filename,
-        "Qntd de pedidos para aprovar:",
-        pedidosAprovar.length
-      );
-      console.log(
-        filename,
-        "Qntd de pedidos para cancelar:",
-        pedidosCancelar.length
-      );
+      console.log(filename, "Qntd de pedidos para aprovar:", pedidosAprovar.length);
+      console.log(filename, "Qntd de pedidos para cancelar:", pedidosCancelar.length);
 
       // Debug
       // console.log(filename, "Pedidos para Aprovar:", pedidosAprovar);
@@ -488,16 +451,9 @@ module.exports = {
       const pedidosAtualizar = [...pedidosAprovar, ...pedidosCancelar];
 
       try {
-        await VendaBusiness.sincronizaPedidos({
-          body: {
-            pedidos: pedidosAtualizar,
-          },
-        });
+        await VendaBusiness.sincronizaListaPedidos(pedidosAtualizar);
       } catch (error) {
-        console.log(
-          filename,
-          `Erro durante sincronização de pedidos: ${error.message}`
-        );
+        console.log(filename, `Erro durante sincronização de pedidos: ${error.message}`);
       }
 
       console.log(filename, "Rotina de aprovação automática finalizada");
@@ -530,10 +486,7 @@ module.exports = {
         message: "Rotina de aprovação automática iniciada",
       });
     } catch (error) {
-      console.log(
-        filename,
-        `Erro ao iniciar rotina de aprovação automática: ${error.message}`
-      );
+      console.log(filename, `Erro ao iniciar rotina de aprovação automática: ${error.message}`);
 
       return http.failure({
         message: `Erro ao iniciar rotina de aprovação automática: ${error.message}`,

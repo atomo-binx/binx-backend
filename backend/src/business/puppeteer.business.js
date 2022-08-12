@@ -37,7 +37,7 @@ module.exports = {
           melhorMetodo.servicoTraduzido
         );
 
-        await VendaBusiness.novaSincronizaListaPedidos([pedido.idpedidovenda]);
+        await VendaBusiness.sincronizaListaPedidos([pedido.idpedidovenda]);
 
         await models.tbpedidovenda.update(
           {
