@@ -29,7 +29,7 @@ module.exports = {
     try {
       const pedido = JSON.parse(req.body.data).retorno.pedidos[0].pedido;
 
-      const resposta = await VendaBusiness.novaCallbackVendas(pedido);
+      const resposta = await VendaBusiness.callbackVendas(pedido);
 
       res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
