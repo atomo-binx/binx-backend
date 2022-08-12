@@ -4,7 +4,6 @@ const { protectedRoute }= require("../middlewares/auth");
 
 function load(routes) {
   routes.post("/sincroniza/status", upload.single("orders"), controller.sync);
-  routes.post("/sincroniza/alterarstatuspedido", controller.alterarStatusPedido);
   routes.get("/sincronizastatus/aprovacaoautomatica", protectedRoute, controller.aprovacaoAutomatica);
 }
 
