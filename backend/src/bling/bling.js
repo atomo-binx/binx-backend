@@ -10,6 +10,7 @@ const api = axios.create({ baseURL: url });
 const { manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
+const { ConfirmSignUpResponseFilterSensitiveLog } = require("@aws-sdk/client-cognito-identity-provider");
 
 const situacoes = {
   "Em aberto": 6,
@@ -500,7 +501,7 @@ module.exports = {
       email: contato.email,
       situacao: contato.situacao,
       contribuinte: contato.contribuinte,
-      vendedor: contato.nomeVendedor,
+      vendedor: contato.nomeVendedor || null,
       dataalteracao: contato.dataAlteracao,
       datainclusao: contato.dataInclusao,
       clientedesde: contato.clienteDesde,
@@ -656,6 +657,26 @@ module.exports = {
       });
   },
 
+  // Adquire dados de um contato
+  async contato(contato) {
+    return this.blingRequest("GET", `/contato/${contato}/json/`, {
+      params: {
+        apikey: process.env.BLING_API_KEY,
+      },
+    })
+      .then((result) => {
+        if (result.data.retorno.contatos) {
+          return this.desestruturaContato(result.data.retorno.contatos[0].contato);
+        } else {
+          throw Error("O contato informado não foi encontrado.");
+        }
+      })
+      .catch((error) => {
+        console.log(filename, `Erro durante requisição na API do Bling: ${error.message}`);
+        throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
+      });
+  },
+
   // Busca uma única página de pedidos de venda
   async listaPaginaVendas(pagina, filtros) {
     return this.blingRequest("GET", `/pedidos/page=${pagina}/json/`, {
@@ -669,9 +690,7 @@ module.exports = {
         if (res.data.retorno.pedidos) {
           console.log(filename, "Página de pedidos de venda encontrada:", pagina);
 
-          return res.data.retorno.pedidos.map((pedido) =>
-            this.desestruturaPedidoVenda(pedido["pedido"])
-          );
+          return res.data.retorno.pedidos.map((pedido) => this.desestruturaPedidoVenda(pedido["pedido"]));
         } else {
           return [];
         }
@@ -722,9 +741,7 @@ module.exports = {
         if (res.data.retorno.produtos) {
           console.log(filename, `Página de produtos encontrada:`, pagina);
 
-          return res.data.retorno.produtos.map((produto) =>
-            this.desestruturaProduto(produto["produto"])
-          );
+          return res.data.retorno.produtos.map((produto) => this.desestruturaProduto(produto["produto"]));
         } else {
           return [];
         }
@@ -744,9 +761,7 @@ module.exports = {
     })
       .then((res) => {
         if (res.data.retorno.contatos) {
-          return res.data.retorno.contatos.map((contato) =>
-            this.desestruturaContato(contato.contato)
-          );
+          return res.data.retorno.contatos.map((contato) => this.desestruturaContato(contato.contato));
         } else {
           return [];
         }
