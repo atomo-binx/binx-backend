@@ -2,22 +2,20 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const fs = require("fs");
 
-const Venda = require("../models/venda.model");
 const Produto = require("../models/produto.model");
-const VendaProduto = require("../models/vendaProduto.model");
-const Categoria = require("../models/categoria.model");
 const ProdutoDeposito = require("../models/produtoDeposito.model");
 
 const { Op } = require("sequelize");
 const ss = require("simple-statistics");
+
+const { models } = require("../modules/sequelize");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 module.exports = {
   // Monta dicionários que serão úteis para o decorrer da rotina
   async dicionarios() {
-    // Lista todas as categorias existentes
-    let categorias = await Categoria.findAll();
+    let categorias = await models.tbcategoria.findAll();
 
     // Cria dicionário de idcategoria - tipo de curva
     let tipoCurvaCategoria = {};
@@ -36,36 +34,24 @@ module.exports = {
 
   // Query que busca massa de dados de pedidos de vendas
   async queryVendas() {
-    // Define relacionamentos necessários para a Query de massa de dados
-    Venda.hasMany(VendaProduto, {
-      foreignKey: "idpedidovenda",
-    });
-    VendaProduto.belongsTo(Venda, {
-      foreignKey: "idpedidovenda",
-    });
-    VendaProduto.hasMany(Produto, {
-      foreignKey: "idsku",
-    });
-
-    console.log(filename, "Iniciando query ...");
+    console.log(filename, "Iniciando query de pedidos de venda");
     let queryStart = new Date();
 
-    const resposta = await Venda.findAll({
+    const resposta = await models.tbpedidovenda.findAll({
       attributes: ["idpedidovenda", "idstatusvenda", "datavenda", "idloja"],
       include: [
         {
-          model: VendaProduto,
+          model: models.tbvendaproduto,
           required: true,
           attributes: ["quantidade", "valorunidade"],
           include: [
             {
-              model: Produto,
+              model: models.tbproduto,
               attributes: ["idsku", "idcategoria", "nome"],
               required: true,
               where: {
                 situacao: 1,
                 idsku: {
-                  // [Op.regexp]: "^((?!VIR|KIT).)*$",
                   [Op.regexp]: "^[0-9]+$",
                 },
               },
@@ -74,53 +60,44 @@ module.exports = {
         },
       ],
       where: {
-        // idloja: "203398134",
         idstatusvenda: {
           [Op.not]: "12",
         },
         datavenda: {
           [Op.gt]: moment().subtract(1, "year"),
-          // [Op.gt]: moment().subtract(3, "months"),
         },
       },
       raw: true,
+      nest: true,
     });
 
-    // Debug de tempo gasto na execução da query
     let queryEnd = new Date();
-    let queryElapsed = new Date(queryEnd - queryStart)
-      .toISOString()
-      .slice(11, -1);
+    let queryElapsed = new Date(queryEnd - queryStart).toISOString().slice(11, -1);
     console.log(filename, "Tempo gasto na query: ", queryElapsed);
+
+    console.log(filename, "Quantidade de pedidos contabilizados:", resposta.length);
 
     return resposta;
   },
 
   // Recebe uma massa de dados bruta e monta linhas de venda para serem tratadas
-  async montaVendas(vendas) {
-    let itens = [];
+  async montaVendaProduto(vendas) {
+    let itens = vendas.map((venda) => {
+      return {
+        idpedidovenda: venda.idpedidovenda,
+        idstatusvenda: venda.idstatusvenda,
+        datavenda: venda.datavenda,
+        idloja: venda.idloja,
+        idsku: venda.tbvendaprodutos.tbproduto.idsku,
+        nome: venda.tbvendaprodutos.tbproduto.nome,
+        quantidade: venda.tbvendaprodutos.quantidade,
+        idcategoria: venda.tbvendaprodutos.tbproduto.idcategoria,
+        valorunidade: venda.tbvendaprodutos.valorunidade,
+      };
+    });
 
-    for (const venda of vendas) {
-      let linha = [];
+    console.log(filename, "Relacionamentos Venda-Produto processados: ", itens.length);
 
-      linha["idpedidovenda"] = venda["idpedidovenda"];
-      linha["datavenda"] = venda["datavenda"];
-      linha["idloja"] = venda["idloja"];
-
-      linha["quantidade"] = venda["VendaProdutos.quantidade"];
-      linha["valorunidade"] = venda["VendaProdutos.valorunidade"];
-      linha["idsku"] = venda["VendaProdutos.Produtos.idsku"];
-      linha["idcategoria"] = venda["VendaProdutos.Produtos.idcategoria"];
-      linha["nome"] = venda["VendaProdutos.Produtos.nome"];
-
-      itens.push(linha);
-    }
-
-    console.log(
-      filename,
-      "Relacionamentos Venda-Produto adicionados: ",
-      itens.length
-    );
     return itens;
   },
 
@@ -148,20 +125,19 @@ module.exports = {
 
       // Agora alteramos apenas o campo que vai mudar de acordo com as categorias
       switch (tipoCurvaCategoria[item.idcategoria]) {
-        // Categorias com curva por Quantidade Total Vendida
+        // Cálculo por Quantidade Total Vendida
         case "Q":
           curvas[item.idcategoria][item.idsku].contador += item.quantidade;
           break;
 
-        // Categorias com curva por Vezes que apareceu em pedidos
+        // Cálculo por Vezes que apareceu em pedidos
         case "V":
           curvas[item.idcategoria][item.idsku].contador++;
           break;
 
-        // Categorias com curva por valor de Faturamento
+        // Cálculo por valor de Faturamento
         case "F":
-          curvas[item.idcategoria][item.idsku].contador +=
-            item.quantidade * item.valorunidade;
+          curvas[item.idcategoria][item.idsku].contador += item.quantidade * item.valorunidade;
 
           break;
       }
@@ -170,26 +146,17 @@ module.exports = {
     // Realiza ajuste no valor de faturamento para 2 casas decimais
     // Percore apenas os itens da categoria de ferramentas (índice 3) e maker (índice )
     for (const sku in curvas[3]) {
-      curvas[3][sku]["contador"] = parseFloat(
-        parseFloat(curvas[3][sku]["contador"]).toFixed(2)
-      );
+      curvas[3][sku]["contador"] = parseFloat(parseFloat(curvas[3][sku]["contador"]).toFixed(2));
     }
     for (const sku in curvas[5]) {
-      curvas[5][sku]["contador"] = parseFloat(
-        parseFloat(curvas[5][sku]["contador"]).toFixed(2)
-      );
+      curvas[5][sku]["contador"] = parseFloat(parseFloat(curvas[5][sku]["contador"]).toFixed(2));
     }
 
     console.log(filename, "Filtro por categoria finalizado");
 
     console.log(filename, "Registros por Categoria:");
     for (let i = 0; i < curvas.length; i++) {
-      console.log(
-        filename,
-        nomeCategoria[i],
-        "-",
-        Object.keys(curvas[i]).length
-      );
+      console.log(filename, nomeCategoria[i], "-", Object.keys(curvas[i]).length);
     }
 
     // Desestrutura itens de dentro da array de resultados para permitir a ordenação
@@ -236,11 +203,7 @@ module.exports = {
   },
 
   monthDiff(dateFrom, dateTo) {
-    return (
-      dateTo.getMonth() -
-      dateFrom.getMonth() +
-      12 * (dateTo.getFullYear() - dateFrom.getFullYear())
-    );
+    return dateTo.getMonth() - dateFrom.getMonth() + 12 * (dateTo.getFullYear() - dateFrom.getFullYear());
   },
 
   // Cálcula valores médios de venda por mês
@@ -262,10 +225,7 @@ module.exports = {
       }
 
       // Push na lista que contém o id da loja
-      qntdItem[item.idcategoria][item.idsku].push([
-        item.quantidade,
-        item.idloja,
-      ]);
+      qntdItem[item.idcategoria][item.idsku].push([item.quantidade, item.idloja]);
 
       // Push na lista que contém apenas a quantidade vendida
       qntdItemSemLoja[item.idcategoria][item.idsku].push(item.quantidade);
@@ -295,10 +255,9 @@ module.exports = {
         let totalVendido = ss.sum(dadosSemLoja);
         let moda = ss.mode(dadosSemLoja);
         let desvioPadrao = ss.standardDeviation(dadosSemLoja).toFixed(2);
+
         // Vendas destoantes - Geral
-        let destoantes = dados.filter(
-          (venda) => venda[0] >= desvioPadrao && venda[1] != 203398134
-        );
+        let destoantes = dados.filter((venda) => venda[0] >= desvioPadrao && venda[1] != 203398134);
         let destoantesSemLoja = [];
         for (let i = 0; i < destoantes.length; i++) {
           destoantesSemLoja.push(destoantes[i][0]);
@@ -315,9 +274,7 @@ module.exports = {
         let totalDestoantes = ss.sum(destoantesCorporativosSemLoja);
 
         // Filtro final para remover vendas destoantes das vendas a considerar
-        dados = dados.filter(
-          (venda) => !(venda[0] >= desvioPadrao && venda[1] == 203398134)
-        );
+        dados = dados.filter((venda) => !(venda[0] >= desvioPadrao && venda[1] == 203398134));
 
         // Monta array de dados a serem considerados após realizado o filtro
         dadosSemLoja = [];
@@ -348,22 +305,10 @@ module.exports = {
           console.log("Moda: ", moda);
           console.log("Desvio padrão: ", desvioPadrao);
           console.log("Quantidades destoantes: - Geral\n", destoantesSemLoja);
-          console.log(
-            "Quantidades destoantes - Corporativo:\n",
-            destoantesCorporativosSemLoja
-          );
-          console.log(
-            "Soma do total de quantidades descartadas: ",
-            totalDestoantes
-          );
-          console.log(
-            "Soma do total de quantidades filtradas: ",
-            totalFiltrada
-          );
-          console.log(
-            "Primeira data de venda (YYYY-MM-DD): ",
-            primeiraData.toISOString().split("T")[0]
-          );
+          console.log("Quantidades destoantes - Corporativo:\n", destoantesCorporativosSemLoja);
+          console.log("Soma do total de quantidades descartadas: ", totalDestoantes);
+          console.log("Soma do total de quantidades filtradas: ", totalFiltrada);
+          console.log("Primeira data de venda (YYYY-MM-DD): ", primeiraData.toISOString().split("T")[0]);
           console.log("Quantidade de meses vendidos: ", mesesVendidos);
           console.log("Média de venda/mês: ", mediaMes);
           console.log("Mínimo: ", minimo);
@@ -386,11 +331,7 @@ module.exports = {
   // Calcula informação de máximo e mínimo a partir do último dado de média/mês acrescentado
   async minMax(mediaMes) {
     for (let idxCategoria = 0; idxCategoria < mediaMes.length; idxCategoria++) {
-      for (
-        let idxItem = 0;
-        idxItem < mediaMes[idxCategoria].length;
-        idxItem++
-      ) {
+      for (let idxItem = 0; idxItem < mediaMes[idxCategoria].length; idxItem++) {
         let item = mediaMes[idxCategoria][idxItem];
 
         // Calcular valor máximo de acordo com as regras estabelecidas
@@ -472,11 +413,7 @@ module.exports = {
 
     // Percorre cada um dos itens a serem exportados
     for (let idxCategoria = 0; idxCategoria < exportar.length; idxCategoria++) {
-      for (
-        let idxItem = 0;
-        idxItem < exportar[idxCategoria].length;
-        idxItem++
-      ) {
+      for (let idxItem = 0; idxItem < exportar[idxCategoria].length; idxItem++) {
         let item = exportar[idxCategoria][idxItem];
 
         // Monta pacote com a curva do Produto
@@ -506,16 +443,9 @@ module.exports = {
       await Produto.bulkCreate(produtos, {
         updateOnDuplicate: ["curva", "idcurva"],
       });
-      console.log(
-        filename,
-        "Curvas dos produtos atualizadas no banco de dados"
-      );
+      console.log(filename, "Curvas dos produtos atualizadas no banco de dados");
     } catch (error) {
-      console.log(
-        filename,
-        "Não foi possível atualizar as curvas no banco de dados:",
-        error.message
-      );
+      console.log(filename, "Não foi possível atualizar as curvas no banco de dados:", error.message);
     }
 
     // Salva valores de Máximo e Mínimo no banco de dados
@@ -523,10 +453,7 @@ module.exports = {
       await ProdutoDeposito.bulkCreate(produtosDepositos, {
         updateOnDuplicate: ["maximo", "minimo", "mediames"],
       });
-      console.log(
-        filename,
-        "Valores de Máximo e Mínimo atualizados no banco de dados"
-      );
+      console.log(filename, "Valores de Máximo e Mínimo atualizados no banco de dados");
     } catch (error) {
       console.log(
         filename,
@@ -642,15 +569,14 @@ module.exports = {
 
   // API - Realiza análise de Estoque Máximo e Mínimo
   async minmax() {
-    // Busca massa de dados dos pedidos de venda
+    // Adquire massa de dados bruta na query de pedidos de vendas
     let vendas = await this.queryVendas();
 
-    // Inicia tratamento de dados em memória
-    console.log(filename, "Iniciando tratamento em memória ...");
+    console.log(filename, "Iniciando tratamento em memória");
     let memoryStart = new Date();
 
-    // Transforma o resultado da massa de dados em uma tabela de dados úteis para serem trabalhados
-    let itens = await this.montaVendas(vendas);
+    // Transforma o resultado da query de venda em uma lista de relacionamentos venda-produto
+    let itens = await this.montaVendaProduto(vendas);
 
     // Cálculo de Curvas
     let curvas = await this.calculaCurvas(itens);
@@ -672,14 +598,8 @@ module.exports = {
 
     // Debug de tempo gasto na execução do procedimento
     let memoryEnd = new Date();
-    let memoryElapsed = new Date(memoryEnd - memoryStart)
-      .toISOString()
-      .slice(11, -1);
-    console.log(
-      filename,
-      "Tempo gasto no tratamento em memória: ",
-      memoryElapsed
-    );
+    let memoryElapsed = new Date(memoryEnd - memoryStart).toISOString().slice(11, -1);
+    console.log(filename, "Tempo gasto no tratamento em memória: ", memoryElapsed);
 
     // Exporta as curvas para o banco de dados
     // Agora esse procedimento é realizado separadamente sob demanda
@@ -719,11 +639,7 @@ module.exports = {
         response = "exports/minmax.xlsx";
       }
     } catch (err) {
-      console.error(
-        filename,
-        "Erro ao tentar acessar o arquivo de minmax em excel:",
-        err
-      );
+      console.error(filename, "Erro ao tentar acessar o arquivo de minmax em excel:", err);
     }
 
     return { status: status, response: response };
@@ -819,8 +735,6 @@ module.exports = {
     await workbook.xlsx
       .writeFile("./exports/minmax.xlsx")
       .then(() => console.log("Arquivo excel exportado com sucesso"))
-      .catch((error) =>
-        console.log("Erro ao exportar arquivo excel: ", error.message)
-      );
+      .catch((error) => console.log("Erro ao exportar arquivo excel: ", error.message));
   },
 };

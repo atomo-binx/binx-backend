@@ -1,17 +1,21 @@
-const controller = require("../controllers/compras.controller");
+const ControllerCompras = require("../controllers/compras.controller");
+const ControllerRelatorios = require("../controllers/relatoriocompras.controller");
+
 const { protectedRoute } = require("../middlewares/auth");
 
 function load(routes) {
-  routes.get("/compras/dashboard", controller.dashboard);
-  routes.get("/compras/dashboard/salvar", protectedRoute, controller.salvarDashboardDiario);
-  routes.get("/compras/disponibilidade", controller.disponibilidade);
+  routes.get("/compras/dashboard", ControllerCompras.dashboard);
+  routes.get("/compras/dashboard/salvar", protectedRoute, ControllerCompras.salvarDashboardDiario);
+  routes.get("/compras/disponibilidade", ControllerCompras.disponibilidade);
 
-  routes.get("/compras/relatorio/precificacao", protectedRoute, controller.relatorioPrecificacao);
-  routes.get("/compras/relatorio/ultimocusto", protectedRoute, controller.relatorioUltimoCusto);
-  routes.get("/compras/relatorio/situacaoestoque", protectedRoute, controller.relatorioSituacaoEstoque);
-  routes.get("/compras/relatorio/compraproduto", protectedRoute, controller.relatorioCompraProduto);
-  routes.get("/compras/relatorio/analiseestoque", protectedRoute, controller.relatorioTransferencia);
-  routes.get("/compras/relatorio/montagemkits", protectedRoute, controller.relatorioMontagemKits);
+  routes.get("/compras/relatorio/precificacao", protectedRoute, ControllerCompras.relatorioPrecificacao);
+  routes.get("/compras/relatorio/ultimocusto", protectedRoute, ControllerCompras.relatorioUltimoCusto);
+  routes.get("/compras/relatorio/situacaoestoque", protectedRoute, ControllerCompras.relatorioSituacaoEstoque);
+  routes.get("/compras/relatorio/compraproduto", protectedRoute, ControllerCompras.relatorioCompraProduto);
+  routes.get("/compras/relatorio/analiseestoque", protectedRoute, ControllerCompras.relatorioTransferencia);
+  routes.get("/compras/relatorio/montagemkits", protectedRoute, ControllerCompras.relatorioMontagemKits);
+
+  routes.get("/compras/relatorio/geral", protectedRoute, ControllerRelatorios.relatorioGeral);
 }
 
 module.exports = load;
