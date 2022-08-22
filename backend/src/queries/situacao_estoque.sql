@@ -1,30 +1,39 @@
-SELECT
-  tbproduto.idsku as "SKU",
-  tbproduto.nome as " Produto",
-  tbproduto.curva as "Curva",
-  tbprodutoestoque.minimo as "Min",
-  tbprodutoestoque.maximo as "Max",
-  tbprodutoestoque.quantidade as "Qntd",
-  case
-    when tbprodutoestoque.quantidade > tbprodutoestoque.minimo then "Acima"
-    when tbprodutoestoque.quantidade < tbprodutoestoque.minimo then "Abaixo"
-    when tbprodutoestoque.quantidade = tbprodutoestoque.minimo then "Igual"
-    else "-"
-  end as "Situação",
-  replace(
-    round(
-      (
-        tbprodutoestoque.quantidade / tbprodutoestoque.minimo
-      ),
-      2
-    ),
-    ".",
-    ","
-  ) as "Cobertura"
-FROM
+select
+  tbproduto.idsku,
+  tbfornecedor.nomefornecedor,
+  tbpedidocompra.idpedidocompra,
+  tbpedidocompra.idstatus,
+  tbstatuscompra.nome as "situacao",
+  tbpedidocompra.datacriacao
+from
   tbproduto
-  inner join tbprodutoestoque on tbproduto.idsku = tbprodutoestoque.idsku
+  inner join tbcompraproduto on tbcompraproduto.idsku = tbproduto.idsku
+  inner join tbpedidocompra on tbpedidocompra.idpedidocompra = tbcompraproduto.idpedidocompra
+  inner join tbfornecedor on tbfornecedor.idfornecedor = tbpedidocompra.idfornecedor
+  inner join tbstatuscompra on tbpedidocompra.idstatus = tbstatuscompra.idstatus
 where
-  tbprodutoestoque.idestoque = 7141524213
-  and tbproduto.idsku regexp("^[0-9]+$")
-  and tbproduto.situacao = 1;
+  tbproduto.idsku regexp("^[0-9]+$")
+  and tbproduto.situacao = 1
+  and tbpedidocompra.idstatus <> 2
+  and tbfornecedor.idfornecedor not in (
+    -- Baú da Eletrônica Componentes Eletronicos Ltda -
+    "7401278638",
+    -- Loja Física
+    "9172761844",
+    -- TRANSFERENCIA
+    "10733118103",
+    -- estoque virtual
+    "12331146486",
+    -- ESTOQUE VIRTUAL
+    "15723207321",
+    -- LANÇAMENTO DE ESTOQUE DE PEDIDO
+    "15727421793",
+    -- Rolo para Metro
+    "15703295970",
+    -- Montagem de Kits
+    "7589965226",
+    -- Montagem de Kits
+    "7590009181"
+  )
+order by
+  tbpedidocompra.datacriacao desc;
