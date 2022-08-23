@@ -2,7 +2,7 @@ select
   tbproduto.idsku,
   tbfornecedor.nomefornecedor,
   tbpedidocompra.idpedidocompra,
-  tbstatuscompra.nome as "situacao",
+  tbstatuscompra.nome as "status",
   tbpedidocompra.datacriacao,
   tbcompraproduto.codigofornecedor
 from

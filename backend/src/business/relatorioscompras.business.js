@@ -42,7 +42,7 @@ module.exports = {
       entrada.minimo = entrada.tbprodutoestoques.minimo;
       entrada.maximo = entrada.tbprodutoestoques.maximo;
       entrada.quantidade = entrada.tbprodutoestoques.quantidade;
-      entrada.situacao = entrada.tbprodutoestoques.situacao;
+      entrada.situacaoEstoqueMin = entrada.tbprodutoestoques.situacaoEstoqueMin;
       entrada.cobertura = entrada.tbprodutoestoques.cobertura;
       delete entrada.tbprodutoestoques;
 
@@ -61,7 +61,7 @@ module.exports = {
 
       entrada.idpedidocompra = pedido ? pedido.idpedidocompra : "";
       entrada.nomefornecedor = pedido ? pedido.nomefornecedor : "";
-      entrada.situacao = pedido ? pedido.situacao : "";
+      entrada.status = pedido ? pedido.status : "";
       entrada.datacriacao = pedido ? pedido.datacriacao : "";
       entrada.codigofornecedor = pedido ? pedido.codigofornecedor : "";
     });
@@ -97,7 +97,7 @@ module.exports = {
                 END
                 `
               ),
-              "situacao",
+              "situacaoEstoqueMin",
             ],
             [Sequelize.literal(`replace(round(quantidade/minimo, 2), ".", ",")`), "cobertura"],
           ],

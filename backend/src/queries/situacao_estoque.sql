@@ -3,7 +3,7 @@ select
   tbfornecedor.nomefornecedor,
   tbpedidocompra.idpedidocompra,
   tbpedidocompra.idstatus,
-  tbstatuscompra.nome as "situacao",
+  tbstatuscompra.nome as "situacaoPedido",
   tbpedidocompra.datacriacao
 from
   tbproduto
