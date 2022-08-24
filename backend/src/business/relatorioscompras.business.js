@@ -59,10 +59,8 @@ module.exports = {
         pedido = abertoOuAndamento.length > 0 ? abertoOuAndamento[0] : pedidos[0];
       }
 
-      entrada.idpedidocompra = pedido ? pedido.idpedidocompra : "";
       entrada.nomefornecedor = pedido ? pedido.nomefornecedor : "";
       entrada.status = pedido ? pedido.status : "";
-      entrada.datacriacao = pedido ? pedido.datacriacao : "";
       entrada.codigofornecedor = pedido ? pedido.codigofornecedor : "";
     });
 

@@ -40,23 +40,27 @@ module.exports = {
   },
 
   async removerFiltroEmAberto(page) {
-    console.log(filename, "Removendo filtro de Em Aberto.");
+    try {
+      console.log(filename, "Removendo filtro de Em Aberto.");
 
-    await page.waitForXPath(`//span[text()='Em aberto']/following-sibling::span`, {
-      visible: true,
-      timeout: 15000,
-    });
+      await page.waitForXPath(`//span[text()='Em aberto']/following-sibling::span`, {
+        visible: true,
+        timeout: 15000,
+      });
 
-    await page.waitForTimeout(1000);
-    const popUpButton = await page.$x(`//span[text()='Em aberto']/following-sibling::span`);
-    await popUpButton[0].click();
+      await page.waitForTimeout(1000);
+      const popUpButton = await page.$x(`//span[text()='Em aberto']/following-sibling::span`);
+      await popUpButton[0].click();
 
-    await page.waitForXPath(`//span[text()='Em aberto']/following-sibling::span`, {
-      hidden: true,
-      timeout: 15000,
-    });
+      await page.waitForXPath(`//span[text()='Em aberto']/following-sibling::span`, {
+        hidden: true,
+        timeout: 15000,
+      });
 
-    console.log(filename, "Filtro de Em Aberto removido.");
+      console.log(filename, "Filtro de Em Aberto removido.");
+    } catch (error) {
+      console.log(filename, "Falha ao tentar remover filtro em aberto:", error.message);
+    }
   },
 
   async alterarTransportadora(pedido, metodo) {
@@ -152,9 +156,7 @@ module.exports = {
         // Aguarda a página de pedido ter sido realmente carregada
 
         // Aguarda aparecer um Option, dentro de um select que contenha o campo "Matriz"
-        await page.waitForXPath(
-          "//select[@id='idConfUnidadeNegocio']//option[contains(text(), 'Matriz')]"
-        );
+        await page.waitForXPath("//select[@id='idConfUnidadeNegocio']//option[contains(text(), 'Matriz')]");
 
         // Verifica se foi aberto o pedido correto
         await page.waitForXPath("//input[@name='numeroPedido']", {
@@ -223,9 +225,7 @@ module.exports = {
 
             // Aguarda e posiciona no novo select que será renderizado
             await page.waitForXPath("//select[@name='servicosLogistica[]']//option[@value='-1']");
-            const selectHoversedex = await page.waitForXPath(
-              "//select[@name='servicosLogistica[]']"
-            );
+            const selectHoversedex = await page.waitForXPath("//select[@name='servicosLogistica[]']");
             await selectHoversedex.hover();
 
             // Seleciona o serviço
