@@ -38,12 +38,7 @@ module.exports = {
         // Tenta salvar histórico de disponibilidade
         const { pdisponivel, pDisponivelPorCurva } = resposta.body;
 
-        console.log(
-          filename,
-          "Valores a serem salvos:",
-          pdisponivel,
-          pDisponivelPorCurva
-        );
+        console.log(filename, "Valores a serem salvos:", pdisponivel, pDisponivelPorCurva);
 
         // Tenta salvar o histórico de disponibilidade de produtos
         try {
@@ -52,10 +47,7 @@ module.exports = {
             valor: pdisponivel,
             transaction: t,
           });
-          console.log(
-            filename,
-            "Valor diário de disponibilidade do dashboard de compras salvo com sucesso"
-          );
+          console.log(filename, "Valor diário de disponibilidade do dashboard de compras salvo com sucesso");
         } catch (error) {
           console.log(
             filename,
@@ -72,8 +64,7 @@ module.exports = {
 
           // Retornando falha no procedimento
           return http.failure({
-            message:
-              "Falha no procedimento de salvar valores diários do dashboard de compras",
+            message: "Falha no procedimento de salvar valores diários do dashboard de compras",
           });
         }
 
@@ -107,8 +98,7 @@ module.exports = {
 
           // Retornando falha no procedimento
           return http.failure({
-            message:
-              "Falha no procedimento de salvar valores diários do dashboard de compras",
+            message: "Falha no procedimento de salvar valores diários do dashboard de compras",
           });
         }
 
@@ -127,8 +117,7 @@ module.exports = {
         // Verifica status do procedimento de salvar valores diários
         if (commitStatus) {
           return http.ok({
-            message:
-              "Procedimento de salvar valores diários do dashboard de compras finalizado",
+            message: "Procedimento de salvar valores diários do dashboard de compras finalizado",
           });
         } else {
           return http.failure({
@@ -143,10 +132,7 @@ module.exports = {
         });
       }
     } catch (error) {
-      console.log(
-        filename,
-        `Erro durante o procedimento de salvar dashboard de compras: ${error.message}`
-      );
+      console.log(filename, `Erro durante o procedimento de salvar dashboard de compras: ${error.message}`);
       return http.failure({
         message: `Erro durante o procedimento de salvar dashboard de compras: ${error.message}`,
       });
@@ -226,7 +212,6 @@ module.exports = {
       };
 
       // Arrays para realizar a exportação dos itens considerados para o dash
-      let consideradosAtivos = produtos;
       let consideradosDisponiveis = [];
       let consideradosIndisponiveis = [];
       let consideradosAbaixoMin = [];
@@ -295,37 +280,24 @@ module.exports = {
 
       // Calcula disponibilidade de produtos por curva
       for (let i = 0; i < 4; i++) {
-        disponibilidadePorCurva[i] =
-          contProdutosPorCurva[i] - contIndisponiveisPorCurva[i];
+        disponibilidadePorCurva[i] = contProdutosPorCurva[i] - contIndisponiveisPorCurva[i];
       }
 
       // Calcula a porcentagem de disponibilidade de produtos por curva
       for (let i = 0; i < 4; i++) {
         pDisponibilidadePorCurva[i] = parseFloat(
-          (
-            (100 * disponibilidadePorCurva[i]) /
-            contProdutosPorCurva[i]
-          ).toFixed(1)
+          ((100 * disponibilidadePorCurva[i]) / contProdutosPorCurva[i]).toFixed(1)
         );
       }
 
       // Calcula Porcentagem de produtos disponíveis:
-      let porcentagemDisponiveis = (
-        (100 * contProdutosDisponiveis) /
-        contProdutosAtivos
-      ).toFixed(1);
+      let porcentagemDisponiveis = ((100 * contProdutosDisponiveis) / contProdutosAtivos).toFixed(1);
 
       // Calcula Porcentagem de produtos indisponíveis
-      let porcentagemIndisponiveis = (
-        (100 * contProdutosIndisponiveis) /
-        contProdutosAtivos
-      ).toFixed(1);
+      let porcentagemIndisponiveis = ((100 * contProdutosIndisponiveis) / contProdutosAtivos).toFixed(1);
 
       // Calcula Porcentagem de produtos abaixo do estoque minimo
-      let porcentagemAbaixoMin = (
-        (100 * contAbaixoMin) /
-        contProdutosAtivos
-      ).toFixed(1);
+      let porcentagemAbaixoMin = ((100 * contAbaixoMin) / contProdutosAtivos).toFixed(1);
 
       // Calcula Porcentagem de produtos indisponiveis por curva
       let porcentagemIndisponiveisCurva = [0, 0, 0, 0];
@@ -333,69 +305,23 @@ module.exports = {
       // Calcula porcentagem de Indisponibilidade por Curva em relação aos items indisponiveis
       for (let i = 0; i < 4; i++) {
         porcentagemIndisponiveisCurva[i] = parseFloat(
-          (
-            (100 * contIndisponiveisPorCurva[i]) /
-            contProdutosIndisponiveis
-          ).toFixed(1)
+          ((100 * contIndisponiveisPorCurva[i]) / contProdutosIndisponiveis).toFixed(1)
         );
       }
 
       console.log(filename, "Produtos ativos: ", contProdutosAtivos);
       console.log(filename, "Produtos disponíveis: ", contProdutosDisponiveis);
-      console.log(
-        filename,
-        "Produtos indisponíveis: ",
-        contProdutosIndisponiveis
-      );
+      console.log(filename, "Produtos indisponíveis: ", contProdutosIndisponiveis);
       console.log(filename, "Produtos abaixo do mínimo: ", contAbaixoMin);
-      console.log(
-        filename,
-        "Porcentagem de produtos disponíveis: ",
-        porcentagemDisponiveis,
-        "%"
-      );
-      console.log(
-        filename,
-        "Porcentagem de produtos indisponíveis: ",
-        porcentagemIndisponiveis,
-        "%"
-      );
-      console.log(
-        filename,
-        "Porcentagem de produtos abaixo do minimo: ",
-        porcentagemAbaixoMin,
-        "%"
-      );
-      console.log(
-        filename,
-        "Indisponibilidade por curva:",
-        contIndisponiveisPorCurva
-      );
-      console.log(
-        filename,
-        "Porcentagem de indisponibilidade por curva:",
-        porcentagemIndisponiveisCurva
-      );
-      console.log(
-        filename,
-        "Contagem de produtos por curva:",
-        contProdutosPorCurva
-      );
-      console.log(
-        filename,
-        "Disponibilidade por Curva:",
-        disponibilidadePorCurva
-      );
-      console.log(
-        filename,
-        "Porcentagem de Disponibilidade por Curva:",
-        pDisponibilidadePorCurva
-      );
-      console.log(
-        filename,
-        "Quantidade de itens abaixo do mínimo por curva:",
-        contAbaixoMinPorCurva
-      );
+      console.log(filename, "Porcentagem de produtos disponíveis: ", porcentagemDisponiveis, "%");
+      console.log(filename, "Porcentagem de produtos indisponíveis: ", porcentagemIndisponiveis, "%");
+      console.log(filename, "Porcentagem de produtos abaixo do minimo: ", porcentagemAbaixoMin, "%");
+      console.log(filename, "Indisponibilidade por curva:", contIndisponiveisPorCurva);
+      console.log(filename, "Porcentagem de indisponibilidade por curva:", porcentagemIndisponiveisCurva);
+      console.log(filename, "Contagem de produtos por curva:", contProdutosPorCurva);
+      console.log(filename, "Disponibilidade por Curva:", disponibilidadePorCurva);
+      console.log(filename, "Porcentagem de Disponibilidade por Curva:", pDisponibilidadePorCurva);
+      console.log(filename, "Quantidade de itens abaixo do mínimo por curva:", contAbaixoMinPorCurva);
 
       // Adquire os últimos valores de disponibilidade de produtos para montar o gráfico de histórico
       let ultimasDisponibilidades = await Disponibilidade.findAll({
@@ -430,33 +356,10 @@ module.exports = {
         abaixoMinPorCurva: contAbaixoMinPorCurva,
       };
 
-      // Exportação para Excel
-      if (false) {
-        let nomesParaExportar = [
-          "Ativos",
-          "Disponiveis",
-          "Indisponiveis",
-          "Abaixo",
-        ];
-
-        let dadosParaExportar = [
-          consideradosAtivos,
-          consideradosDisponiveis,
-          consideradosIndisponiveis,
-          consideradosAbaixoMin,
-        ];
-
-        // Exporta os dados para o Excel
-        await this.exportaExcel(nomesParaExportar, dadosParaExportar);
-      }
-
       // Retorna resposta para chamada da API
       return http.ok(resposta);
     } catch (error) {
-      console.log(
-        filename,
-        `Erro durante o processamento do dashboard de compras: ${error.message}`
-      );
+      console.log(filename, `Erro durante o processamento do dashboard de compras: ${error.message}`);
       return http.failure({
         messa: `Erro durante o processamento do dashboard de compras: ${error.message}`,
       });
@@ -490,13 +393,7 @@ module.exports = {
     for (let i = 0; i < worksheets.length; i++) {
       for (let itemIdx = 0; itemIdx < dados[i].length; itemIdx++) {
         let item = dados[i][itemIdx];
-        worksheets[i].addRow([
-          item.idsku,
-          item.nome,
-          item.quantidade,
-          item.minimo,
-          item.maximo,
-        ]);
+        worksheets[i].addRow([item.idsku, item.nome, item.quantidade, item.minimo, item.maximo]);
       }
     }
 
@@ -504,9 +401,7 @@ module.exports = {
     await workbook.xlsx
       .writeFile("./exports/dashboard_compras.xlsx")
       .then(() => console.log(filename, "Arquivo excel exportado com sucesso"))
-      .catch((error) =>
-        console.log(filename, "Erro ao exportar arquivo excel: ", error.message)
-      );
+      .catch((error) => console.log(filename, "Erro ao exportar arquivo excel: ", error.message));
   },
 
   async disponibilidade() {
@@ -527,14 +422,10 @@ module.exports = {
       // Por ex: para trazer 3 dias (3 resultados),subtrair "2" do número de dias
       // Isso irá contar o dia atual, e mais 2 dias para trás
 
-      let dataFinal = moment(moment().endOf("day")).format(
-        "YYYY-MM-DD HH:mm:ss"
-      );
+      let dataFinal = moment(moment().endOf("day")).format("YYYY-MM-DD HH:mm:ss");
       console.log(filename, "Data Final:", dataFinal);
 
-      let dataInicio = moment(
-        moment().subtract(30, "days").startOf("day")
-      ).format("YYYY-MM-DD HH:mm:ss");
+      let dataInicio = moment(moment().subtract(30, "days").startOf("day")).format("YYYY-MM-DD HH:mm:ss");
       console.log(filename, "Data Inicio:", dataInicio);
 
       // if(req.query.inicio && req.query.final){
@@ -662,9 +553,7 @@ module.exports = {
 
     // Debug de tempo gasto na execução das querys
     let queryEnd = new Date();
-    let queryElapsed = new Date(queryEnd - queryStart)
-      .toISOString()
-      .slice(11, -1);
+    let queryElapsed = new Date(queryEnd - queryStart).toISOString().slice(11, -1);
     console.log(filename, "Tempo gasto nas querys: ", queryElapsed);
 
     return http.ok({
@@ -674,9 +563,7 @@ module.exports = {
   },
 
   async relatorioPrecificacao() {
-    const query = (
-      await fs.promises.readFile("src/queries/relatorio_precificacao.sql")
-    ).toString();
+    const query = (await fs.promises.readFile("src/queries/relatorio_precificacao.sql")).toString();
 
     const resultados = await sequelize.query(query, {
       type: QueryTypes.SELECT,
@@ -695,9 +582,7 @@ module.exports = {
   },
 
   async relatorioUltimoCusto() {
-    const query = (
-      await fs.promises.readFile("src/queries/ultimo_custo.sql")
-    ).toString();
+    const query = (await fs.promises.readFile("src/queries/ultimo_custo.sql")).toString();
 
     const resultados = await sequelize.query(query, {
       type: QueryTypes.SELECT,
@@ -716,16 +601,13 @@ module.exports = {
   },
 
   async relatorioSituacaoEstoque() {
-    const query = (
-      await fs.promises.readFile("src/queries/situacao_estoque.sql")
-    ).toString();
+    const query = (await fs.promises.readFile("src/queries/situacao_estoque.sql")).toString();
 
     const resultados = await sequelize.query(query, {
       type: QueryTypes.SELECT,
     });
 
-    const nomeArquivo =
-      "exports/relatorio-situacao-estoque-" + dateToFilename();
+    const nomeArquivo = "exports/relatorio-situacao-estoque-" + dateToFilename();
 
     await this.exportToExcel(resultados, nomeArquivo);
 
@@ -738,9 +620,7 @@ module.exports = {
   },
 
   async relatorioCompraProduto() {
-    const query = (
-      await fs.promises.readFile("src/queries/compra_produto.sql")
-    ).toString();
+    const query = (await fs.promises.readFile("src/queries/compra_produto.sql")).toString();
 
     const resultados = await sequelize.query(query, {
       type: QueryTypes.SELECT,
@@ -759,9 +639,7 @@ module.exports = {
   },
 
   async relatorioTransferencia() {
-    const query = (
-      await fs.promises.readFile("src/queries/transferencia.sql")
-    ).toString();
+    const query = (await fs.promises.readFile("src/queries/transferencia.sql")).toString();
 
     const resultados = await sequelize.query(query, {
       type: QueryTypes.SELECT,
@@ -780,9 +658,7 @@ module.exports = {
   },
 
   async relatorioMontagemKits() {
-    const query = (
-      await fs.promises.readFile("src/queries/montagem_kits.sql")
-    ).toString();
+    const query = (await fs.promises.readFile("src/queries/montagem_kits.sql")).toString();
 
     const resultados = await sequelize.query(query, {
       type: QueryTypes.SELECT,
@@ -853,9 +729,7 @@ module.exports = {
     // Ajuste de tamanho das colunas
     worksheets[0].columns.forEach((column) => {
       const lengths = column.values.map((v) => v.toString().length);
-      const maxLength = Math.max(
-        ...lengths.filter((v) => typeof v === "number")
-      );
+      const maxLength = Math.max(...lengths.filter((v) => typeof v === "number"));
       column.width = maxLength + 2;
     });
 
@@ -863,8 +737,6 @@ module.exports = {
     await workbook.xlsx
       .writeFile(arquivo + ".xlsx")
       .then(() => console.log("Arquivo excel exportado com sucesso"))
-      .catch((error) =>
-        console.log("Erro ao exportar arquivo excel: ", error.message)
-      );
+      .catch((error) => console.log("Erro ao exportar arquivo excel: ", error.message));
   },
 };

@@ -1,8 +1,10 @@
 select
   tbproduto.idsku,
   tbfornecedor.nomefornecedor,
-  tbpedidocompra.idstatus,
-  tbstatuscompra.nome as "situacaoPedido"
+  tbpedidocompra.idpedidocompra,
+  tbstatuscompra.nome as "status",
+  tbpedidocompra.datacriacao,
+  tbcompraproduto.codigofornecedor
 from
   tbproduto
   inner join tbcompraproduto on tbcompraproduto.idsku = tbproduto.idsku

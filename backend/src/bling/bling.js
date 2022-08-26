@@ -10,7 +10,6 @@ const api = axios.create({ baseURL: url });
 const { manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
-const { ConfirmSignUpResponseFilterSensitiveLog } = require("@aws-sdk/client-cognito-identity-provider");
 
 const situacoes = {
   "Em aberto": 6,
@@ -276,7 +275,7 @@ module.exports = {
             produto: item["item"]["descricao"],
             quantidade: item["item"]["qtde"],
             valor: item["item"]["valor"],
-            codigofornecedor: item["item"]["codigofornecedor"],
+            codigofornecedor: item["item"]["codigofornecedor"] || null,
           });
         }
       }
