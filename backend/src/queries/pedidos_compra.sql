@@ -27,13 +27,7 @@ where
     -- ESTOQUE VIRTUAL
     "15723207321",
     -- LANÇAMENTO DE ESTOQUE DE PEDIDO
-    "15727421793",
-    -- Rolo para Metro
-    "15703295970",
-    -- Montagem de Kits
-    "7589965226",
-    -- Montagem de Kits
-    "7590009181"
+    "15727421793"
   )
 order by
   tbpedidocompra.datacriacao desc;
