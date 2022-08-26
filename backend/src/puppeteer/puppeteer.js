@@ -117,7 +117,7 @@ module.exports = {
 
         // No dia 28/06/2022 o Bling alterou a tela de pedidos e passou a exibir um popup
         // É necessário clicar no botão de "Não mostrar novamente" para não exibi-lo definitivamente
-        await this.removePopUp(page);
+        // await this.removePopUp(page);
 
         // Aguarda pela barra de pesquisa
         await page.waitForSelector("#pesquisa-mini", { visible: true });

@@ -53,15 +53,15 @@ module.exports = {
 
       if (pedidos) {
         const abertoOuAndamento = pedidos.filter(
-          (pedido) => pedido.situacao === "Em aberto" || pedido.situacao === "Em andamento"
+          (pedido) => pedido.status === "Em aberto" || pedido.status === "Em andamento"
         );
 
         pedido = abertoOuAndamento.length > 0 ? abertoOuAndamento[0] : pedidos[0];
       }
 
-      entrada.nomefornecedor = pedido ? pedido.nomefornecedor : "";
-      entrada.status = pedido ? pedido.status : "";
-      entrada.codigofornecedor = pedido ? pedido.codigofornecedor : "";
+      entrada.nomefornecedor = pedido ? pedido.nomefornecedor : "-";
+      entrada.status = pedido ? pedido.status : "-";
+      entrada.codigofornecedor = pedido ? pedido.codigofornecedor : "-";
     });
 
     // console.log(relatorioGeral);

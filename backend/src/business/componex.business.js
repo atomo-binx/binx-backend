@@ -6,13 +6,7 @@ const filename = __filename.slice(__dirname.length + 1) + " -";
 const { parse } = require("node-html-parser");
 
 module.exports = {
-  async sincronizaCadastro(
-    sku,
-    exportarDescricao,
-    exportarImagens,
-    exportarSEO,
-    especificacoes
-  ) {
+  async sincronizaCadastro(sku, exportarDescricao, exportarImagens, exportarSEO, especificacoes) {
     try {
       console.log(filename, "Migrando produto para a Loja Integrada");
 
@@ -20,9 +14,7 @@ module.exports = {
       const produtoBling = await bling.produto(sku, "203426320");
 
       // Adquirir os dados do produto na Loja Integrada (para obter o vínculo de SEO)
-      const produtoLojaIntegrada = await componex.detalhesProduto(
-        produtoBling.idProdutoLoja
-      );
+      const produtoLojaIntegrada = await componex.detalhesProduto(produtoBling.idProdutoLoja);
 
       // Adquirir os dados do produto no Magento
       const { produtoMagento, imagensMagento } = await this.dadosMagento(sku);
@@ -34,11 +26,7 @@ module.exports = {
 
       // Exportar dados do produto
       if (exportarDescricao) {
-        await this.exportarDadosProduto(
-          produtoMagento,
-          produtoBling,
-          especificacoes
-        );
+        await this.exportarDadosProduto(produtoMagento, produtoBling, especificacoes);
       }
 
       // Atualizar informações de SEO
@@ -88,17 +76,9 @@ module.exports = {
     const client = await magento.createClient();
     const sessionId = await magento.login(client);
 
-    const produtoMagento = await magento.catalogProductInfo(
-      client,
-      sessionId,
-      sku
-    );
+    const produtoMagento = await magento.catalogProductInfo(client, sessionId, sku);
 
-    const imagensMagento = await magento.catalogProductAttributeMediaList(
-      client,
-      sessionId,
-      sku
-    );
+    const imagensMagento = await magento.catalogProductAttributeMediaList(client, sessionId, sku);
 
     try {
       await magento.endSession(client, sessionId);
@@ -141,10 +121,10 @@ module.exports = {
 
     // Monta descrição
     // descricao_completa =
-    //   head + descricao_completa + tabelaEspecificacoes + tail;
+    descricao_completa = head + descricao_completa + tail;
 
     // DEBUG
-    descricao_completa = descricao_completa + tabelaEspecificacoes;
+    // descricao_completa = descricao_completa + tabelaEspecificacoes;
 
     // Montar o objeto de exportação para a Loja Integrada
     const dadosLojaIntegrada = {
@@ -154,10 +134,7 @@ module.exports = {
       categorias: [],
     };
 
-    await componex.alterarProduto(
-      produtoBling.idProdutoLoja,
-      dadosLojaIntegrada
-    );
+    await componex.alterarProduto(produtoBling.idProdutoLoja, dadosLojaIntegrada);
   },
 
   async atualizarSEO(produtoMagento, produtoLojaIntegrada) {

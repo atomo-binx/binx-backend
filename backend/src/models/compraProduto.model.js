@@ -28,7 +28,7 @@ const CompraProduto = sequelize.define(
     },
     codigofornecedor: {
       type: DataTypes.STRING(45),
-      allowNull: false,
+      allowNull: true,
     },
   },
   {
