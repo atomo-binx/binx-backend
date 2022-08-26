@@ -32,10 +32,7 @@ module.exports = {
 
         const melhorMetodo = await this.escolherMelhorMetodo(metodosFrete, pedido);
 
-        await Puppeteer.alterarTransportadora(
-          pedido.idpedidovenda.toString(),
-          melhorMetodo.servicoTraduzido
-        );
+        await Puppeteer.alterarTransportadora(pedido.idpedidovenda.toString(), melhorMetodo.servicoTraduzido);
 
         await VendaBusiness.sincronizaListaPedidos([pedido.idpedidovenda]);
 
@@ -159,7 +156,7 @@ module.exports = {
       }
     }
 
-    if (metodoEscolhido) {
+    if (metodoEscolhido != undefined) {
       console.log(
         filename,
         `Pedido de Venda: ${pedido.idpedidovenda} -`,
@@ -188,6 +185,12 @@ module.exports = {
         filename,
         `Pedido de Venda: ${pedido.idpedidovenda} -`,
         `Prazo do método escolhido: ${metodoEscolhido.prazoGordura}`
+      );
+    } else {
+      console.log(
+        filename,
+        `Pedido de Venda: ${pedido.idpedidovenda}:`,
+        "Não foi possível escolher um método de frete para este pedido."
       );
     }
 

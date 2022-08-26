@@ -106,7 +106,7 @@ module.exports = {
       ShippingItemArray: ShippingItemArray,
     };
 
-    console.log(body);
+    // console.log(body);
 
     // A API da Frenet não possui código de erro, apenas um campo chamado "message"
     // Todas as requisições retornam código HTTP 200, portanto um erro não será capturado
