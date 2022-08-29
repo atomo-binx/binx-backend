@@ -528,6 +528,10 @@ module.exports = {
           if (codigo === 429) {
             console.log(filename, `Hash: ${hash} - Too Many Requests - Tentativa ${tentativa}`);
           }
+
+          if (codigo === 503) {
+            console.log(filename, `Hash: ${hash} - Códig 503`);
+          }
         };
 
         do {
@@ -588,7 +592,7 @@ module.exports = {
           // Tentativas excedidas ou obteve sucesso na execução
         } while (rodando);
       } catch (error) {
-        console.log(error.message);
+        console.log(filename, "Erro", error.message);
         reject(error);
       }
     });
