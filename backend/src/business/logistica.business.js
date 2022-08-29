@@ -36,9 +36,17 @@ module.exports = {
 
     // Caso o cálculo seja de pedido de venda, escolher método de frete mais adequado
     let metodoEscolhido = {};
+    let alias = null;
+    let prazoSolicitado = null;
 
-    if (tipo === "pedido") {
-      metodoEscolhido = await this.escolherMelhorMetodo(metodosFrete, venda);
+    try {
+      if (tipo === "pedido") {
+        metodoEscolhido = await this.escolherMelhorMetodo(metodosFrete, venda);
+        alias = await this.adquirirAlias(venda.idpedidovenda);
+        prazoSolicitado = await this.adquirirPrazoSolicitado(venda, alias);
+      }
+    } catch (error) {
+      console.log(filename, error.message);
     }
 
     const resposta = {
@@ -48,6 +56,8 @@ module.exports = {
       possuiPesoZero,
       metodosFrete,
       metodoEscolhido,
+      alias,
+      prazoSolicitado,
     };
 
     return ok({
@@ -202,7 +212,7 @@ module.exports = {
     return metodosFrete;
   },
 
-  async adquirirPrazoSolicitado(pedido) {
+  async adquirirPrazoSolicitado(pedido, alias = null) {
     let prazoSolicitado = NaN;
 
     // Tentar definir através do campo de "serviço"
@@ -214,13 +224,12 @@ module.exports = {
     // É possível que o puppeteer tenha tentado alterar esse pedido e falhou
     // Prosseguir tentando extrair o prazo solicitado a partir do campo de "alias"
     if (isNaN(prazoSolicitado)) {
-      const alias = await models.tbpedidovenda.findByPk(pedido.idpedidovenda, {
-        attributes: ["alias"],
-        raw: true,
-      });
+      if (!alias) {
+        alias = await this.adquirirAlias(pedido.idpedidovenda);
+      }
 
       if (alias !== undefined && alias !== null) {
-        prazoSolicitado = parseInt(pedido.alias.replace(/[^0-9]/g, ""));
+        prazoSolicitado = parseInt(alias.replace(/[^0-9]/g, ""));
       }
     }
 
@@ -253,8 +262,7 @@ module.exports = {
     try {
       prazoSolicitado = await this.adquirirPrazoSolicitado(pedido);
     } catch (error) {
-      // throw Error(error.message);
-      console.log("ue");
+      throw Error(error.message);
     }
 
     for (const metodo of metodosFrete) {
@@ -353,5 +361,18 @@ module.exports = {
     }
 
     return metodoEscolhido;
+  },
+
+  async adquirirAlias(idpedidovenda) {
+    const alias = await models.tbpedidovenda.findByPk(idpedidovenda, {
+      attributes: ["alias"],
+      raw: true,
+    });
+
+    if (Object.prototype.hasOwnProperty.call(alias, "alias")) {
+      return alias.alias;
+    }
+
+    return null;
   },
 };

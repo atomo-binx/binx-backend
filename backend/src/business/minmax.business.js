@@ -300,7 +300,9 @@ module.exports = {
         let maximo = 0;
 
         // Debug
-        if (false) {
+        const debug = false;
+
+        if (debug) {
           console.log("Total vendido no período:", totalVendido);
           console.log("Moda: ", moda);
           console.log("Desvio padrão: ", desvioPadrao);
