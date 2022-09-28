@@ -66,6 +66,13 @@ module.exports = {
         datavenda: {
           [Op.gt]: moment().subtract(1, "year"),
         },
+        // Para restringir apenas para a loja física
+        // idloja: "203398261",
+
+        // Procedimento padrão, ignorar Transferências
+        idloja: {
+          [Op.notIn]: ["203564921"],
+        },
       },
       raw: true,
       nest: true,
