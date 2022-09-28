@@ -300,8 +300,6 @@ module.exports = {
           if (!regex.test(produto.idsku) && skusNumericos) sync = false;
 
           if (sync) {
-            console.log(produto.idsku);
-
             await this.produtoTransaction(produto)
               .then(() => contadorInseridos++)
               .catch(() => contadorRejeitados++);

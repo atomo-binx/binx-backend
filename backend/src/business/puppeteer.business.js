@@ -24,13 +24,7 @@ module.exports = {
 
     for (const pedido of pedidos) {
       try {
-        if (pedido.idpedidovenda == 142889) continue;
-
-        console.log("Disparando");
-
         const pedidoBling = await Bling.pedidoVenda(pedido.idpedidovenda);
-
-        console.log("Passou");
 
         const { metodosFrete } = await LogisticaBusiness.adquirirMetodosFrete(pedidoBling);
 
