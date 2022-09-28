@@ -7,12 +7,12 @@ module.exports = {
   },
 
   // Função para formatar um valor, inteiro ou float, numérico ou string em moeda BRL
-  BRLString(valor, simbolo = "") {
+  BRLString(valor, simbolo = "", minimumFractionDigits = 2, maximumFractionDigits = 6) {
     let formatado = new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-      minimumFractionDigits: 2,
-      maximumFractionDigits : 6,
+      minimumFractionDigits,
+      maximumFractionDigits,
     }).format(valor);
 
     if (simbolo != "") {

@@ -14,6 +14,7 @@ const fs = require("fs");
 const { OkStatus } = require("../modules/codes");
 const { dateToFilename } = require("../utils/date");
 const validator = require("validator");
+const currency = require("currency.js");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
@@ -157,7 +158,7 @@ module.exports = {
       // Lista Produtos - Massa de Dados Bruta
       // Buscamos apenas os produtos Ativos e com SKU numérico, e do depósito geral
       const produtosQuery = await Produto.findAll({
-        attributes: ["idsku", "nome", "curva"],
+        attributes: ["idsku", "nome", "curva", "ultimocusto"],
         where: {
           situacao: true,
           idsku: {
@@ -169,16 +170,9 @@ module.exports = {
             model: ProdutoEstoque,
             required: true,
             attributes: ["quantidade", "maximo", "minimo"],
-            include: [
-              {
-                model: Estoque,
-                required: true,
-                attributes: [],
-                where: {
-                  nome: "Geral",
-                },
-              },
-            ],
+            where: {
+              idestoque: "7141524213",
+            },
           },
         ],
         raw: true,
@@ -189,10 +183,13 @@ module.exports = {
         idsku: produto.idsku,
         nome: produto.nome,
         curva: produto.curva,
+        ultimocusto: produto.ultimocusto,
         quantidade: produto["ProdutoDepositos.quantidade"],
         minimo: produto["ProdutoDepositos.minimo"],
         maximo: produto["ProdutoDepositos.maximo"],
       }));
+
+      console.log(filename, "Quantidade de produtos:", produtos.length);
 
       // Variáveis para as contagens de produtos
       let contProdutosAtivos = produtos.length;
@@ -204,6 +201,8 @@ module.exports = {
       let disponibilidadePorCurva = [0, 0, 0, 0];
       let pDisponibilidadePorCurva = [0, 0, 0, 0];
       let contAbaixoMinPorCurva = [0, 0, 0, 0];
+
+      let montantesPorCurva = [0, 0, 0, 0];
 
       let dicionarioCurvas = {
         "Curva A": 0,
@@ -270,11 +269,21 @@ module.exports = {
         // Realiza contagem de produtos por Curva
         let idxCurva = dicionarioCurvas[produto["curva"]];
 
-        if (idxCurva != undefined) {
-          contProdutosPorCurva[idxCurva]++;
-        } else {
-          // Produtos que não possuem nenhuma curva associada
-          contProdutosPorCurva[3]++;
+        idxCurva = idxCurva === undefined || idxCurva === null ? 3 : idxCurva;
+
+        contProdutosPorCurva[idxCurva]++;
+
+        // Realiza acumulação do valor de montante para o produto
+        if (produto.ultimocusto !== null && produto.ultimocusto !== undefined && produto.quantidade > 0) {
+          const atual = currency(montantesPorCurva[idxCurva], { precision: 6 });
+
+          const adicionar = currency(produto.ultimocusto, { precision: 6 }).multiply(produto.quantidade, {
+            precision: 6,
+          });
+
+          const acumulado = atual.add(adicionar).value;
+
+          montantesPorCurva[idxCurva] = acumulado;
         }
       }
 
@@ -322,6 +331,7 @@ module.exports = {
       console.log(filename, "Disponibilidade por Curva:", disponibilidadePorCurva);
       console.log(filename, "Porcentagem de Disponibilidade por Curva:", pDisponibilidadePorCurva);
       console.log(filename, "Quantidade de itens abaixo do mínimo por curva:", contAbaixoMinPorCurva);
+      console.log(filename, "Montantes por Curva:", montantesPorCurva);
 
       // Adquire os últimos valores de disponibilidade de produtos para montar o gráfico de histórico
       let ultimasDisponibilidades = await Disponibilidade.findAll({
