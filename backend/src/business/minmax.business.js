@@ -66,6 +66,13 @@ module.exports = {
         datavenda: {
           [Op.gt]: moment().subtract(1, "year"),
         },
+        // Para restringir apenas para a loja física
+        // idloja: "203398261",
+
+        // Procedimento padrão, ignorar Transferências
+        idloja: {
+          [Op.notIn]: ["203564921"],
+        },
       },
       raw: true,
       nest: true,
@@ -300,7 +307,9 @@ module.exports = {
         let maximo = 0;
 
         // Debug
-        if (false) {
+        const debug = false;
+
+        if (debug) {
           console.log("Total vendido no período:", totalVendido);
           console.log("Moda: ", moda);
           console.log("Desvio padrão: ", desvioPadrao);

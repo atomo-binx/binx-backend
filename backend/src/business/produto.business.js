@@ -14,11 +14,9 @@ const http = require("../utils/http");
 const { models } = require("../modules/sequelize");
 
 module.exports = {
-  async sincronizaProdutos(dataAlteracao, dataInclusao, situacao) {
+  async sincronizaProdutos(dataAlteracao, dataInclusao, situacao, skusNumericos, produtos) {
     // Definição do filtro do Bling com base nos parâmetros passados
     let filtros = [];
-
-    let analiseCompleta = situacao ? false : true;
 
     if (situacao) {
       filtros.push(`situacao[${situacao}]`);
@@ -36,69 +34,13 @@ module.exports = {
 
     filtros = filtros.length > 1 ? filtros.join(";") : filtros[0];
 
-    // Medida de tempo de execução
-    let start = new Date();
-
-    // Flags de busca
-    let procurando = true;
-    let pagina = 1;
-
-    //Contadores
-    let contadorInseridos = 0;
-    let contadorRejeitados = 0;
-
-    // Flags para controlar busca por produtos ativos/inativos
-    let finalizadoAtivos = false;
-
-    // Inicia busca
-    while (procurando) {
-      console.log(filename, "Iniciando busca de produtos na página: ", pagina);
-
-      // Caso não tenha sido informado uma situação, a busca será realizada nas duas situações
-      // Então é necessário verificar o término de uma situação, para começar a outra
-      if (analiseCompleta) {
-        if (finalizadoAtivos) filtros = filtros.replace("[A]", "[I]");
-      }
-
-      let produtos = await Bling.listaPaginaProdutos(pagina++, filtros);
-
-      // Recebemos uma paǵina com produtos
-      if (produtos.length > 0) {
-        for (const produto of produtos) {
-          await this.produtoTransaction(produto)
-            .then(() => contadorInseridos++)
-            .catch(() => contadorRejeitados++);
-        }
-      } else {
-        // Recebemos uma página sem produtos, chegamos ao final?
-
-        if (analiseCompleta) {
-          // Verificar se o ciclo de produtos "ativos" foi finalizado
-          if (finalizadoAtivos) {
-            procurando = false;
-          } else {
-            // Finaliza a busca por produtos "ativos" e inicia a busca por produtos "inativos"
-            finalizadoAtivos = true;
-
-            // Reseta o contador de target page
-            pagina = 1;
-          }
-        } else {
-          // Não está sendo feita a análise completa (ativos e inativos), podemos finalizar a busca
-          procurando = false;
-        }
-      }
+    if (produtos) {
+      console.log(filename, "Sincronizando uma lista de produtos.");
+      await this.sincronizaListaProdutos(produtos);
+    } else {
+      console.log(filename, "Sincronizando através de filtros:", filtros);
+      await this.sincronizaPaginaProdutos(filtros, situacao, skusNumericos);
     }
-
-    console.log(filename, "Ciclo de sincronização de produtos finalizado.");
-
-    // Cálculo do tempo gasto na execução da tarefa
-    let end = new Date();
-    let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
-
-    console.log(filename, "Tempo gasto no procedimento: ", elapsedTime);
-    console.log(filename, "Total de produtos inseridos: ", contadorInseridos);
-    console.log(filename, "Total de produtos recusados: ", contadorRejeitados);
   },
 
   async produtoTransaction(produto) {
@@ -289,9 +231,7 @@ module.exports = {
 
       const quantidadeAtual = produtoDeposito.quantidade;
 
-      const depositoGeral = callback.depositos.filter(
-        (deposito) => deposito.idestoque === "7141524213"
-      );
+      const depositoGeral = callback.depositos.filter((deposito) => deposito.idestoque === "7141524213");
 
       const novaQuantidade = depositoGeral[0].quantidade;
 
@@ -317,11 +257,104 @@ module.exports = {
         );
       }
     } catch (error) {
-      console.log(
-        filename,
-        "Falha durante procedimento de verificação de itens zerados:",
-        error.message
-      );
+      console.log(filename, "Falha durante procedimento de verificação de itens zerados:", error.message);
     }
+  },
+
+  async sincronizaPaginaProdutos(filtros, situacao, skusNumericos) {
+    let analiseCompleta = situacao ? false : true;
+
+    // Medida de tempo de execução
+    let start = new Date();
+
+    // Flags de busca
+    let procurando = true;
+    let pagina = 1;
+
+    //Contadores
+    let contadorInseridos = 0;
+    let contadorRejeitados = 0;
+
+    // Flags para controlar busca por produtos ativos/inativos
+    let finalizadoAtivos = false;
+
+    // Inicia busca
+    while (procurando) {
+      console.log(filename, "Iniciando busca de produtos na página: ", pagina);
+
+      // Caso não tenha sido informado uma situação, a busca será realizada nas duas situações
+      // Então é necessário verificar o término de uma situação, para começar a outra
+      if (analiseCompleta) {
+        if (finalizadoAtivos) filtros = filtros.replace("[A]", "[I]");
+      }
+
+      let produtos = await Bling.listaPaginaProdutos(pagina++, filtros);
+
+      // Recebemos uma paǵina com produtos
+      if (produtos.length > 0) {
+        for (const produto of produtos) {
+          let sync = true;
+
+          // Verfificar cláusula de verificação de SKUs numéricos
+          const regex = /^[0-9]+$/;
+          if (!regex.test(produto.idsku) && skusNumericos) sync = false;
+
+          if (sync) {
+            await this.produtoTransaction(produto)
+              .then(() => contadorInseridos++)
+              .catch(() => contadorRejeitados++);
+          }
+        }
+      } else {
+        // Recebemos uma página sem produtos, chegamos ao final?
+
+        if (analiseCompleta) {
+          // Verificar se o ciclo de produtos "ativos" foi finalizado
+          if (finalizadoAtivos) {
+            procurando = false;
+          } else {
+            // Finaliza a busca por produtos "ativos" e inicia a busca por produtos "inativos"
+            finalizadoAtivos = true;
+
+            // Reseta o contador de target page
+            pagina = 1;
+          }
+        } else {
+          // Não está sendo feita a análise completa (ativos e inativos), podemos finalizar a busca
+          procurando = false;
+        }
+      }
+    }
+
+    console.log(filename, "Ciclo de sincronização de produtos finalizado.");
+
+    // Cálculo do tempo gasto na execução da tarefa
+    let end = new Date();
+    let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
+
+    console.log(filename, "Tempo gasto no procedimento: ", elapsedTime);
+    console.log(filename, "Total de produtos inseridos: ", contadorInseridos);
+    console.log(filename, "Total de produtos recusados: ", contadorRejeitados);
+  },
+
+  async sincronizaListaProdutos(produtos) {
+    let inseridos = 0;
+    let rejeitados = 0;
+
+    let start = new Date();
+
+    for (const produto of produtos) {
+      const produtoBling = await Bling.produto(produto);
+
+      await this.produtoTransaction(produtoBling)
+        .then(() => inseridos++)
+        .catch(() => rejeitados++);
+    }
+
+    let end = new Date();
+    let elapsedTime = new Date(end - start).toISOString().slice(11, -1);
+
+    console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
+    console.log(filename, "Total de pedidos sincronizados:", inseridos);
   },
 };

@@ -3,7 +3,7 @@ const ProdutoBusiness = require("../business/produto.business");
 module.exports = {
   async sincronizaProdutos(req, res, next) {
     try {
-      const { dataAlteracao, dataInclusao, situacao } = req.query;
+      const { dataAlteracao, dataInclusao, situacao, skusNumericos, produtos } = req.query;
 
       // const rules = [
       //   [dataAlteracao, DataFilterValidator],
@@ -16,7 +16,9 @@ module.exports = {
       //   return res.status(400).json(validationResult);
       // }
 
-      ProdutoBusiness.sincronizaProdutos(dataAlteracao, dataInclusao, situacao);
+      const arrayprodutos = produtos ? produtos.split(",").map((element) => element.trim()) : null;
+
+      ProdutoBusiness.sincronizaProdutos(dataAlteracao, dataInclusao, situacao, skusNumericos, arrayprodutos);
 
       return res.status(200).json({
         message: "A sincronização de produtos foi iniciada em segundo plano.",
