@@ -187,6 +187,7 @@ module.exports = {
 
     // Define curvas
     for (let i = 0; i < curvasOrdenadas.length; i++) {
+      // 20%, 35%, restante curva C
       let total = curvasOrdenadas[i].length;
       let tgt20 = Math.round((20 * total) / 100);
       let tgt35 = Math.round((35 * total) / 100);

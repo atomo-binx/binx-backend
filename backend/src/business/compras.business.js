@@ -158,7 +158,7 @@ module.exports = {
       // Lista Produtos - Massa de Dados Bruta
       // Buscamos apenas os produtos Ativos e com SKU numérico, e do depósito geral
       const produtosQuery = await Produto.findAll({
-        attributes: ["idsku", "nome", "curva", "ultimocusto"],
+        attributes: ["idsku", "nome", "curva", "ultimocusto", "formato"],
         where: {
           situacao: true,
           idsku: {
@@ -184,6 +184,7 @@ module.exports = {
         nome: produto.nome,
         curva: produto.curva,
         ultimocusto: produto.ultimocusto,
+        formato: produto.formato,
         quantidade: produto["ProdutoDepositos.quantidade"],
         minimo: produto["ProdutoDepositos.minimo"],
         maximo: produto["ProdutoDepositos.maximo"],
@@ -274,7 +275,12 @@ module.exports = {
         contProdutosPorCurva[idxCurva]++;
 
         // Realiza acumulação do valor de montante para o produto
-        if (produto.ultimocusto !== null && produto.ultimocusto !== undefined && produto.quantidade > 0) {
+        if (
+          produto.ultimocusto !== null &&
+          produto.ultimocusto !== undefined &&
+          produto.quantidade > 0 &&
+          produto.formato === "Simples"
+        ) {
           const atual = currency(montantesPorCurva[idxCurva], { precision: 6 });
 
           const adicionar = currency(produto.ultimocusto, { precision: 6 }).multiply(produto.quantidade, {
