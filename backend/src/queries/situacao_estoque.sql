@@ -10,7 +10,7 @@ from
   inner join tbfornecedor on tbfornecedor.idfornecedor = tbpedidocompra.idfornecedor
   inner join tbstatuscompra on tbpedidocompra.idstatus = tbstatuscompra.idstatus
 where
-  tbproduto.idsku regexp("^[0-9]+$")
+  tbproduto.idsku regexp ("^[0-9]+$")
   and tbproduto.situacao = 1
   and tbpedidocompra.idstatus <> 2
   and tbfornecedor.idfornecedor not in (

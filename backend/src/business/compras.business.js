@@ -342,7 +342,7 @@ module.exports = {
       // Adquire os últimos valores de disponibilidade de produtos para montar o gráfico de histórico
       let ultimasDisponibilidades = await Disponibilidade.findAll({
         attributes: ["data", "valor"],
-        limit: 7,
+        limit: 14,
         order: [["data", "desc"]],
         raw: true,
       });
@@ -350,7 +350,7 @@ module.exports = {
       // Adquire os últimos valores de disponibilidades por curva, para o gráfico de histórico
       let ultimasDisponibilidadesCurva = await DisponibilidadeCurva.findAll({
         attributes: ["data", "curva_1", "curva_2", "curva_3", "curva_4"],
-        limit: 7,
+        limit: 10,
         order: [["data", "desc"]],
         raw: true,
       });
@@ -370,6 +370,7 @@ module.exports = {
         disponibilidades: ultimasDisponibilidades,
         disponiblidadesCurva: ultimasDisponibilidadesCurva,
         abaixoMinPorCurva: contAbaixoMinPorCurva,
+        produtosPorCurva: contProdutosPorCurva,
       };
 
       // Retorna resposta para chamada da API
