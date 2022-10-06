@@ -9,6 +9,7 @@ var _tbcontato = require("./tbcontato");
 var _tbcurva = require("./tbcurva");
 var _tbcustopedido = require("./tbcustopedido");
 var _tbcustoproposta = require("./tbcustoproposta");
+var _tbdashboardcompras = require("./tbdashboardcompras");
 var _tbdisponibilidade = require("./tbdisponibilidade");
 var _tbdisponibilidadecurva = require("./tbdisponibilidadecurva");
 var _tbemail = require("./tbemail");
@@ -18,6 +19,7 @@ var _tbestrutura = require("./tbestrutura");
 var _tbformapagamento = require("./tbformapagamento");
 var _tbfornecedor = require("./tbfornecedor");
 var _tbfreteforcado = require("./tbfreteforcado");
+var _tbhistoricomontante = require("./tbhistoricomontante");
 var _tbkits = require("./tbkits");
 var _tbloja = require("./tbloja");
 var _tbmotivoprecificacao = require("./tbmotivoprecificacao");
@@ -48,6 +50,7 @@ function initModels(sequelize) {
   var tbcurva = _tbcurva(sequelize, DataTypes);
   var tbcustopedido = _tbcustopedido(sequelize, DataTypes);
   var tbcustoproposta = _tbcustoproposta(sequelize, DataTypes);
+  var tbdashboardcompras = _tbdashboardcompras(sequelize, DataTypes);
   var tbdisponibilidade = _tbdisponibilidade(sequelize, DataTypes);
   var tbdisponibilidadecurva = _tbdisponibilidadecurva(sequelize, DataTypes);
   var tbemail = _tbemail(sequelize, DataTypes);
@@ -57,6 +60,7 @@ function initModels(sequelize) {
   var tbformapagamento = _tbformapagamento(sequelize, DataTypes);
   var tbfornecedor = _tbfornecedor(sequelize, DataTypes);
   var tbfreteforcado = _tbfreteforcado(sequelize, DataTypes);
+  var tbhistoricomontante = _tbhistoricomontante(sequelize, DataTypes);
   var tbkits = _tbkits(sequelize, DataTypes);
   var tbloja = _tbloja(sequelize, DataTypes);
   var tbmotivoprecificacao = _tbmotivoprecificacao(sequelize, DataTypes);
@@ -172,6 +176,7 @@ function initModels(sequelize) {
     tbcurva,
     tbcustopedido,
     tbcustoproposta,
+    tbdashboardcompras,
     tbdisponibilidade,
     tbdisponibilidadecurva,
     tbemail,
@@ -181,6 +186,7 @@ function initModels(sequelize) {
     tbformapagamento,
     tbfornecedor,
     tbfreteforcado,
+    tbhistoricomontante,
     tbkits,
     tbloja,
     tbmotivoprecificacao,

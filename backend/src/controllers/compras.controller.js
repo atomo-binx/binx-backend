@@ -1,10 +1,15 @@
 const ComprasBusiness = require("../business/compras.business");
+const DashboardComprasBusiness = require("../business/dashboardcompras.business");
 const { OkStatus } = require("../modules/codes");
 
 module.exports = {
-  async dashboard(req, res) {
-    const resposta = await ComprasBusiness.dashboard();
-    res.status(resposta.statusCode).json(resposta.body);
+  async dashboard(req, res, next) {
+    try {
+      const resposta = await DashboardComprasBusiness.dashboard();
+      res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
   },
 
   async salvarDashboardDiario(req, res) {

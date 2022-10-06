@@ -7,6 +7,8 @@ const Curva = require("../models/curva.model");
 const PedidoCompra = require("../models/pedidoCompra.model");
 const CompraProduto = require("../models/compraProduto.model");
 
+const { models } = require("../modules/sequelize");
+
 const sequelize = require("../services/sequelize");
 const { Op, QueryTypes } = require("sequelize");
 const moment = require("moment");
@@ -141,23 +143,8 @@ module.exports = {
   },
 
   async dashboard() {
-    // Configurações de relacionamento
-    Produto.hasMany(ProdutoEstoque, {
-      foreignKey: "idsku",
-    });
-
-    ProdutoEstoque.hasMany(Estoque, {
-      foreignKey: "idestoque",
-    });
-
-    Estoque.belongsTo(ProdutoEstoque, {
-      foreignKey: "idestoque",
-    });
-
     try {
-      // Lista Produtos - Massa de Dados Bruta
-      // Buscamos apenas os produtos Ativos e com SKU numérico, e do depósito geral
-      const produtosQuery = await Produto.findAll({
+      const produtosQuery = await models.tbproduto.findAll({
         attributes: ["idsku", "nome", "curva", "ultimocusto", "formato"],
         where: {
           situacao: true,
@@ -167,7 +154,7 @@ module.exports = {
         },
         include: [
           {
-            model: ProdutoEstoque,
+            model: models.tbprodutoestoque,
             required: true,
             attributes: ["quantidade", "maximo", "minimo"],
             where: {
@@ -185,9 +172,9 @@ module.exports = {
         curva: produto.curva,
         ultimocusto: produto.ultimocusto,
         formato: produto.formato,
-        quantidade: produto["ProdutoDepositos.quantidade"],
-        minimo: produto["ProdutoDepositos.minimo"],
-        maximo: produto["ProdutoDepositos.maximo"],
+        quantidade: produto["tbprodutoestoques.quantidade"],
+        minimo: produto["tbprodutoestoques.minimo"],
+        maximo: produto["tbprodutoestoques.maximo"],
       }));
 
       console.log(filename, "Quantidade de produtos:", produtos.length);
@@ -340,7 +327,7 @@ module.exports = {
       console.log(filename, "Montantes por Curva:", montantesPorCurva);
 
       // Adquire os últimos valores de disponibilidade de produtos para montar o gráfico de histórico
-      let ultimasDisponibilidades = await Disponibilidade.findAll({
+      let ultimasDisponibilidades = await models.tbdisponibilidade.findAll({
         attributes: ["data", "valor"],
         limit: 14,
         order: [["data", "desc"]],
@@ -348,7 +335,7 @@ module.exports = {
       });
 
       // Adquire os últimos valores de disponibilidades por curva, para o gráfico de histórico
-      let ultimasDisponibilidadesCurva = await DisponibilidadeCurva.findAll({
+      let ultimasDisponibilidadesCurva = await models.tbdisponibilidadecurva.findAll({
         attributes: ["data", "curva_1", "curva_2", "curva_3", "curva_4"],
         limit: 10,
         order: [["data", "desc"]],
@@ -378,7 +365,7 @@ module.exports = {
     } catch (error) {
       console.log(filename, `Erro durante o processamento do dashboard de compras: ${error.message}`);
       return http.failure({
-        messa: `Erro durante o processamento do dashboard de compras: ${error.message}`,
+        message: `Erro durante o processamento do dashboard de compras: ${error.message}`,
       });
     }
   },
