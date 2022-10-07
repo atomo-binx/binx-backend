@@ -5,7 +5,7 @@ const { protectedRoute } = require("../middlewares/auth");
 
 function load(routes) {
   routes.get("/compras/dashboard", ControllerCompras.dashboard);
-  routes.get("/compras/dashboard/salvar", protectedRoute, ControllerCompras.salvarDashboardDiario);
+  routes.get("/compras/dashboard/salvar", protectedRoute, ControllerCompras.salvarDashboard);
   routes.get("/compras/disponibilidade", ControllerCompras.disponibilidade);
 
   routes.get("/compras/relatorio/precificacao", protectedRoute, ControllerCompras.relatorioPrecificacao);

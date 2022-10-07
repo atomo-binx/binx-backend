@@ -12,8 +12,8 @@ module.exports = {
     }
   },
 
-  async salvarDashboardDiario(req, res) {
-    const resposta = await ComprasBusiness.salvarDashboardDiario(req);
+  async salvarDashboard(req, res) {
+    const resposta = await DashboardComprasBusiness.salvarDashboard(req);
 
     res.status(resposta.statusCode).json(resposta.body);
   },

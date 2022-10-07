@@ -110,6 +110,7 @@ module.exports = {
 
   // Recebe a lista  itens, calcula seus contadores e define curvas
   async calculaCurvas(itens) {
+    console.log(itens);
     // Para realizar o cálculo de curva precisamos dos dados das categorias existentes
     // Puxamos esses dados do banco para facilitar a adaptação para possíveis nova categorias
     let { tipoCurvaCategoria, nomeCategoria } = await this.dicionarios();

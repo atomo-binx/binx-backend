@@ -7,23 +7,39 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    geral: {
+    montante_geral: {
+      type: DataTypes.DECIMAL(18,10),
+      allowNull: true
+    },
+    montante_curva_a: {
+      type: DataTypes.DECIMAL(18,10),
+      allowNull: true
+    },
+    montante_curva_b: {
+      type: DataTypes.DECIMAL(18,10),
+      allowNull: true
+    },
+    montante_curva_c: {
+      type: DataTypes.DECIMAL(18,10),
+      allowNull: true
+    },
+    montante_sem_curva: {
+      type: DataTypes.DECIMAL(18,10),
+      allowNull: true
+    },
+    montante_relativo_curva_a: {
       type: DataTypes.DECIMAL(5,2),
       allowNull: true
     },
-    curva_a: {
+    montante_relativo_curva_b: {
       type: DataTypes.DECIMAL(5,2),
       allowNull: true
     },
-    curva_b: {
+    montante_relativo_curva_c: {
       type: DataTypes.DECIMAL(5,2),
       allowNull: true
     },
-    curva_c: {
-      type: DataTypes.DECIMAL(5,2),
-      allowNull: true
-    },
-    sem_curva: {
+    montante_relativo_sem_curva: {
       type: DataTypes.DECIMAL(5,2),
       allowNull: true
     },

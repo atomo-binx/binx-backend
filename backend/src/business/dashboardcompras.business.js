@@ -3,9 +3,10 @@ const { Op } = require("sequelize");
 const currency = require("currency.js");
 const { ok } = require("../utils/http");
 const filename = __filename.slice(__dirname.length + 1) + " -";
+const { sequelize } = require("../modules/sequelize");
 
 module.exports = {
-  async queryDashboard() {
+  async query() {
     const results = await models.tbproduto.findAll({
       attributes: ["idsku", "nome", "curva", "ultimocusto", "formato"],
       where: {
@@ -28,8 +29,6 @@ module.exports = {
       nest: true,
     });
 
-    console.log(results);
-
     return results.map((produto) => ({
       idsku: produto.idsku,
       nome: produto.nome,
@@ -43,7 +42,7 @@ module.exports = {
   },
 
   async dashboard() {
-    const produtos = await this.queryDashboard();
+    const produtos = await this.query();
 
     console.log(filename, "Quantidade de produtos:", produtos.length);
 
@@ -152,7 +151,7 @@ module.exports = {
     const montanteGeral = currency(montantesPorCurva[0])
       .add(montantesPorCurva[1])
       .add(montantesPorCurva[2])
-      .add(montantesPorCurva[3]);
+      .add(montantesPorCurva[3]).value;
 
     // Converter os montantes por curva para 2 casas decimais
     // Realizar as multiplicações com 6 casas decimais, e a exibição final com 2 casas decimais
@@ -176,13 +175,17 @@ module.exports = {
     }
 
     // Calcula Porcentagem de produtos disponíveis:
-    let porcentagemDisponiveis = ((100 * contProdutosDisponiveis) / contProdutosAtivos).toFixed(1);
+    let porcentagemDisponiveis = parseFloat(
+      ((100 * contProdutosDisponiveis) / contProdutosAtivos).toFixed(1)
+    );
 
     // Calcula Porcentagem de produtos indisponíveis
-    let porcentagemIndisponiveis = ((100 * contProdutosIndisponiveis) / contProdutosAtivos).toFixed(1);
+    let porcentagemIndisponiveis = parseFloat(
+      ((100 * contProdutosIndisponiveis) / contProdutosAtivos).toFixed(1)
+    );
 
     // Calcula Porcentagem de produtos abaixo do estoque minimo
-    let porcentagemAbaixoMin = ((100 * contAbaixoMin) / contProdutosAtivos).toFixed(1);
+    let porcentagemAbaixoMin = parseFloat(((100 * contAbaixoMin) / contProdutosAtivos).toFixed(1));
 
     // Calcula Porcentagem de produtos indisponiveis por curva
     let porcentagemIndisponiveisCurva = [0, 0, 0, 0];
@@ -208,7 +211,7 @@ module.exports = {
     console.log(filename, "Porcentagem de Disponibilidade por Curva:", pDisponibilidadePorCurva);
     console.log(filename, "Quantidade de itens abaixo do mínimo por curva:", contAbaixoMinPorCurva);
     console.log(filename, "Montantes por Curva:", montantesPorCurva);
-    console.log(filename, "Montante Geral:", montanteGeral.value);
+    console.log(filename, "Montante Geral:", montanteGeral);
     console.log(filename, "Porcentagem relativa dos montantes por curva:", pMontantesPorCurva);
 
     // Adquire os últimos valores de disponibilidade de produtos para montar o gráfico de histórico
@@ -251,6 +254,75 @@ module.exports = {
     // Retorna resposta para chamada da API
     return ok({
       ...resposta,
+    });
+  },
+
+  async salvarDashboard() {
+    let resposta = await this.dashboard();
+
+    await sequelize.transaction(async (t) => {
+      // Desestruturar dados que serão salvos
+      const { pdisponivel, pDisponivelPorCurva, montanteGeral, pMontantesPorCurva, montantesPorCurva } =
+        resposta.body;
+
+      // Salvar Histórico de Disponibilidade
+      console.log(filename, "Salvar Dashboard - Disponibilidade:", pdisponivel);
+
+      // await models.tbdisponibilidade.create(
+      //   {
+      //     data: new Date(),
+      //     valor: pdisponivel,
+      //     transaction: t,
+      //   },
+      //   {
+      //     transaction: t,
+      //   }
+      // );
+
+      // Salvar Histórico de Disponibilidade por Curvas
+
+      console.log(filename, "Salvar Dashboard - Disponibilidade por Curvas:", pDisponivelPorCurva);
+
+      // await models.tbdisponibilidadecurva.create(
+      //   {
+      //     data: new Date(),
+      //     curva_1: pDisponivelPorCurva[0],
+      //     curva_2: pDisponivelPorCurva[1],
+      //     curva_3: pDisponivelPorCurva[2],
+      //     curva_4: pDisponivelPorCurva[3],
+      //   },
+      //   {
+      //     transaction: t,
+      //   }
+      // );
+
+      // Salvar Histórico de Montantes
+
+      console.log(filename, "Salvar Dashboard - Montante Geral:", montanteGeral);
+      console.log(filename, "Salvar Dashboard - Montantes por Curva:", montantesPorCurva);
+      console.log(filename, "Salvar Dashboard - Montantes Relativos:", pMontantesPorCurva);
+
+      // await models.tbhistoricomontante.create(
+      //   {
+      //     montante_geral: montanteGeral,
+      //     montante_curva_a: montantesPorCurva[0],
+      //     montante_curva_b: montantesPorCurva[1],
+      //     montante_curva_c: montantesPorCurva[2],
+      //     montante_sem_curva: montantesPorCurva[3],
+      //     montante_relativo_curva_a: pMontantesPorCurva[0],
+      //     montante_relativo_curva_b: pMontantesPorCurva[1],
+      //     montante_relativo_curva_c: pMontantesPorCurva[2],
+      //     montante_relativo_sem_curva: pMontantesPorCurva[3],
+      //     data: new Date(),
+      //   },
+      //   {
+      //     transaction: t,
+      //   }
+      // );
+    });
+
+    return ok({
+      message: "Dashboard de compras salvo com successo.",
     });
   },
 };
