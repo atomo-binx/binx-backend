@@ -230,6 +230,25 @@ module.exports = {
       raw: true,
     });
 
+    // Adquire os últimos valores de montantes
+    let historicoMontantes = await models.tbhistoricomontante.findAll({
+      attributes: [
+        "data",
+        "montante_geral",
+        "montante_curva_a",
+        "montante_curva_b",
+        "montante_curva_c",
+        "montante_sem_curva",
+        "montante_relativo_curva_a",
+        "montante_relativo_curva_b",
+        "montante_relativo_curva_c",
+        "montante_relativo_sem_curva",
+      ],
+      raw: true,
+      limit: 10,
+      order: [["data", "desc"]],
+    });
+
     // Monta a resposta para enviar ao frontend
     let resposta = {
       ativos: contProdutosAtivos,
@@ -249,6 +268,7 @@ module.exports = {
       montantesPorCurva,
       montanteGeral,
       pMontantesPorCurva,
+      historicoMontantes,
     };
 
     // Retorna resposta para chamada da API
@@ -268,57 +288,55 @@ module.exports = {
       // Salvar Histórico de Disponibilidade
       console.log(filename, "Salvar Dashboard - Disponibilidade:", pdisponivel);
 
-      // await models.tbdisponibilidade.create(
-      //   {
-      //     data: new Date(),
-      //     valor: pdisponivel,
-      //     transaction: t,
-      //   },
-      //   {
-      //     transaction: t,
-      //   }
-      // );
+      await models.tbdisponibilidade.create(
+        {
+          data: new Date(),
+          valor: pdisponivel,
+          transaction: t,
+        },
+        {
+          transaction: t,
+        }
+      );
 
       // Salvar Histórico de Disponibilidade por Curvas
-
       console.log(filename, "Salvar Dashboard - Disponibilidade por Curvas:", pDisponivelPorCurva);
 
-      // await models.tbdisponibilidadecurva.create(
-      //   {
-      //     data: new Date(),
-      //     curva_1: pDisponivelPorCurva[0],
-      //     curva_2: pDisponivelPorCurva[1],
-      //     curva_3: pDisponivelPorCurva[2],
-      //     curva_4: pDisponivelPorCurva[3],
-      //   },
-      //   {
-      //     transaction: t,
-      //   }
-      // );
+      await models.tbdisponibilidadecurva.create(
+        {
+          data: new Date(),
+          curva_1: pDisponivelPorCurva[0],
+          curva_2: pDisponivelPorCurva[1],
+          curva_3: pDisponivelPorCurva[2],
+          curva_4: pDisponivelPorCurva[3],
+        },
+        {
+          transaction: t,
+        }
+      );
 
       // Salvar Histórico de Montantes
-
       console.log(filename, "Salvar Dashboard - Montante Geral:", montanteGeral);
       console.log(filename, "Salvar Dashboard - Montantes por Curva:", montantesPorCurva);
       console.log(filename, "Salvar Dashboard - Montantes Relativos:", pMontantesPorCurva);
 
-      // await models.tbhistoricomontante.create(
-      //   {
-      //     montante_geral: montanteGeral,
-      //     montante_curva_a: montantesPorCurva[0],
-      //     montante_curva_b: montantesPorCurva[1],
-      //     montante_curva_c: montantesPorCurva[2],
-      //     montante_sem_curva: montantesPorCurva[3],
-      //     montante_relativo_curva_a: pMontantesPorCurva[0],
-      //     montante_relativo_curva_b: pMontantesPorCurva[1],
-      //     montante_relativo_curva_c: pMontantesPorCurva[2],
-      //     montante_relativo_sem_curva: pMontantesPorCurva[3],
-      //     data: new Date(),
-      //   },
-      //   {
-      //     transaction: t,
-      //   }
-      // );
+      await models.tbhistoricomontante.create(
+        {
+          montante_geral: montanteGeral,
+          montante_curva_a: montantesPorCurva[0],
+          montante_curva_b: montantesPorCurva[1],
+          montante_curva_c: montantesPorCurva[2],
+          montante_sem_curva: montantesPorCurva[3],
+          montante_relativo_curva_a: pMontantesPorCurva[0],
+          montante_relativo_curva_b: pMontantesPorCurva[1],
+          montante_relativo_curva_c: pMontantesPorCurva[2],
+          montante_relativo_sem_curva: pMontantesPorCurva[3],
+          data: new Date(),
+        },
+        {
+          transaction: t,
+        }
+      );
     });
 
     return ok({
