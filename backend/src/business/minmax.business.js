@@ -110,7 +110,6 @@ module.exports = {
 
   // Recebe a lista  itens, calcula seus contadores e define curvas
   async calculaCurvas(itens) {
-    console.log(itens);
     // Para realizar o cálculo de curva precisamos dos dados das categorias existentes
     // Puxamos esses dados do banco para facilitar a adaptação para possíveis nova categorias
     let { tipoCurvaCategoria, nomeCategoria } = await this.dicionarios();
@@ -264,6 +263,8 @@ module.exports = {
         let totalVendido = ss.sum(dadosSemLoja);
         let moda = ss.mode(dadosSemLoja);
         let desvioPadrao = ss.standardDeviation(dadosSemLoja).toFixed(2);
+
+        console.log(desvioPadrao);
 
         // Vendas destoantes - Geral
         let destoantes = dados.filter((venda) => venda[0] >= desvioPadrao && venda[1] != 203398134);
