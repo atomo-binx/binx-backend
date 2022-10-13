@@ -1,12 +1,3 @@
-const Produto = require("../models/produto.model");
-const Estoque = require("../models/deposito.model");
-const ProdutoEstoque = require("../models/produtoDeposito.model");
-const Disponibilidade = require("../models/disponibilidade.model");
-const DisponibilidadeCurva = require("../models/disponibilidadeCurva.model");
-const Curva = require("../models/curva.model");
-const PedidoCompra = require("../models/pedidoCompra.model");
-const CompraProduto = require("../models/compraProduto.model");
-
 const { models } = require("../modules/sequelize");
 
 const sequelize = require("../services/sequelize");
@@ -20,8 +11,7 @@ const validator = require("validator");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 const ExcelJS = require("exceljs");
-const http = require("../utils/http");
-const { ok } = require("../utils/http");
+const { ok, failure } = require("../utils/http");
 
 module.exports = {
   async exportaExcel(nomes, dados) {
@@ -90,7 +80,7 @@ module.exports = {
 
       // }
 
-      const resultados = await Disponibilidade.findAll({
+      const resultados = await models.tbdisponibilidade.findAll({
         attributes: ["data", "valor"],
         order: [["data", "desc"]],
         where: {
@@ -101,123 +91,12 @@ module.exports = {
         raw: true,
       });
 
-      return http.ok(resultados);
+      return ok(resultados);
     } catch (error) {
-      return http.failure({
+      return failure({
         message: `Falha: ${error.message}`,
       });
     }
-  },
-
-  async analiseCompras() {
-    // Configurações de relacionamento
-
-    // Produto, Curva - 1:N
-    Produto.belongsTo(Curva, {
-      foreignKey: "idcurva",
-    });
-
-    // ProdutoEstoque, Estoque - 1:N
-    ProdutoEstoque.belongsTo(Estoque, {
-      foreignKey: "idestoque",
-    });
-
-    Estoque.hasMany(ProdutoEstoque, {
-      foreignKey: "idestoque",
-    });
-
-    // ProdutoEstoque, Produto - 1:N
-    ProdutoEstoque.belongsTo(Produto, {
-      foreignKey: "idsku",
-    });
-
-    Produto.hasMany(ProdutoEstoque, {
-      foreignKey: "idsku",
-    });
-
-    // Produto, Estoque - N:N - Tabela de junção ProdutoEstoque
-    Produto.belongsToMany(Estoque, {
-      through: ProdutoEstoque,
-    });
-
-    // Início do procedimento
-    console.log(filename, "Iniciando conjunto de querys");
-    let queryStart = new Date();
-
-    const produtos = await Produto.findAll({
-      attributes: ["idsku", "nome"],
-      where: {
-        situacao: 1,
-        idsku: {
-          [Op.regexp]: "^[0-9]+$",
-        },
-      },
-      include: [
-        {
-          model: Curva,
-          required: false,
-          attributes: ["nome"],
-        },
-        {
-          model: ProdutoEstoque,
-          required: false,
-          attributes: ["minimo", "maximo"],
-          where: {
-            idestoque: 7141524213,
-          },
-        },
-      ],
-      raw: true,
-    });
-
-    const pedidos = await Produto.findAll({
-      attributes: ["idsku"],
-      where: {
-        situacao: true,
-        idsku: {
-          [Op.notLike]: "%CONS%",
-        },
-      },
-      include: [
-        {
-          model: CompraProduto,
-          required: false,
-          attributes: ["idpedidocompra", "idsku"],
-
-          include: [
-            {
-              model: PedidoCompra,
-              required: false,
-              attributes: ["idpedidocompra"],
-              where: {
-                idstatus: {
-                  [Op.ne]: 2,
-                },
-              },
-            },
-          ],
-        },
-      ],
-      group: "idsku",
-      raw: true,
-    });
-
-    console.log("Produtos:", produtos.length);
-    // console.log(produtos[0]);
-
-    console.log("Pedidos:", pedidos.length);
-    console.log(pedidos);
-    // console.log(pedidos[0]);
-
-    // Debug de tempo gasto na execução das querys
-    let queryEnd = new Date();
-    let queryElapsed = new Date(queryEnd - queryStart).toISOString().slice(11, -1);
-    console.log(filename, "Tempo gasto nas querys: ", queryElapsed);
-
-    return http.ok({
-      message: "Ok",
-      time: queryElapsed,
-    });
   },
 
   async relatorioPrecificacao() {

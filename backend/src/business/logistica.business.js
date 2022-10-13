@@ -124,6 +124,7 @@ module.exports = {
       ShippingItemArray: ShippingItemArray,
     };
 
+    // console.log(filename, "Requisição enviada a Frenet:");
     // console.log(body);
 
     // A API da Frenet não possui código de erro, apenas um campo chamado "message"
@@ -139,6 +140,9 @@ module.exports = {
 
     if (respostaFrenet.data["ShippingSevicesArray"]) {
       const resultadosFrenet = respostaFrenet.data["ShippingSevicesArray"];
+
+      // console.log(filename, "Resposta da Frenet:");
+      // console.log(resultadosFrenet);
 
       const metodosFrete = resultadosFrenet.map((resultado) => {
         if (resultado["Error"]) {

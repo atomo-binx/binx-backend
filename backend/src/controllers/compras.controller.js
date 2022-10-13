@@ -23,15 +23,6 @@ module.exports = {
     res.status(resposta.statusCode).json(resposta.body);
   },
 
-  async analiseCompras(req, res, next) {
-    try {
-      const resposta = await ComprasBusiness.analiseCompras();
-      res.status(resposta.statusCode).json(resposta.body);
-    } catch (error) {
-      next(error);
-    }
-  },
-
   async relatorioPrecificacao(req, res, next) {
     try {
       const resposta = await ComprasBusiness.relatorioPrecificacao();
