@@ -53,8 +53,6 @@ module.exports = {
       nest: true,
     });
 
-    console.log(filename, "Tempo gasto na query:", elapsedTime(queryStart));
-
     const relacionamentos = resultadosQuery.map((res) => {
       return {
         idpedidovenda: res.idpedidovenda,
@@ -69,15 +67,14 @@ module.exports = {
       };
     });
 
-    console.log(filename, "Relacionamentos Venda-Produto processados: ", relacionamentos.length);
+    console.log(filename, "Tempo gasto na query:", elapsedTime(queryStart));
 
     return relacionamentos;
   },
 
-  async calcularDestoante(relacionamentos) {
-    // O parâmetro para cálculo do desvio padrão deve ser uma array com as quantidades vendidas
-
+  gerarQuantidadesVendidas(relacionamentos) {
     // Gerar um dicionário que contenha uma lista com as quantidades vendidas de cada item
+
     // {
     //   "1810": [10, 20, 30, ...],
     //   "1811": [40, 50, 60, ...]
@@ -91,7 +88,11 @@ module.exports = {
       quantidadesVendidas[rel.idsku] = quantidades;
     });
 
-    // Agora com as quantidades vendidas de cada SKU, podemos calcular o valor destoante
+    return quantidadesVendidas;
+  },
+
+  calcularDestoantes(quantidadesVendidas) {
+    // O parâmetro para cálculo do desvio padrão deve ser uma array com as quantidades vendidas
     // O valor destoante será igual ao valor de media + desvio padrão das quantidades vendidas
 
     // O resultado é um dicionário com o valor destoante para cada SKU
@@ -100,7 +101,7 @@ module.exports = {
     //   "1811": 20,
     // }
 
-    let valorDestoante = {};
+    let destoantes = {};
 
     for (const idsku in quantidadesVendidas) {
       const quantidades = quantidadesVendidas[idsku];
@@ -108,18 +109,48 @@ module.exports = {
       const desvio = Number(ss.standardDeviation(quantidades).toFixed(2));
       const destoante = Number(parseFloat(media + desvio).toFixed(2));
 
-      valorDestoante[idsku] = destoante;
+      destoantes[idsku] = destoante;
     }
 
-    return valorDestoante;
+    return destoantes;
   },
 
+  filtrarDestoantes(relacionamentos, destoantes) {
+    const filtrados = relacionamentos.filter((registro) => {
+      const valorCorte = destoantes[registro.idsku];
+
+      if (valorCorte) {
+        if (registro.quantidade >= valorCorte && registro.idloja == "203398134") return false;
+      }
+
+      return true;
+    });
+
+    return filtrados;
+  },
+
+  calcularMediaMes() {},
+
   async analiseCurva() {
+    // Adquirir todos os relacionamentos de venda-produto
     const relacionamentos = await this.query();
 
-    const destoantes = this.calcularDestoante(relacionamentos);
+    console.log(filename, "Quantidade de registros processados:", relacionamentos.length);
 
-    console.log("Fim");
+    let memoryStart = new Date();
+
+    // Gerar dicionário de quantidades vendidas
+    const quantidadesVendidas = this.gerarQuantidadesVendidas(relacionamentos);
+
+    // Calcular valores destoantes para cada produto
+    const destoantes = this.calcularDestoantes(quantidadesVendidas);
+
+    // Remover registros com quantidades destoantes da lista
+    const destoantesFiltrados = this.filtrarDestoantes(relacionamentos, destoantes);
+
+    console.log(filename, "Quantidade de registros filtrados:", destoantesFiltrados.length);
+
+    console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
     return ok({
       message: "Alive",

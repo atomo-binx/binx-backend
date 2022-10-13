@@ -62,6 +62,8 @@ module.exports = {
       if (entrada.formato === "Com Composição") {
         entrada.nomefornecedor = "Estrutura";
       }
+
+      delete entrada.formato;
     });
 
     // console.log(relatorioGeral);
