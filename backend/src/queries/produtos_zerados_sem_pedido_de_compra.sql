@@ -19,7 +19,7 @@ from
       JOIN tbfornecedor ON tbpedidocompra.idfornecedor = tbfornecedor.idfornecedor
     WHERE
       tbpedidocompra.idstatus IN (0, 3)
-      AND tbproduto.idsku REGEXP("^[0-9]+$")
+      AND tbproduto.idsku REGEXP ("^[0-9]+$")
       AND tbprodutoestoque.idestoque = 7141524213
       AND tbprodutoestoque.quantidade < 1
       AND tbfornecedor.idfornecedor NOT IN (
@@ -34,7 +34,7 @@ from
 WHERE
   tbproduto.situacao = 1
   AND tbproduto.idsku <> ""
-  AND tbproduto.idsku REGEXP("^[0-9]+$")
+  AND tbproduto.idsku REGEXP ("^[0-9]+$")
   AND tbprodutoestoque.idestoque = 7141524213
   AND tbprodutoestoque.quantidade < 1
   AND produtoszerados.idsku is null

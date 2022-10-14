@@ -3,23 +3,19 @@ const pdf = require("html-pdf");
 const QRCode = require("qrcode");
 const bling = require("../bling/bling");
 const { Op } = require("sequelize");
-const { ErrorStatus, OkStatus } = require("../modules/codes");
+const { ErrorStatus, OkStatus, NotFound } = require("../modules/codes");
 const { ok, notFound } = require("../modules/http");
 const { dictionary } = require("../utils/dict");
 const { ordenaPorChave } = require("../utils/sort");
 const { replaceAll } = require("../utils/replace");
 
-const Produto = require("../models/produto.model");
-const { NotFound } = require("@aws-sdk/client-s3");
+const { models } = require("../modules/sequelize");
 
 module.exports = {
   async generateQrCode(content) {
-    const qrcodeImage = await QRCode.toDataURL(
-      content || "https://baudaeletronica.com.br",
-      {
-        margin: 1,
-      }
-    );
+    const qrcodeImage = await QRCode.toDataURL(content || "https://baudaeletronica.com.br", {
+      margin: 1,
+    });
 
     return qrcodeImage;
   },
@@ -45,12 +41,12 @@ module.exports = {
     });
   },
 
-  async etiquetaPedido(pedidos) {
+  async etiquetaPedido(pedido) {
     // Busca informações do pedido de venda no Bling
     let dadosVenda = null;
 
     try {
-      dadosVenda = await bling.pedidoVenda(pedidos[0]);
+      dadosVenda = await bling.pedidoVenda(pedido);
     } catch (error) {
       return notFound({
         status: ErrorStatus,
@@ -63,7 +59,7 @@ module.exports = {
     const itens = dadosVenda["itens"];
 
     // Adquire as localizações dos itens no Binx
-    let produtosBinx = await Produto.findAll({
+    let produtosBinx = await models.tbproduto.findAll({
       attributes: ["idsku", "localizacao"],
       where: {
         idsku: {
@@ -78,7 +74,7 @@ module.exports = {
     // Adiciona a localização do Binx ao grupo de itens do Bling
     // Caso o item não tenha sido retornado do Binx, adicionar um campo vazio à localização
     // Aplicar a mesma regra caso o item retornado não tenha localização
-    for (const item of itens) {
+    itens.forEach((item) => {
       if (produtosBinx[item["idsku"]]) {
         // Remover todos os caracteres especiais da localização
         // Necessário para manter a mesma ordem de produtos que a ordenação do Bling
@@ -89,7 +85,7 @@ module.exports = {
       } else {
         item["localizacao"] = "";
       }
-    }
+    });
 
     // Ordena o grupo de itens com base na localização
     ordenaPorChave(itens, "localizacao");
@@ -98,9 +94,7 @@ module.exports = {
     const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
-    let html = (
-      await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")
-    ).toString();
+    let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")).toString();
 
     // Verifica necessidade de aplicar Zoom no arquivo principal de html
     if (process.env.NODE_ENV === "production") {
@@ -108,9 +102,7 @@ module.exports = {
     }
 
     // Carrega uma linha de etiqueta em html
-    let linha = (
-      await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")
-    ).toString();
+    let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")).toString();
 
     // Monta a quantidade correta de linhas
     const quantidadeLinhas = Math.floor(itens.length / 2) + (itens.length % 2);
@@ -124,14 +116,16 @@ module.exports = {
     // Realiza substituições no corpo HTML da etiqueta
     html = html.replace("#LINHAS", linhas);
 
-    for (const [index, item] of itens.entries()) {
+    itens.forEach((item, index) => {
       const nomeProduto = item["nome"];
+
       // Configurar corretamente a quebra de linha
       html = html.replace("#QUEBRA_LINHA", "duas-linhas");
 
       html = html.replace("#PRODUTO", nomeProduto);
       html = html.replace("#SKU", item["idsku"]);
       html = html.replace("#QNTD", item["quantidade"]);
+
       // Limpar uma etiqueta vazia quando houver
       if (index === itens.length - 1) {
         html = html.replace("#PRODUTO", "");
@@ -139,15 +133,8 @@ module.exports = {
         html = html.replace("QNTD: #QNTD", "");
         html = html.replace("Quantidade: #QNTD", "");
       }
-    }
+    });
 
-    // fs.writeFileSync("/tmp/resultado.html", html);
-
-    // Para utilização com o módulo atualizado html-pdf-node
-    // const file = { content: html };
-    // const filename = await this.pdfCreatePromise(file, options);
-
-    // Para utilização com o módulo antigo html-pdf
     const filename = await this.pdfCreatePromise(html, options);
 
     return ok({
@@ -160,7 +147,7 @@ module.exports = {
 
   async etiquetaProduto(idsku, quantidade, etiquetaSimples) {
     // Adquire dados do produto
-    const produto = await Produto.findOne({
+    const produto = await models.tbproduto.findOne({
       attributes: ["idsku", "nome", "urlproduto"],
       where: {
         idsku: idsku,
@@ -179,9 +166,7 @@ module.exports = {
     const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
-    let html = (
-      await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")
-    ).toString();
+    let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")).toString();
 
     // Verifica necessidade de aplicar Zoom no arquivo principal de html
     if (process.env.NODE_ENV === "production") {
@@ -189,9 +174,7 @@ module.exports = {
     }
 
     // Carrega uma linha de etiqueta em html
-    let linha = (
-      await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")
-    ).toString();
+    let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")).toString();
 
     if (etiquetaSimples) {
       // Neste modo, a quantidade representa o número de cópias desejado
@@ -268,8 +251,7 @@ module.exports = {
     return ok({
       status: OkStatus,
       response: {
-        message:
-          "Arquivos de etiquetas do diretório temporário removidas com sucesso.",
+        message: "Arquivos de etiquetas do diretório temporário removidas com sucesso.",
       },
     });
   },
@@ -279,11 +261,7 @@ module.exports = {
     const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
-    let html = (
-      await fs.promises.readFile(
-        "src/etiquetas/etiqueta_corpo personalizada.html"
-      )
-    ).toString();
+    let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo personalizada.html")).toString();
 
     // Verifica necessidade de aplicar Zoom no arquivo principal de html
     if (process.env.NODE_ENV === "production") {
@@ -291,23 +269,105 @@ module.exports = {
     }
 
     // Carrega uma linha de etiqueta em html
-    let linha = (
-      await fs.promises.readFile(
-        "src/etiquetas/etiqueta_linha personalizada.html"
-      )
-    ).toString();
+    let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha personalizada.html")).toString();
 
     html = html.replace("#LINHAS", linha);
 
     // Carrega imagem
     var bitmap = fs.readFileSync("../backend/src/etiquetas/imagens/mike.png");
-    const imgBuffer =
-      "data:image/png;base64," + new Buffer.from(bitmap).toString("base64");
+    const imgBuffer = "data:image/png;base64," + new Buffer.from(bitmap).toString("base64");
     html = html.replace("#IMG_1", imgBuffer);
 
     console.log(imgBuffer);
 
     // Cria o arquivo HTML
+    const filename = await this.pdfCreatePromise(html, options);
+
+    return ok({
+      status: OkStatus,
+      response: {
+        filename,
+      },
+    });
+  },
+
+  async etiquetaEstrutura(idsku) {
+    let produtos = await models.tbestrutura.findAll({
+      attributes: ["skufilho", "quantidade"],
+      where: {
+        skupai: idsku,
+      },
+      include: {
+        model: models.tbproduto,
+        attributes: ["nome", "localizacao"],
+      },
+      raw: true,
+      nest: true,
+    });
+
+    if (produtos.length === 0) {
+      return notFound({
+        status: ErrorStatus,
+        message: "A estrutura com o SKU informado não foi encontrada.",
+      });
+    }
+
+    produtos = produtos.map((produto) => {
+      return {
+        idsku: produto.skufilho,
+        quantidade: produto.quantidade,
+        nome: produto.tbproduto.nome,
+        localizacao: produto.tbproduto.localizacao,
+      };
+    });
+
+    ordenaPorChave(produtos, "localizacao");
+
+    // Parametriza o arquivo PDF
+    const options = { height: "25mm", width: "83mm" };
+
+    // Carrega o corpo da etiqueta em html
+    let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")).toString();
+
+    // Verifica necessidade de aplicar Zoom no arquivo principal de html
+    if (process.env.NODE_ENV === "production") {
+      html = html.replace("zoom: 1;", `zoom: 0.75;`);
+    }
+
+    // Carrega uma linha de etiqueta em html
+    let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")).toString();
+
+    // Monta a quantidade correta de linhas
+    const quantidadeLinhas = Math.floor(produtos.length / 2) + (produtos.length % 2);
+
+    let linhas = "";
+
+    for (let i = 0; i < quantidadeLinhas; i++) {
+      linhas += linha;
+    }
+
+    // Realiza substituições no corpo HTML da etiqueta
+    html = html.replace("#LINHAS", linhas);
+
+    produtos.forEach((item, index) => {
+      const nomeProduto = item["nome"];
+
+      // Configurar corretamente a quebra de linha
+      html = html.replace("#QUEBRA_LINHA", "duas-linhas");
+
+      html = html.replace("#PRODUTO", nomeProduto);
+      html = html.replace("#SKU", item["idsku"]);
+      html = html.replace("#QNTD", item["quantidade"]);
+
+      // Limpar uma etiqueta vazia quando houver
+      if (index === produtos.length - 1) {
+        html = html.replace("#PRODUTO", "");
+        html = html.replace("SKU: #SKU", "");
+        html = html.replace("QNTD: #QNTD", "");
+        html = html.replace("Quantidade: #QNTD", "");
+      }
+    });
+
     const filename = await this.pdfCreatePromise(html, options);
 
     return ok({

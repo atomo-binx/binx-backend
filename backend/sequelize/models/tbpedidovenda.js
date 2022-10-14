@@ -26,6 +26,14 @@ module.exports = function(sequelize, DataTypes) {
         key: 'idstatus'
       }
     },
+    idcontato: {
+      type: DataTypes.STRING(16),
+      allowNull: true,
+      references: {
+        model: 'tbcontato',
+        key: 'idcontato'
+      }
+    },
     cliente: {
       type: DataTypes.STRING(255),
       allowNull: false
@@ -125,14 +133,6 @@ module.exports = function(sequelize, DataTypes) {
     numeroproposta: {
       type: DataTypes.STRING(20),
       allowNull: true
-    },
-    idcontato: {
-      type: DataTypes.STRING(16),
-      allowNull: true,
-      references: {
-        model: 'tbcontato',
-        key: 'idcontato'
-      }
     }
   }, {
     sequelize,

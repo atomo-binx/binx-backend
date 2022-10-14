@@ -1,14 +1,19 @@
 const ComprasBusiness = require("../business/compras.business");
+const DashboardComprasBusiness = require("../business/dashboardcompras.business");
 const { OkStatus } = require("../modules/codes");
 
 module.exports = {
-  async dashboard(req, res) {
-    const resposta = await ComprasBusiness.dashboard();
-    res.status(resposta.statusCode).json(resposta.body);
+  async dashboard(req, res, next) {
+    try {
+      const resposta = await DashboardComprasBusiness.dashboard();
+      res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
   },
 
-  async salvarDashboardDiario(req, res) {
-    const resposta = await ComprasBusiness.salvarDashboardDiario(req);
+  async salvarDashboard(req, res) {
+    const resposta = await DashboardComprasBusiness.salvarDashboard(req);
 
     res.status(resposta.statusCode).json(resposta.body);
   },
@@ -16,15 +21,6 @@ module.exports = {
   async disponibilidade(req, res) {
     const resposta = await ComprasBusiness.disponibilidade(req);
     res.status(resposta.statusCode).json(resposta.body);
-  },
-
-  async analiseCompras(req, res, next) {
-    try {
-      const resposta = await ComprasBusiness.analiseCompras();
-      res.status(resposta.statusCode).json(resposta.body);
-    } catch (error) {
-      next(error);
-    }
   },
 
   async relatorioPrecificacao(req, res, next) {

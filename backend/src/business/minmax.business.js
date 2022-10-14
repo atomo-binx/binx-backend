@@ -187,6 +187,7 @@ module.exports = {
 
     // Define curvas
     for (let i = 0; i < curvasOrdenadas.length; i++) {
+      // 20%, 35%, restante curva C
       let total = curvasOrdenadas[i].length;
       let tgt20 = Math.round((20 * total) / 100);
       let tgt35 = Math.round((35 * total) / 100);
@@ -262,6 +263,8 @@ module.exports = {
         let totalVendido = ss.sum(dadosSemLoja);
         let moda = ss.mode(dadosSemLoja);
         let desvioPadrao = ss.standardDeviation(dadosSemLoja).toFixed(2);
+
+        console.log(desvioPadrao);
 
         // Vendas destoantes - Geral
         let destoantes = dados.filter((venda) => venda[0] >= desvioPadrao && venda[1] != 203398134);

@@ -29,9 +29,7 @@ module.exports = {
     await auto
       .run()
       .then((data) => {
-        const arquivosCriados = Object.getOwnPropertyNames(data.tables).map(
-          (name) => name + ".js"
-        );
+        const arquivosCriados = Object.getOwnPropertyNames(data.tables).map((name) => name + ".js");
 
         fs.readdirSync("./sequelize/models").forEach((file) => {
           if (!arquivosCriados.includes(file) && file !== "init-models.js") {

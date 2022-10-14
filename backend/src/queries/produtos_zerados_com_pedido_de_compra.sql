@@ -1,4 +1,4 @@
--- PRODUTOS ZERADOS QUE ESTÃO EM PEDIDO DE COMPRA
+ -- PRODUTOS ZERADOS QUE ESTÃO EM PEDIDO DE COMPRA
 SELECT
   tbproduto.idsku as "SKU",
   tbproduto.nome as "Nome",
@@ -17,7 +17,7 @@ FROM
   JOIN tbfornecedor ON tbpedidocompra.idfornecedor = tbfornecedor.idfornecedor
 WHERE
   tbpedidocompra.idstatus IN (0, 3)
-  AND tbproduto.idsku REGEXP("^[0-9]+$")
+  AND tbproduto.idsku REGEXP ("^[0-9]+$")
   AND tbprodutoestoque.idestoque = 7141524213
   AND tbprodutoestoque.quantidade < 1
   AND tbfornecedor.idfornecedor NOT IN (
@@ -26,5 +26,5 @@ WHERE
     12331146486,
     15723207321,
     15727421793,
-    9172761844
+    9172761844,
   );

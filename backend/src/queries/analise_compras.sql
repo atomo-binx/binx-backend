@@ -8,7 +8,7 @@ select
   max(tbcompraproduto.idpedidocompra) as "Último Pedido",
   tbstatuscompra.nome as "Situação",
   tbcompraproduto.quantidade as "Qntd. Comprada",
-  replace(tbcompraproduto.valor, ".", ",") as "Custo",
+  replace (tbcompraproduto.valor, ".", ",") as "Custo",
   tbfornecedor.nomefornecedor as "Fornecedor"
 from
   tbproduto
@@ -18,15 +18,15 @@ from
   inner join tbstatuscompra on tbpedidocompra.idstatus = tbstatuscompra.idstatus
   inner join tbprodutoestoque on tbproduto.idsku = tbprodutoestoque.idsku
 where
-  tbproduto.idsku regexp("^[0-9]+$")
+  tbproduto.idsku regexp ("^[0-9]+$")
   and tbproduto.situacao = true
-  and tbfornecedor.idfornecedor not in(
+  and tbfornecedor.idfornecedor not in (
     "7401278638",
     "9172761844",
     "10733118103",
     "12331146486",
     "15723207321",
-    "15727421793"
+    "15727421793",
   )
   and tbpedidocompra.idstatus <> 2
   and tbprodutoestoque.idestoque = 7141524213

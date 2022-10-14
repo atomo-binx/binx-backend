@@ -28,13 +28,9 @@ module.exports = {
     let dicionarioPedidosCompra = {};
 
     pedidosCompra.forEach((pedido) => {
-      if (Object.prototype.hasOwnProperty.call(dicionarioPedidosCompra, pedido.idsku)) {
-        const listaAtual = dicionarioPedidosCompra[pedido.idsku];
-        listaAtual.push(pedido);
-        dicionarioPedidosCompra[pedido.idsku] = [...listaAtual];
-      } else {
-        dicionarioPedidosCompra[pedido.idsku] = [pedido];
-      }
+      const listaAtual = dicionarioPedidosCompra[pedido.idsku] || [];
+      listaAtual.push(pedido);
+      dicionarioPedidosCompra[pedido.idsku] = [...listaAtual];
     });
 
     relatorioGeral.forEach((entrada) => {
@@ -62,6 +58,12 @@ module.exports = {
       entrada.nomefornecedor = pedido ? pedido.nomefornecedor : "-";
       entrada.status = pedido ? pedido.status : "-";
       entrada.codigofornecedor = pedido ? pedido.codigofornecedor : "-";
+
+      if (entrada.formato === "Com Composição") {
+        entrada.nomefornecedor = "Estrutura";
+      }
+
+      delete entrada.formato;
     });
 
     // console.log(relatorioGeral);
@@ -76,7 +78,7 @@ module.exports = {
 
   async querySituacaoEstoque() {
     const resultado = await models.tbproduto.findAll({
-      attributes: ["idsku", "nome", "curva"],
+      attributes: ["idsku", "nome", "curva", "formato"],
       include: [
         {
           model: models.tbprodutoestoque,
