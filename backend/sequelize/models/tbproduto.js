@@ -20,11 +20,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     curva: {
       type: DataTypes.STRING(50),
-      allowNull: true
+      allowNull: true,
+      defaultValue: "Sem Curva"
     },
     idcurva: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: 1,
       references: {
         model: 'tbcurva',
         key: 'idcurva'

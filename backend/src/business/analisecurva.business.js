@@ -3,8 +3,11 @@ const { ok } = require("../modules/http");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
-const { elapsedTime } = require("../utils/time");
+const { elapsedTime, monthDiff } = require("../utils/time");
 const ss = require("simple-statistics");
+const minMax = require("dayjs/plugin/minMax");
+
+dayjs.extend(minMax);
 
 module.exports = {
   async query() {
@@ -30,6 +33,13 @@ module.exports = {
                   [Op.regexp]: "^[0-9]+$",
                 },
               },
+              include: [
+                {
+                  model: models.tbcategoria,
+                  required: true,
+                  attributes: ["nome"],
+                },
+              ],
             },
           ],
         },
@@ -62,6 +72,7 @@ module.exports = {
         nome: res.tbvendaprodutos.tbproduto.nome,
         quantidade: res.tbvendaprodutos.quantidade,
         idcategoria: res.tbvendaprodutos.tbproduto.idcategoria,
+        categoria: res.tbvendaprodutos.tbproduto.tbcategorium.nome,
         valorunidade: parseFloat(res.tbvendaprodutos.valorunidade),
       };
     });
@@ -121,6 +132,8 @@ module.exports = {
       return true;
     });
 
+    // O resultado é uma lista de relacionamentos com os registros destoantes removidos
+
     return filtrados;
   },
 
@@ -154,23 +167,104 @@ module.exports = {
     // Possuindo as datas, realizar o cálculo de média mês
     let mediaMes = {};
 
-    Object.entries(datasQuantidades).map((registro) => {
+    for (let idsku in datasQuantidades) {
+      const registro = datasQuantidades[idsku];
+
       // Realizar somatória das quantidades vendidas
       const somatoriaQuantidades = ss.sum(registro.quantidades);
 
       // Adquirir a menor e maior data de venda
-      const menorData = dayjs.min(registro.datas);
-      const maiorData = dayjs.max(registro.datas);
+      const menorData = registro.datas.reduce(function (a, b) {
+        return a < b ? a : b;
+      });
+      const maiorData = registro.datas.reduce(function (a, b) {
+        return a > b ? a : b;
+      });
+
+      // Calcular a diferença de meses entre a maior e menor data
+      const mesesVendidos = monthDiff(new Date(menorData), new Date(maiorData));
+
+      // Calcular a média mês
+      const media = Number(Number(somatoriaQuantidades / mesesVendidos).toFixed(2));
 
       mediaMes[registro.idsku] = {
         somatoriaQuantidades,
         menorData,
         maiorData,
+        mesesVendidos,
+        media,
       };
-    });
+    }
+
+    // O resultado é um dicionário em que a chave é o SKU do produto
+
+    // {
+    //   '1810': {
+    //     somatoriaQuantidades: 120,
+    //     menorData: '2020-10-01',
+    //     maiorData: '2021-10-01',
+    //     mesesVendidos: 12,
+    //     mediaMes: 10
+    //   }
+    // }
 
     return mediaMes;
   },
+
+  separarPorCategoria(relacionamentos) {
+    const relacionamentosPorCategoria = {};
+
+    relacionamentos.forEach((rel) => {
+      const chave = rel.categoria ? rel.categoria : "Sem Categoria";
+
+      const atuais = relacionamentosPorCategoria[chave] || [];
+
+      atuais.push(rel);
+
+      relacionamentosPorCategoria[chave] = atuais;
+    });
+
+    for (const key in relacionamentosPorCategoria) {
+      console.log(key, relacionamentosPorCategoria[key].length);
+    }
+
+    console.log(relacionamentosPorCategoria["Sem Categoria"]);
+
+    // [
+    //   [
+    //     {
+    //       ...
+    //     },
+    //     {
+    //       ...
+    //     }
+    //   ],
+    //   [
+    //     {
+    //       ...
+    //     },
+    //     {
+    //       ...
+    //     }
+    //   ]
+    // ]
+
+    // {
+    //   "Motores": [
+    //     {
+    //       ...
+    //     },
+    //     {
+    //       ...
+    //     }
+    //   ],
+    //   "Maker": [
+    //     ...
+    //   ]
+    // }
+  },
+
+  gerarContadores(relacionamentos) {},
 
   async analiseCurva() {
     // Adquirir todos os relacionamentos de venda-produto
@@ -186,13 +280,11 @@ module.exports = {
     // Remover registros com quantidades destoantes da lista
     const destoantesFiltrados = this.filtrarDestoantes(relacionamentos, destoantes);
 
-    // Calcular valor de média mês
-    // DEBUG
+    console.log(filename, "Quantidade de registros filtrados:", destoantesFiltrados.length);
+
     const mediaMes = this.calcularMediaMes(destoantesFiltrados);
 
-    console.log(mediaMes);
-
-    console.log(filename, "Quantidade de registros filtrados:", destoantesFiltrados.length);
+    this.separarPorCategoria(relacionamentos);
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
