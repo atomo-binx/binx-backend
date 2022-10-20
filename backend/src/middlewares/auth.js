@@ -3,15 +3,21 @@ const TokenBusiness = require("../business/auth/token.business");
 async function protectedRoute(req, res, next) {
   const token = extractToken(req.headers);
 
-  const decoded = await TokenBusiness.verifyToken(token);
+  console.log(typeof process.env.USE_AUTH);
 
-  if (decoded["status"] === "error") {
-    return res.status(401).json(decoded);
+  if (process.env.USE_AUTH === "true") {
+    const decoded = await TokenBusiness.verifyToken(token);
+
+    if (decoded["status"] === "error") {
+      return res.status(401).json(decoded);
+    }
+
+    req.token = decoded;
+
+    next();
+  } else {
+    next();
   }
-
-  req.token = decoded;
-
-  next();
 }
 
 function extractToken(headers) {
