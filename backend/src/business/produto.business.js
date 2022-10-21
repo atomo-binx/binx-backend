@@ -1,7 +1,3 @@
-const Produto = require("../models/produto.model");
-const ProdutoDeposito = require("../models/produtoDeposito.model");
-const Estrutura = require("../models/estrutura.model");
-
 const Bling = require("../bling/bling");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
@@ -49,24 +45,24 @@ module.exports = {
 
       (async () => {
         await sequelize.transaction(async (t) => {
-          await Produto.upsert(dadosProduto, {
+          await models.tbproduto.upsert(dadosProduto, {
             transaction: t,
           });
 
-          await ProdutoDeposito.bulkCreate(depositos, {
+          await models.tbprodutoestoque.bulkCreate(depositos, {
             updateOnDuplicate: ["quantidade"],
             transaction: t,
           });
 
           if (estrutura) {
-            await Estrutura.destroy({
+            await models.tbestrutura.destroy({
               where: {
                 skupai: dadosProduto["idsku"].toString(),
               },
               transaction: t,
             });
 
-            await Estrutura.bulkCreate(estrutura, {
+            await models.tbestrutura.bulkCreate(estrutura, {
               updateOnDuplicate: ["quantidade"],
               transaction: t,
             });
@@ -117,7 +113,7 @@ module.exports = {
         // Foi percebido, que o callback de movimentação de estoque não está retornando o nome dos produtos
         // O nome retorna apenas para produtos "VIR ...", mas não para SKU's numéricos
         if (dadosProduto["nome"] == null) {
-          const nome = await Produto.findOne({
+          const nome = await models.tbproduto.findOne({
             attributes: ["nome"],
             where: {
               idsku: dadosProduto["codigo"],
@@ -173,7 +169,7 @@ module.exports = {
       if (req.query.busca) {
         const alvoBusca = req.query.busca;
 
-        const resultados = await Produto.findAll({
+        const resultados = await models.tbproduto.findAll({
           attributes: ["idsku", "nome", "localizacao"],
           where: {
             [Op.or]: [
@@ -288,7 +284,11 @@ module.exports = {
         if (finalizadoAtivos) filtros = filtros.replace("[A]", "[I]");
       }
 
-      let produtos = await Bling.listaPaginaProdutos(pagina++, filtros);
+      // Listar página de produtos
+
+      // Para gerar os ID da Componex e do Magento, basta informar um terceiro parâmetro de ID da loja
+      // Deve ser alterado em conjunto com a função de desestruturar produtos do módulo do Bling
+      let produtos = await Bling.listaPaginaProdutos(pagina++, filtros, "203382852");
 
       // Recebemos uma paǵina com produtos
       if (produtos.length > 0) {

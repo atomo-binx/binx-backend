@@ -369,7 +369,10 @@ module.exports = {
     try {
       let estrutura = [];
       let formato = "Simples";
-      let idProdutoLoja = "";
+
+      // Não conseguimos salvar os dois vínculos ao mesmo tempo
+      // Selecionar qual vínculo queremos salvar
+      let idComponex = null;
 
       // Realiza desestruturação dos depósitos para o produto
       const depositos = this.desestruturaDepositos(produto);
@@ -391,7 +394,7 @@ module.exports = {
 
       // Verifica se foi retornado algum vínculo com loja
       if (Object.prototype.hasOwnProperty.call(produto, "produtoLoja")) {
-        idProdutoLoja = produto["produtoLoja"]["idProdutoLoja"];
+        idComponex = produto["produtoLoja"]["idProdutoLoja"];
       }
 
       // Monta produto desestruturado
@@ -405,10 +408,10 @@ module.exports = {
         peso: produto["pesoBruto"] || 0,
         localizacao: produto["localizacao"] || "",
         custo: produto["precoCusto"],
-
         formato,
         estrutura,
-        idProdutoLoja,
+
+        idComponex,
       };
 
       // Retornar apenas produtos que não estejam com SKU vazios
@@ -732,12 +735,13 @@ module.exports = {
   },
 
   // Lista uma única página de produtos do Bling
-  async listaPaginaProdutos(pagina, filtros) {
+  async listaPaginaProdutos(pagina, filtros, loja) {
     return this.blingRequest("GET", `/produtos/page=${pagina}/json`, {
       params: {
         apikey: process.env.BLING_API_KEY,
         estoque: "S",
         filters: filtros,
+        loja: loja || "",
       },
     })
       .then((res) => {

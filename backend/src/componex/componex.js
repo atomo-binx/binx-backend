@@ -13,7 +13,7 @@ module.exports = {
   async detalhesProduto(idProdutoLoja) {
     return new Promise((resolve, reject) => {
       api
-        .get(`/produto/${idProdutoLoja}`)
+        .get(`/produto/${idProdutoLoja}/`)
         .then((res) => {
           resolve(res.data);
         })

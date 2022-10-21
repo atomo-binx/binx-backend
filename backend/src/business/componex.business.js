@@ -14,7 +14,7 @@ module.exports = {
       const produtoBling = await bling.produto(sku, "203426320");
 
       // Adquirir os dados do produto na Loja Integrada (para obter o vínculo de SEO)
-      const produtoLojaIntegrada = await componex.detalhesProduto(produtoBling.idProdutoLoja);
+      const produtoLojaIntegrada = await componex.detalhesProduto(produtoBling.idComponex);
 
       // Adquirir os dados do produto no Magento
       const { produtoMagento, imagensMagento } = await this.dadosMagento(sku);
@@ -64,7 +64,7 @@ module.exports = {
 
         await componex.cadastrarImagens(
           imagem.url,
-          produtoBling.idProdutoLoja,
+          produtoBling.idComponex,
           principal,
           parseInt(imagem.position)
         );
@@ -134,7 +134,7 @@ module.exports = {
       categorias: [],
     };
 
-    await componex.alterarProduto(produtoBling.idProdutoLoja, dadosLojaIntegrada);
+    await componex.alterarProduto(produtoBling.idComponex, dadosLojaIntegrada);
   },
 
   async atualizarSEO(produtoMagento, produtoLojaIntegrada) {
