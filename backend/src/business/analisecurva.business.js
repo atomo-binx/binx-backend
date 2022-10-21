@@ -6,6 +6,7 @@ const dayjs = require("dayjs");
 const { elapsedTime, monthDiff } = require("../utils/time");
 const ss = require("simple-statistics");
 const minMax = require("dayjs/plugin/minMax");
+const currency = require("currency.js");
 
 dayjs.extend(minMax);
 
@@ -264,7 +265,42 @@ module.exports = {
     // }
   },
 
-  gerarContadores(relacionamentos) {},
+  gerarContadores(relacionamentos) {
+    // Core Config?
+    const dicionarioFatores = {
+      Acessórios: "quantidadeVendida",
+      Componentes: "numeroPedidos",
+      Ferramentas: "faturamento",
+      Motores: "quantidadeVendida",
+      Maker: "faturamento",
+    };
+
+    const contadores = {};
+
+    relacionamentos.forEach((rel) => {
+      const fator = dicionarioFatores[rel.categoria] || null;
+
+      if (fator) {
+        let contador = contadores[rel.idsku] || 0;
+
+        switch (fator) {
+          case "quantidadeVendida":
+            contador += rel.quantidade;
+            break;
+          case "numeroPedidos":
+            contador++;
+            break;
+          case "faturamento":
+            contador = currency(contador).add(currency(rel.valorunidade).multiply(rel.quantidade)).value;
+            break;
+        }
+
+        contadores[rel.idsku] = contador;
+      }
+    });
+
+    return contadores;
+  },
 
   async analiseCurva() {
     // Adquirir todos os relacionamentos de venda-produto
@@ -282,9 +318,11 @@ module.exports = {
 
     console.log(filename, "Quantidade de registros filtrados:", destoantesFiltrados.length);
 
-    const mediaMes = this.calcularMediaMes(destoantesFiltrados);
+    // Gerar Contadores
+    const contadores = this.gerarContadores(destoantesFiltrados);
 
-    this.separarPorCategoria(relacionamentos);
+    // Gerar a Média Mês
+    const mediaMes = this.calcularMediaMes(destoantesFiltrados);
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 

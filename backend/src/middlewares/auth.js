@@ -3,8 +3,6 @@ const TokenBusiness = require("../business/auth/token.business");
 async function protectedRoute(req, res, next) {
   const token = extractToken(req.headers);
 
-  console.log(typeof process.env.USE_AUTH);
-
   if (process.env.USE_AUTH === "true") {
     const decoded = await TokenBusiness.verifyToken(token);
 
