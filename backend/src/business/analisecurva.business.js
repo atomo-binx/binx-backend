@@ -1,12 +1,12 @@
 const { models } = require("../modules/sequelize");
 const { ok } = require("../modules/http");
-const filename = __filename.slice(__dirname.length + 1) + " -";
 const { Op } = require("sequelize");
-const dayjs = require("dayjs");
 const { elapsedTime, monthDiff } = require("../utils/time");
+const dayjs = require("dayjs");
 const ss = require("simple-statistics");
 const minMax = require("dayjs/plugin/minMax");
 const currency = require("currency.js");
+const filename = __filename.slice(__dirname.length + 1) + " -";
 
 dayjs.extend(minMax);
 
@@ -83,7 +83,7 @@ module.exports = {
     return relacionamentos;
   },
 
-  calcularDestoantes(relacionamentos) {
+  calcularCorteDestoante(relacionamentos) {
     // O parâmetro para cálculo do desvio padrão deve ser uma array com as quantidades vendidas
 
     // Gerar um dicionário que contenha uma lista com as quantidades vendidas de cada item
@@ -122,13 +122,14 @@ module.exports = {
     return destoantes;
   },
 
-  filtrarDestoantes(relacionamentos, destoantes) {
-    const filtrados = relacionamentos.filter((registro) => {
-      const valorCorte = destoantes[registro.idsku];
+  filtrarDestoantes(relacionamentos, cortesDestoantes) {
+    // Remove da lista de relacionamentos todos os registros com quantidades de venda destoantes
+    // É recebido uma lista de relacionamentos e um dicionário com os valores de corte
 
-      if (valorCorte) {
-        if (registro.quantidade >= valorCorte && registro.idloja == "203398134") return false;
-      }
+    const filtrados = relacionamentos.filter((registro) => {
+      const valorCorte = cortesDestoantes[registro.idsku];
+
+      if (registro.quantidade >= valorCorte && registro.idloja == "203398134") return false;
 
       return true;
     });
@@ -136,6 +137,59 @@ module.exports = {
     // O resultado é uma lista de relacionamentos com os registros destoantes removidos
 
     return filtrados;
+  },
+
+  calcularDestoantesAcumulados(relacionamentos, cortesDestoantes) {
+    // Calcula o valor acumulado total destoante conforme cada uma das categorias
+
+    // Fatores de cálculo para cada uma das categorias - Core Config?
+    const dicionarioFatores = {
+      Acessórios: "quantidadeVendida",
+      Componentes: "numeroPedidos",
+      Ferramentas: "faturamento",
+      Motores: "quantidadeVendida",
+      Maker: "faturamento",
+    };
+
+    // Gerar uma lista com o valor acumulado considerado como destoante
+    // O valor acumulado muda conforme o fator de cálculo de cada categoria
+
+    // {
+    //   "1810": 100,
+    //   "1811": 1569.99
+    // }
+
+    const destoantesAcumulados = {};
+
+    relacionamentos.forEach((rel) => {
+      const valorCorte = cortesDestoantes[rel.idsku];
+
+      const consideradoDestoante = rel.quantidade >= valorCorte && rel.idloja == "203398134";
+
+      if (consideradoDestoante) {
+        const fator = dicionarioFatores[rel.categoria] || null;
+
+        let acumulado = destoantesAcumulados[rel.idsku] || 0;
+
+        switch (fator) {
+          case "quantidadeVendida":
+            acumulado += rel.quantidade;
+            break;
+          case "numeroPedidos":
+            acumulado++;
+            break;
+          case "faturamento":
+            acumulado = currency(acumulado).add(currency(rel.valorunidade).multiply(rel.quantidade)).value;
+            break;
+          default:
+            break;
+        }
+
+        destoantesAcumulados[rel.idsku] = acumulado;
+      }
+    });
+
+    return destoantesAcumulados;
   },
 
   calcularMediaMes(relacionamentos) {
@@ -213,55 +267,46 @@ module.exports = {
   },
 
   separarPorCategoria(relacionamentos) {
-    const relacionamentosPorCategoria = {};
+    // const skuSet = new Set();
+
+    // relacionamentos.forEach((rel) => {
+    //   skuSet.add(rel.idsku);
+    // });
+
+    const produtosPorCategoria = {};
 
     relacionamentos.forEach((rel) => {
-      const chave = rel.categoria ? rel.categoria : "Sem Categoria";
+      const categoria = rel.categoria ? rel.categoria : "Sem Categoria";
 
-      const atuais = relacionamentosPorCategoria[chave] || [];
+      const produtos = produtosPorCategoria[categoria] || {};
 
-      atuais.push(rel);
+      produtos[rel.idsku] = {
+        idsku: rel.idsku,
+        idcategoria: rel.idcategoria,
+        categoria: rel.categoria,
+        nome: rel.nome,
+      };
 
-      relacionamentosPorCategoria[chave] = atuais;
+      produtosPorCategoria[categoria] = produtos;
     });
 
-    for (const key in relacionamentosPorCategoria) {
-      console.log(key, relacionamentosPorCategoria[key].length);
-    }
-
-    console.log(relacionamentosPorCategoria["Sem Categoria"]);
-
-    // [
-    //   [
-    //     {
-    //       ...
-    //     },
-    //     {
-    //       ...
-    //     }
-    //   ],
-    //   [
-    //     {
-    //       ...
-    //     },
-    //     {
-    //       ...
-    //     }
-    //   ]
-    // ]
+    return produtosPorCategoria;
 
     // {
-    //   "Motores": [
-    //     {
-    //       ...
-    //     },
-    //     {
-    //       ...
+    //   "Motores": {
+    //     "SKU": {
+    //       "contador": "",
+    //       "media": "",
+    //       "...": "..."
     //     }
-    //   ],
-    //   "Maker": [
-    //     ...
-    //   ]
+    //   },
+    //   "Maker": {
+    //     "SKU": {
+    //       "contador": "",
+    //       "media": "",
+    //       "...": "..."
+    //     }
+    //   }
     // }
   },
 
@@ -308,15 +353,16 @@ module.exports = {
 
     console.log(filename, "Quantidade de registros processados:", relacionamentos.length);
 
+    // Início do tratamento em memória
     let memoryStart = new Date();
 
-    // Calcular valores destoantes para cada produto
-    const destoantes = this.calcularDestoantes(relacionamentos);
+    // Calcular valores de corte destoante para cada produto
+    const cortesDestoantes = this.calcularCorteDestoante(relacionamentos);
 
     // Remover registros com quantidades destoantes da lista
-    const destoantesFiltrados = this.filtrarDestoantes(relacionamentos, destoantes);
+    const destoantesFiltrados = this.filtrarDestoantes(relacionamentos, cortesDestoantes);
 
-    console.log(filename, "Quantidade de registros filtrados:", destoantesFiltrados.length);
+    console.log(filename, "Quantidade de registros após filtro destoante:", destoantesFiltrados.length);
 
     // Gerar Contadores
     const contadores = this.gerarContadores(destoantesFiltrados);
@@ -324,7 +370,76 @@ module.exports = {
     // Gerar a Média Mês
     const mediaMes = this.calcularMediaMes(destoantesFiltrados);
 
+    // Calcular o valor acumulado considerado como destoantes
+    const destoantesAcumulados = this.calcularDestoantesAcumulados(relacionamentos, cortesDestoantes);
+
+    // Criar listas separadas por categoria
+    const categorias = this.separarPorCategoria(relacionamentos);
+
+    // Acrescentar dados calculados na lista de categorias
+    for (const categoria in categorias) {
+      for (const sku in categorias[categoria]) {
+        const registro = categorias[categoria][sku];
+
+        let contador = 0;
+        let media = 0;
+        let destoante = 0;
+
+        if (Object.prototype.hasOwnProperty.call(contadores, sku)) {
+          contador = contadores[sku];
+        }
+
+        if (Object.prototype.hasOwnProperty.call(mediaMes, sku)) {
+          media = mediaMes[sku].media;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(destoantesAcumulados, sku)) {
+          destoante = destoantesAcumulados[sku];
+        }
+
+        categorias[categoria][sku] = {
+          ...registro,
+          contador,
+          mediaMes: media,
+          destoante,
+        };
+      }
+    }
+
+    // Ordernar lista de categorias pelo contador
+    let chavesOrdenadas = {};
+
+    for (const categoria in categorias) {
+      const keys = Object.keys(categorias[categoria]);
+
+      chavesOrdenadas[categoria] = keys.sort((a, b) => {
+        return categorias[categoria][a].contador - categorias[categoria][b].contador;
+      });
+    }
+
+    for (const categoria in categorias) {
+      for (const sku in categorias[categoria]) {
+        console.log(categoria, sku);
+      }
+    }
+
+    // let categoriasOrdenadas = {};
+
+    // for (const categoria in chavesOrdenadas) {
+    //   chavesOrdenadas[categoria].forEach(item => {
+
+    //   })
+    // }
+
+    // console.log(categoriasOrdenadas["Motores"]);
+
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
+
+    // console.log(Object.keys(chavesOrdenadas).length);
+
+    // console.log(chavesOrdenadas);
+
+    // console.log(categorias["Motores"]);
 
     return ok({
       message: "Alive",
