@@ -63,6 +63,8 @@ module.exports = {
       nest: true,
     });
 
+    // O resultado da query é uma array contendo uma lista de relacionamentos
+    // Cada registro na lista, é uma ocorrência de venda-produto
     const relacionamentos = resultadosQuery.map((res) => {
       return {
         idpedidovenda: res.idpedidovenda,
@@ -100,9 +102,9 @@ module.exports = {
       quantidadesVendidas[rel.idsku] = quantidades;
     });
 
-    // O valor destoante será igual ao valor de media + desvio padrão das quantidades vendidas
+    // O valor de corte destoante será igual ao valor de media + desvio padrão das quantidades vendidas
 
-    // O resultado é um dicionário com o valor destoante para cada SKU
+    // O resultado é um dicionário com o valor de corte destoante para cada SKU
     // {
     //   "1810": 10,
     //   "1811": 20,
@@ -194,15 +196,21 @@ module.exports = {
 
   calcularMediaMes(relacionamentos) {
     // Criar um dicionário contendo as quantidades vendidas e as datas de venda
+
     // {
     //   "1810": {
     //     datas: ["2022-01-01", "2022-01-02", "..."],
     //     quantidades: [10, 20, ...]
     //   }
+    //   "1811": {
+    //     datas: ["2022-03-01", "2022-04-02", "..."],
+    //     quantidades: [100, 200, ...]
+    //   }
     // }
 
     let datasQuantidades = {};
 
+    // Definir as listas de datas e quantidades para cada item presente nos relacionamentos
     relacionamentos.forEach((rel) => {
       const registro = datasQuantidades[rel.idsku] || {};
 
@@ -219,20 +227,21 @@ module.exports = {
       datasQuantidades[rel.idsku] = registro;
     });
 
-    // Possuindo as datas, realizar o cálculo de média mês
+    // Com as listas de datas e quantidades, calcular o valor de média mês e meses vendidos
     let mediaMes = {};
 
     for (let idsku in datasQuantidades) {
-      const registro = datasQuantidades[idsku];
+      const datas = datasQuantidades[idsku].datas;
+      const quantidades = datasQuantidades[idsku].quantidades;
 
       // Realizar somatória das quantidades vendidas
-      const somatoriaQuantidades = ss.sum(registro.quantidades);
+      const somatoriaQuantidades = ss.sum(quantidades);
 
       // Adquirir a menor e maior data de venda
-      const menorData = registro.datas.reduce(function (a, b) {
+      const menorData = datas.reduce(function (a, b) {
         return a < b ? a : b;
       });
-      const maiorData = registro.datas.reduce(function (a, b) {
+      const maiorData = datas.reduce(function (a, b) {
         return a > b ? a : b;
       });
 
@@ -242,12 +251,10 @@ module.exports = {
       // Calcular a média mês
       const media = Number(Number(somatoriaQuantidades / mesesVendidos).toFixed(2));
 
-      mediaMes[registro.idsku] = {
-        somatoriaQuantidades,
-        menorData,
-        maiorData,
-        mesesVendidos,
+      mediaMes[idsku] = {
         media,
+        mesesVendidos,
+        somatoriaQuantidades,
       };
     }
 
@@ -255,11 +262,9 @@ module.exports = {
 
     // {
     //   '1810': {
-    //     somatoriaQuantidades: 120,
-    //     menorData: '2020-10-01',
-    //     maiorData: '2021-10-01',
+    //     media: 10
     //     mesesVendidos: 12,
-    //     mediaMes: 10
+    //     somatoriaQuantidades
     //   }
     // }
 
@@ -267,12 +272,6 @@ module.exports = {
   },
 
   separarPorCategoria(relacionamentos) {
-    // const skuSet = new Set();
-
-    // relacionamentos.forEach((rel) => {
-    //   skuSet.add(rel.idsku);
-    // });
-
     const produtosPorCategoria = {};
 
     relacionamentos.forEach((rel) => {
@@ -282,7 +281,6 @@ module.exports = {
 
       produtos[rel.idsku] = {
         idsku: rel.idsku,
-        idcategoria: rel.idcategoria,
         categoria: rel.categoria,
         nome: rel.nome,
       };
@@ -295,22 +293,21 @@ module.exports = {
     // {
     //   "Motores": {
     //     "SKU": {
-    //       "contador": "",
-    //       "media": "",
-    //       "...": "..."
+    //       "..."
     //     }
     //   },
     //   "Maker": {
     //     "SKU": {
-    //       "contador": "",
-    //       "media": "",
-    //       "...": "..."
+    //       "..."
     //     }
     //   }
+    //   ...
     // }
   },
 
   gerarContadores(relacionamentos) {
+    // Adquirir os fatores de cálculo de curva para cada categoria
+
     // Core Config?
     const dicionarioFatores = {
       Acessórios: "quantidadeVendida",
@@ -319,6 +316,15 @@ module.exports = {
       Motores: "quantidadeVendida",
       Maker: "faturamento",
     };
+
+    // Para cada registro de relacionamento, é adquirido o fator de cálculo de curva desse produto
+    // O contador é calculado conforme o fator da categoria e inserido no dicionario
+
+    // Retorna um dicionário contendo os contadores por SKU
+    // {
+    //   "1810": 100,
+    //   "1811": 1564.96
+    // }
 
     const contadores = {};
 
@@ -345,6 +351,62 @@ module.exports = {
     });
 
     return contadores;
+  },
+
+  ordernarPorContador(categorias) {
+    // Gerar lista de SKUS ordenados por cada categoria
+    // O critério de ordenação é o valor do Contador
+    // Primeiramente, teremos apenas a chaves ordenadas, ou seja, apenas os SKU's
+    let chavesOrdenadas = {};
+
+    // Na primeira etapa é gerado um dicionário com os SKU's ordenados por categoria
+
+    // {
+    //   "Motores": [sku, sku, sku, ...],
+    //   "Maker": [sku, sku, sku, ...],
+    // }
+
+    for (const categoria in categorias) {
+      const keys = Object.keys(categorias[categoria]);
+
+      chavesOrdenadas[categoria] = keys.sort((a, b) => {
+        return categorias[categoria][b].contador - categorias[categoria][a].contador;
+      });
+    }
+
+    // Após obter as chaves ordenadas, é necessário remontar o objeto de categorias
+    // Criamos um novo objeto seguindo a ordem das chaves ordenadas
+    let categoriasOrdenadas = {};
+
+    // Para preservar a ordem de inserção, agora a lista foi transformada em uma array
+
+    // {
+    //   "Motores": [
+    //     {
+    //       idsku,
+    //       ...
+    //     },
+    //     {
+    //       {
+    //         idsku,
+    //         ...
+    //       }
+    //     }
+    //   ],
+    //   "Maker": [
+    //     ...
+    //   ]
+    // }
+
+    for (const categoria in chavesOrdenadas) {
+      chavesOrdenadas[categoria].forEach((idsku) => {
+        const atuais = categoriasOrdenadas[categoria] || [];
+        atuais.push(categorias[categoria][idsku]);
+        categoriasOrdenadas[categoria] = atuais;
+      });
+    }
+
+    return categoriasOrdenadas;
   },
 
   async analiseCurva() {
@@ -376,7 +438,7 @@ module.exports = {
     // Criar listas separadas por categoria
     const categorias = this.separarPorCategoria(relacionamentos);
 
-    // Acrescentar dados calculados na lista de categorias
+    // Acrescentar dados calculados na lista de resultados
     for (const categoria in categorias) {
       for (const sku in categorias[categoria]) {
         const registro = categorias[categoria][sku];
@@ -406,40 +468,12 @@ module.exports = {
       }
     }
 
-    // Ordernar lista de categorias pelo contador
-    let chavesOrdenadas = {};
+    // Ordenar os resultados com base no contador
+    const categoriasOrdenadas = this.ordernarPorContador(categorias);
 
-    for (const categoria in categorias) {
-      const keys = Object.keys(categorias[categoria]);
-
-      chavesOrdenadas[categoria] = keys.sort((a, b) => {
-        return categorias[categoria][a].contador - categorias[categoria][b].contador;
-      });
-    }
-
-    for (const categoria in categorias) {
-      for (const sku in categorias[categoria]) {
-        console.log(categoria, sku);
-      }
-    }
-
-    // let categoriasOrdenadas = {};
-
-    // for (const categoria in chavesOrdenadas) {
-    //   chavesOrdenadas[categoria].forEach(item => {
-
-    //   })
-    // }
-
-    // console.log(categoriasOrdenadas["Motores"]);
+    console.log(categoriasOrdenadas["Acessórios"]);
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
-
-    // console.log(Object.keys(chavesOrdenadas).length);
-
-    // console.log(chavesOrdenadas);
-
-    // console.log(categorias["Motores"]);
 
     return ok({
       message: "Alive",
