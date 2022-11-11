@@ -2,6 +2,7 @@ const { models } = require("../modules/sequelize");
 const { ok } = require("../modules/http");
 const { Op } = require("sequelize");
 const { elapsedTime, monthDiff } = require("../utils/time");
+const { inRange } = require("../utils/range");
 const dayjs = require("dayjs");
 const ss = require("simple-statistics");
 const minMax = require("dayjs/plugin/minMax");
@@ -227,6 +228,10 @@ module.exports = {
       datasQuantidades[rel.idsku] = registro;
     });
 
+    const tamanhoDatasQuantidades = Object.keys(datasQuantidades).length;
+
+    console.log({ tamanhoDatasQuantidades });
+
     // Com as listas de datas e quantidades, calcular o valor de média mês e meses vendidos
     let mediaMes = {};
 
@@ -374,6 +379,8 @@ module.exports = {
       });
     }
 
+    return chavesOrdenadas;
+
     // Após obter as chaves ordenadas, é necessário remontar o objeto de categorias
     // Criamos um novo objeto seguindo a ordem das chaves ordenadas
     let categoriasOrdenadas = {};
@@ -398,15 +405,122 @@ module.exports = {
     //   ]
     // }
 
-    for (const categoria in chavesOrdenadas) {
-      chavesOrdenadas[categoria].forEach((idsku) => {
-        const atuais = categoriasOrdenadas[categoria] || [];
-        atuais.push(categorias[categoria][idsku]);
-        categoriasOrdenadas[categoria] = atuais;
+    // Por enquanto vamos retornar o início da função, apenas com as chaves
+    // Testando de maneira que se mantenha a mesma lógica geral, de usar ojetos separados
+    // No final vamos tentar juntar tudo
+
+    // for (const categoria in chavesOrdenadas) {
+    //   chavesOrdenadas[categoria].forEach((idsku) => {
+    //     const atuais = categoriasOrdenadas[categoria] || [];
+    //     atuais.push(categorias[categoria][idsku]);
+    //     categoriasOrdenadas[categoria] = atuais;
+    //   });
+    // }
+
+    // return categoriasOrdenadas;
+  },
+
+  calcularCurvas(categoriasOrdenadas) {
+    // É recebido um dicionário de chaves ordenadas por contador
+
+    // {
+    //   "Motores": [sku, sku, sku, ...],
+    //   "Maker": [sku, sku, sku, ...]
+    // }
+
+    // Para cada uma das categorias, é calculado a quantidade de produtos em cada curva
+
+    // O retorno é um dicionário que contem a curva de cada um dos produtos por sku
+
+    // {
+    //   "1810": "Curva A",
+    //   "4010": "Curva B",
+    //   "8321": "Curva C"
+    // }
+
+    // Core Config?
+    const porcentagensCurvas = {
+      "Curva A": 20,
+      "Curva B": 30,
+      "Curva C": 50,
+    };
+
+    let curvas = {};
+
+    for (const categoria in categoriasOrdenadas) {
+      const totalItensCategoria = categoriasOrdenadas[categoria].length;
+
+      const qntdCurvaA = Math.round((totalItensCategoria * porcentagensCurvas["Curva A"]) / 100);
+      const qntdCurvaB = Math.round((totalItensCategoria * porcentagensCurvas["Curva B"]) / 100);
+
+      categoriasOrdenadas[categoria].forEach((idsku, idx) => {
+        curvas[idsku] = "";
+
+        if (inRange(idx, 0, qntdCurvaA)) curvas[idsku] = "Curva A";
+        if (inRange(idx, qntdCurvaA, qntdCurvaA + qntdCurvaB)) curvas[idsku] = "Curva B";
+        if (inRange(idx, qntdCurvaA + qntdCurvaB, totalItensCategoria)) curvas[idsku] = "Curva C";
       });
     }
 
-    return categoriasOrdenadas;
+    return curvas;
+  },
+
+  calcularMinMax(categoriasOrdenadas, curvas, mediaMes) {
+    let valoresMinMax = {};
+
+    const tamanhoCurvas = Object.keys(curvas).length;
+    const tamanhoMedias = Object.keys(mediaMes).length;
+
+    console.log({ tamanhoCurvas, tamanhoMedias });
+
+    for (const categoria in categoriasOrdenadas) {
+      categoriasOrdenadas[categoria].forEach((idsku) => {
+        const curva = curvas[idsku];
+        const media = mediaMes[idsku].media;
+
+        let min = 0;
+        let max = 0;
+
+        if (categoria === "Ferramentas") {
+          min = Math.ceil(media / 4);
+
+          const fatoresMax = {
+            "Curva A": 1,
+            "Curva B": 2,
+            "Curva C": 3,
+          };
+
+          const fatorMax = fatoresMax[curva];
+
+          if (fatorMax) {
+            max = media * fatorMax;
+          }
+        } else {
+          min = media;
+
+          const fatoresMax = {
+            "Curva A": 3,
+            "Curva B": 5,
+            "Curva C": 6,
+          };
+
+          const fatorMax = fatoresMax[curva];
+
+          if (fatorMax) {
+            max = media * fatorMax;
+          }
+        }
+
+        valoresMinMax[idsku] = {
+          min,
+          max,
+        };
+      });
+    }
+
+    console.log(valoresMinMax);
+
+    return valoresMinMax;
   },
 
   async analiseCurva() {
@@ -438,40 +552,42 @@ module.exports = {
     // Criar listas separadas por categoria
     const categorias = this.separarPorCategoria(relacionamentos);
 
-    // Acrescentar dados calculados na lista de resultados
-    for (const categoria in categorias) {
-      for (const sku in categorias[categoria]) {
-        const registro = categorias[categoria][sku];
-
-        let contador = 0;
-        let media = 0;
-        let destoante = 0;
-
-        if (Object.prototype.hasOwnProperty.call(contadores, sku)) {
-          contador = contadores[sku];
-        }
-
-        if (Object.prototype.hasOwnProperty.call(mediaMes, sku)) {
-          media = mediaMes[sku].media;
-        }
-
-        if (Object.prototype.hasOwnProperty.call(destoantesAcumulados, sku)) {
-          destoante = destoantesAcumulados[sku];
-        }
-
-        categorias[categoria][sku] = {
-          ...registro,
-          contador,
-          mediaMes: media,
-          destoante,
-        };
-      }
-    }
-
     // Ordenar os resultados com base no contador
     const categoriasOrdenadas = this.ordernarPorContador(categorias);
 
-    console.log(categoriasOrdenadas["Acessórios"]);
+    const curvas = this.calcularCurvas(categoriasOrdenadas);
+
+    const valoresMinMax = this.calcularMinMax(categoriasOrdenadas, curvas, mediaMes);
+
+    // // Acrescentar dados calculados na lista de resultados
+    // for (const categoria in categorias) {
+    //   for (const sku in categorias[categoria]) {
+    //     const registro = categorias[categoria][sku];
+
+    //     let contador = 0;
+    //     let media = 0;
+    //     let destoante = 0;
+
+    //     if (Object.prototype.hasOwnProperty.call(contadores, sku)) {
+    //       contador = contadores[sku];
+    //     }
+
+    //     if (Object.prototype.hasOwnProperty.call(mediaMes, sku)) {
+    //       media = mediaMes[sku].media;
+    //     }
+
+    //     if (Object.prototype.hasOwnProperty.call(destoantesAcumulados, sku)) {
+    //       destoante = destoantesAcumulados[sku];
+    //     }
+
+    //     categorias[categoria][sku] = {
+    //       ...registro,
+    //       contador,
+    //       mediaMes: media,
+    //       destoante,
+    //     };
+    //   }
+    // }
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
