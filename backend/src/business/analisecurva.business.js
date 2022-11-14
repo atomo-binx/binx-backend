@@ -200,10 +200,12 @@ module.exports = {
 
     // {
     //   "1810": {
+    //     idsku: 1810
     //     datas: ["2022-01-01", "2022-01-02", "..."],
     //     quantidades: [10, 20, ...]
     //   }
     //   "1811": {
+    //     idsku: 1811,
     //     datas: ["2022-03-01", "2022-04-02", "..."],
     //     quantidades: [100, 200, ...]
     //   }
@@ -227,10 +229,6 @@ module.exports = {
 
       datasQuantidades[rel.idsku] = registro;
     });
-
-    const tamanhoDatasQuantidades = Object.keys(datasQuantidades).length;
-
-    console.log({ tamanhoDatasQuantidades });
 
     // Com as listas de datas e quantidades, calcular o valor de média mês e meses vendidos
     let mediaMes = {};
@@ -454,8 +452,6 @@ module.exports = {
       const qntdCurvaB = Math.round((totalItensCategoria * porcentagensCurvas["Curva B"]) / 100);
 
       categoriasOrdenadas[categoria].forEach((idsku, idx) => {
-        curvas[idsku] = "";
-
         if (inRange(idx, 0, qntdCurvaA)) curvas[idsku] = "Curva A";
         if (inRange(idx, qntdCurvaA, qntdCurvaA + qntdCurvaB)) curvas[idsku] = "Curva B";
         if (inRange(idx, qntdCurvaA + qntdCurvaB, totalItensCategoria)) curvas[idsku] = "Curva C";
@@ -466,12 +462,43 @@ module.exports = {
   },
 
   calcularMinMax(categoriasOrdenadas, curvas, mediaMes) {
+    // Recebe uma lista com o SKU's ordenados por categoria
+
+    // {
+    //   "Motores": [sku, sku, sku, ...],
+    //   "Maker": [sku, sku, sku],
+    // }
+
+    // Recebe um dicionário de curvas por SKU
+
+    // {
+    //   "1810": "Curva A",
+    //   "1811": "Curva B",
+    //   "4010": "Curva C",
+    // }
+
+    // Recebe um dicionário com os valores calculados de media/mês
+
+    // {
+    //   "1810": 100
+    //   "1811": 200
+    //   "4010": 300
+    // }
+
+    // Retorna um dicionário contendo os valores de mínimo e máximo calculados por SKU
+
+    // {
+    //   "1810": {
+    //     min: 100,
+    //     max: 200
+    //   },
+    //   "4010": {
+    //     min: 5,
+    //     max: 50
+    //   }
+    // }
+
     let valoresMinMax = {};
-
-    const tamanhoCurvas = Object.keys(curvas).length;
-    const tamanhoMedias = Object.keys(mediaMes).length;
-
-    console.log({ tamanhoCurvas, tamanhoMedias });
 
     for (const categoria in categoriasOrdenadas) {
       categoriasOrdenadas[categoria].forEach((idsku) => {
@@ -493,10 +520,10 @@ module.exports = {
           const fatorMax = fatoresMax[curva];
 
           if (fatorMax) {
-            max = media * fatorMax;
+            max = Math.round(media * fatorMax);
           }
         } else {
-          min = media;
+          min = Math.round(media) || 1;
 
           const fatoresMax = {
             "Curva A": 3,
@@ -507,7 +534,7 @@ module.exports = {
           const fatorMax = fatoresMax[curva];
 
           if (fatorMax) {
-            max = media * fatorMax;
+            max = Math.round(media * fatorMax);
           }
         }
 
@@ -517,8 +544,6 @@ module.exports = {
         };
       });
     }
-
-    console.log(valoresMinMax);
 
     return valoresMinMax;
   },
@@ -536,21 +561,22 @@ module.exports = {
     const cortesDestoantes = this.calcularCorteDestoante(relacionamentos);
 
     // Remover registros com quantidades destoantes da lista
-    const destoantesFiltrados = this.filtrarDestoantes(relacionamentos, cortesDestoantes);
+    const relacionamentosFiltrados = this.filtrarDestoantes(relacionamentos, cortesDestoantes);
 
-    console.log(filename, "Quantidade de registros após filtro destoante:", destoantesFiltrados.length);
+    console.log(filename, "Quantidade de registros após filtro destoante:", relacionamentosFiltrados.length);
 
     // Gerar Contadores
-    const contadores = this.gerarContadores(destoantesFiltrados);
+    const contadores = this.gerarContadores(relacionamentosFiltrados);
 
     // Gerar a Média Mês
-    const mediaMes = this.calcularMediaMes(destoantesFiltrados);
+    const mediaMes = this.calcularMediaMes(relacionamentosFiltrados);
 
     // Calcular o valor acumulado considerado como destoantes
+    // Para cálculo dos destoantes acumulados, utilizar os relacionamentos sem filtros de destoantes
     const destoantesAcumulados = this.calcularDestoantesAcumulados(relacionamentos, cortesDestoantes);
 
     // Criar listas separadas por categoria
-    const categorias = this.separarPorCategoria(relacionamentos);
+    const categorias = this.separarPorCategoria(relacionamentosFiltrados);
 
     // Ordenar os resultados com base no contador
     const categoriasOrdenadas = this.ordernarPorContador(categorias);
@@ -559,35 +585,64 @@ module.exports = {
 
     const valoresMinMax = this.calcularMinMax(categoriasOrdenadas, curvas, mediaMes);
 
-    // // Acrescentar dados calculados na lista de resultados
-    // for (const categoria in categorias) {
-    //   for (const sku in categorias[categoria]) {
-    //     const registro = categorias[categoria][sku];
+    // Debug
+    const tamanhoContadores = Object.keys(contadores).length;
+    const tamanhoMediaMes = Object.keys(mediaMes).length;
+    const tamanhoCurvas = Object.keys(curvas).length;
+    const tamanhoMinMax = Object.keys(valoresMinMax).length;
 
-    //     let contador = 0;
-    //     let media = 0;
-    //     let destoante = 0;
+    console.log({ tamanhoContadores, tamanhoMediaMes, tamanhoCurvas, tamanhoMinMax });
 
-    //     if (Object.prototype.hasOwnProperty.call(contadores, sku)) {
-    //       contador = contadores[sku];
-    //     }
+    let resultadoFinal = {};
 
-    //     if (Object.prototype.hasOwnProperty.call(mediaMes, sku)) {
-    //       media = mediaMes[sku].media;
-    //     }
+    // Acrescentar dados calculados na lista de resultados
+    for (const categoria in categoriasOrdenadas) {
+      resultadoFinal[categoria] = [];
 
-    //     if (Object.prototype.hasOwnProperty.call(destoantesAcumulados, sku)) {
-    //       destoante = destoantesAcumulados[sku];
-    //     }
+      categoriasOrdenadas[categoria].forEach((sku) => {
+        const registro = categorias[categoria][sku];
 
-    //     categorias[categoria][sku] = {
-    //       ...registro,
-    //       contador,
-    //       mediaMes: media,
-    //       destoante,
-    //     };
-    //   }
-    // }
+        let contador = 0;
+        let media = 0;
+        let destoante = 0;
+        let min = 0;
+        let max = 0;
+        let curva = "Sem Curva";
+
+        if (Object.prototype.hasOwnProperty.call(contadores, sku)) {
+          contador = contadores[sku];
+        }
+
+        if (Object.prototype.hasOwnProperty.call(mediaMes, sku)) {
+          media = mediaMes[sku].media;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(destoantesAcumulados, sku)) {
+          destoante = destoantesAcumulados[sku];
+        }
+
+        if (Object.prototype.hasOwnProperty.call(valoresMinMax, sku)) {
+          min = valoresMinMax[sku].min;
+          max = valoresMinMax[sku].max;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(curvas, sku)) {
+          curva = curvas[sku];
+        }
+
+        resultadoFinal[categoria].push({
+          ...registro,
+          contador,
+          mediaMes: media,
+          destoante,
+          min,
+          max,
+          curva,
+        });
+      });
+    }
+
+    console.log(resultadoFinal);
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
