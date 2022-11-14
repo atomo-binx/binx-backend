@@ -595,11 +595,21 @@ module.exports = {
 
     let resultadoFinal = {};
 
+    console.log("Ordenado");
+    categoriasOrdenadas["Motores"].forEach((sku) => console.log(sku));
+
+    console.log("Iniciando Loop");
     // Acrescentar dados calculados na lista de resultados
     for (const categoria in categoriasOrdenadas) {
       resultadoFinal[categoria] = [];
 
+      const categoriaAtual = [];
+
       categoriasOrdenadas[categoria].forEach((sku) => {
+        if (categoria === "Motores") {
+          console.log(sku);
+        }
+
         const registro = categorias[categoria][sku];
 
         let contador = 0;
@@ -630,7 +640,7 @@ module.exports = {
           curva = curvas[sku];
         }
 
-        resultadoFinal[categoria].push({
+        categoriaAtual.push({
           ...registro,
           contador,
           mediaMes: media,
@@ -640,9 +650,11 @@ module.exports = {
           curva,
         });
       });
+
+      resultadoFinal[categoria] = categoriaAtual;
     }
 
-    console.log(resultadoFinal);
+    console.log(resultadoFinal["Motores"]);
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
