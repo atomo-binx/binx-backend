@@ -252,7 +252,7 @@ module.exports = {
       const mesesVendidos = monthDiff(new Date(menorData), new Date(maiorData));
 
       // Calcular a média mês
-      const media = Number(Number(somatoriaQuantidades / mesesVendidos).toFixed(2));
+      const media = Math.round(Number(somatoriaQuantidades / mesesVendidos).toFixed(2));
 
       mediaMes[idsku] = {
         media,
@@ -308,7 +308,7 @@ module.exports = {
     // }
   },
 
-  gerarContadores(relacionamentos) {
+  gerarContadores(relacionamentosFiltrados) {
     // Adquirir os fatores de cálculo de curva para cada categoria
 
     // Core Config?
@@ -319,6 +319,8 @@ module.exports = {
       Motores: "quantidadeVendida",
       Maker: "faturamento",
     };
+
+    // Recebe como parâmetro os relacionamentos após execução do filtro de destoantes
 
     // Para cada registro de relacionamento, é adquirido o fator de cálculo de curva desse produto
     // O contador é calculado conforme o fator da categoria e inserido no dicionario
@@ -331,7 +333,7 @@ module.exports = {
 
     const contadores = {};
 
-    relacionamentos.forEach((rel) => {
+    relacionamentosFiltrados.forEach((rel) => {
       const fator = dicionarioFatores[rel.categoria] || null;
 
       if (fator) {
@@ -356,66 +358,48 @@ module.exports = {
     return contadores;
   },
 
-  ordernarPorContador(categorias) {
-    // Gerar lista de SKUS ordenados por cada categoria
-    // O critério de ordenação é o valor do Contador
-    // Primeiramente, teremos apenas a chaves ordenadas, ou seja, apenas os SKU's
-    let chavesOrdenadas = {};
-
-    // Na primeira etapa é gerado um dicionário com os SKU's ordenados por categoria
+  ordernarPorContador(categorias, contadores) {
+    // Recebe como parâmetros uma lista de produtos separados por categorias
 
     // {
-    //   "Motores": [sku, sku, sku, ...],
-    //   "Maker": [sku, sku, sku, ...],
+    //   "Motores": {
+    //     "idsku": {
+    //       ...
+    //     },
+    //     "idsku": {
+    //       ...
+    //     }
+    //   },
+    //   "Maker": {
+    //    ...
+    //   }
     // }
+
+    // Recebe também um dicionário com os contadores calculados para cada SKU
+
+    // {
+    //   "idsku": 123,
+    //   "idsku": 987
+    // }
+
+    // Retorna um dicionário de listas, ordenados e separados por categoria
+
+    // {
+    //   "Motores": [idsku, idsku, idsku, ...],
+    //   "Maker": [idsku, idsku, idsku, ...]
+    // }
+
+    let chavesOrdenadas = {};
 
     for (const categoria in categorias) {
       const keys = Object.keys(categorias[categoria]);
 
-      chavesOrdenadas[categoria] = keys.sort((a, b) => {
-        return categorias[categoria][b].contador - categorias[categoria][a].contador;
-      });
+      keys.sort((a, b) => contadores[b] - contadores[a]);
+
+      chavesOrdenadas[categoria] = keys;
     }
 
     return chavesOrdenadas;
-
-    // Após obter as chaves ordenadas, é necessário remontar o objeto de categorias
-    // Criamos um novo objeto seguindo a ordem das chaves ordenadas
-    let categoriasOrdenadas = {};
-
-    // Para preservar a ordem de inserção, agora a lista foi transformada em uma array
-
-    // {
-    //   "Motores": [
-    //     {
-    //       idsku,
-    //       ...
-    //     },
-    //     {
-    //       {
-    //         idsku,
-    //         ...
-    //       }
-    //     }
-    //   ],
-    //   "Maker": [
-    //     ...
-    //   ]
-    // }
-
-    // Por enquanto vamos retornar o início da função, apenas com as chaves
-    // Testando de maneira que se mantenha a mesma lógica geral, de usar ojetos separados
-    // No final vamos tentar juntar tudo
-
-    // for (const categoria in chavesOrdenadas) {
-    //   chavesOrdenadas[categoria].forEach((idsku) => {
-    //     const atuais = categoriasOrdenadas[categoria] || [];
-    //     atuais.push(categorias[categoria][idsku]);
-    //     categoriasOrdenadas[categoria] = atuais;
-    //   });
-    // }
-
-    // return categoriasOrdenadas;
   },
 
   calcularCurvas(categoriasOrdenadas) {
@@ -579,26 +563,17 @@ module.exports = {
     const categorias = this.separarPorCategoria(relacionamentosFiltrados);
 
     // Ordenar os resultados com base no contador
-    const categoriasOrdenadas = this.ordernarPorContador(categorias);
+    const categoriasOrdenadas = this.ordernarPorContador(categorias, contadores);
 
+    // Calcular a curva de cada um dos prdutos, agora com a lista ordenada
     const curvas = this.calcularCurvas(categoriasOrdenadas);
 
+    // Calcular os valores de mínimo e máximo para cada produto, com base mas curvas e na média/mês
     const valoresMinMax = this.calcularMinMax(categoriasOrdenadas, curvas, mediaMes);
 
-    // Debug
-    const tamanhoContadores = Object.keys(contadores).length;
-    const tamanhoMediaMes = Object.keys(mediaMes).length;
-    const tamanhoCurvas = Object.keys(curvas).length;
-    const tamanhoMinMax = Object.keys(valoresMinMax).length;
-
-    console.log({ tamanhoContadores, tamanhoMediaMes, tamanhoCurvas, tamanhoMinMax });
-
+    // Gerar um objeto com o resultado final
     let resultadoFinal = {};
 
-    console.log("Ordenado");
-    categoriasOrdenadas["Motores"].forEach((sku) => console.log(sku));
-
-    console.log("Iniciando Loop");
     // Acrescentar dados calculados na lista de resultados
     for (const categoria in categoriasOrdenadas) {
       resultadoFinal[categoria] = [];
@@ -606,15 +581,11 @@ module.exports = {
       const categoriaAtual = [];
 
       categoriasOrdenadas[categoria].forEach((sku) => {
-        if (categoria === "Motores") {
-          console.log(sku);
-        }
-
         const registro = categorias[categoria][sku];
 
         let contador = 0;
         let media = 0;
-        let destoante = 0;
+        let destoantes = 0;
         let min = 0;
         let max = 0;
         let curva = "Sem Curva";
@@ -628,7 +599,7 @@ module.exports = {
         }
 
         if (Object.prototype.hasOwnProperty.call(destoantesAcumulados, sku)) {
-          destoante = destoantesAcumulados[sku];
+          destoantes = destoantesAcumulados[sku];
         }
 
         if (Object.prototype.hasOwnProperty.call(valoresMinMax, sku)) {
@@ -644,7 +615,7 @@ module.exports = {
           ...registro,
           contador,
           mediaMes: media,
-          destoante,
+          destoantes,
           min,
           max,
           curva,
@@ -654,12 +625,20 @@ module.exports = {
       resultadoFinal[categoria] = categoriaAtual;
     }
 
-    console.log(resultadoFinal["Motores"]);
+    // console.log("Resultado Final");
+    // console.log(resultadoFinal["Maker"]);
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
+    // Fase ainda em testes: Converter resultado para retornar para a chamada da API
+    const retornoApi = [];
+
+    for (const categoria in resultadoFinal) {
+      retornoApi.push(...resultadoFinal[categoria]);
+    }
+
     return ok({
-      message: "Alive",
+      curvas: [...retornoApi],
     });
   },
 };
