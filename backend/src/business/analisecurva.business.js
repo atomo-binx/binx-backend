@@ -532,6 +532,38 @@ module.exports = {
     return valoresMinMax;
   },
 
+  async produtosSemVenda(relacionamentos) {
+    const produtosComVenda = new Set(relacionamentos.map((rel) => rel.idsku));
+
+    const produtosSemVenda = await models.tbproduto.findAll({
+      attributes: ["idsku", "nome"],
+      include: {
+        model: models.tbcategoria,
+        required: true,
+        attributes: ["nome"],
+      },
+      where: {
+        situacao: 1,
+        idsku: {
+          [Op.regexp]: "^[0-9]+$",
+          [Op.notIn]: Array.from(produtosComVenda),
+        },
+      },
+      raw: true,
+      nest: true,
+    });
+
+    const resultado = produtosSemVenda.map((produto) => {
+      return {
+        idsku: produto.idsku,
+        nome: produto.nome,
+        categoria: produto.tbcategorium.nome,
+      };
+    });
+
+    return resultado;
+  },
+
   async analiseCurva() {
     // Adquirir todos os relacionamentos de venda-produto
     const relacionamentos = await this.query();
@@ -581,6 +613,8 @@ module.exports = {
       const categoriaAtual = [];
 
       categoriasOrdenadas[categoria].forEach((sku) => {
+        // A lista de produtos separados por categoria contém as informações básicas do produto
+        // Incluem: nome, idsku e categoria, vamos complementar com as informações calculadas
         const registro = categorias[categoria][sku];
 
         let contador = 0;
@@ -625,8 +659,22 @@ module.exports = {
       resultadoFinal[categoria] = categoriaAtual;
     }
 
-    // console.log("Resultado Final");
-    // console.log(resultadoFinal["Maker"]);
+    // Após realizar todas as etapas de cálculo, acrescentar os itens sem venda
+    const produtosSemVenda = await this.produtosSemVenda(relacionamentos);
+
+    produtosSemVenda.forEach((produto) => {
+      const categoriaFinal = resultadoFinal[produto.categoria];
+
+      categoriaFinal.push({
+        ...produto,
+        contador: 0,
+        mediaMes: 0,
+        destoantes: 0,
+        min: 0,
+        max: 0,
+        curva: "Sem Curva",
+      });
+    });
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
