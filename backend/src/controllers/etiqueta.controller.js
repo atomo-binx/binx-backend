@@ -69,7 +69,7 @@ module.exports = {
 
   async etiquetaEstrutura(req, res, next) {
     try {
-      const idsku = parseInt(req.query["idsku"]);
+      const idsku = parseInt(req.query["idsku"]).toString();
 
       const resposta = await EtiquetaBusiness.etiquetaEstrutura(idsku);
 
