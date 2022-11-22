@@ -1,5 +1,5 @@
 const { models } = require("../modules/sequelize");
-const { ok } = require("../modules/http");
+const { ok, failure } = require("../modules/http");
 const { Op } = require("sequelize");
 const { elapsedTime, monthDiff } = require("../utils/time");
 const { inRange } = require("../utils/range");
@@ -533,6 +533,12 @@ module.exports = {
   },
 
   async produtosSemVenda(relacionamentos) {
+    // Recebe a lista de relacionamentos (sem filtro de destoantes)
+    // Cria um Set com a lista de SKU's que contenham registros
+
+    // É realizada uma query no banco para adquirir todos os produtos que não estejam nessa lista
+    // Filtrar produtos por SKU numérico que estejam ativos
+
     const produtosComVenda = new Set(relacionamentos.map((rel) => rel.idsku));
 
     const produtosSemVenda = await models.tbproduto.findAll({
@@ -553,6 +559,21 @@ module.exports = {
       nest: true,
     });
 
+    // Retorna uma lista de objetos com as informações básicas dos produtos
+
+    // [
+    //   {
+    //     idsku,
+    //     nome,
+    //     cagetoria
+    //   },
+    //   {
+    //     idsku,
+    //     nome,
+    //     categoria
+    //   }
+    // ]
+
     const resultado = produtosSemVenda.map((produto) => {
       return {
         idsku: produto.idsku,
@@ -562,6 +583,47 @@ module.exports = {
     });
 
     return resultado;
+  },
+
+  async exportarBinx(resultadoFinal) {
+    const idCurvas = {
+      "Sem Curva": 1,
+      "Curva A": 2,
+      "Curva B": 3,
+      "Curva C": 4,
+    };
+
+    const pacoteProduto = [];
+    const pacoteProdutoEstoque = [];
+
+    resultadoFinal.forEach((produto) => {
+      pacoteProduto.push({
+        idsku: produto.idsku,
+        curva: produto.curva,
+        idcurva: idCurvas[produto.curva],
+      });
+
+      pacoteProdutoEstoque.push({
+        idestoque: 7141524213,
+        idsku: produto.idsku,
+        minimo: produto.min,
+        maximo: produto.max,
+        mediames: produto.mediaMes,
+      });
+    });
+
+    // Realizar alterações no banco de dados
+    try {
+      await models.tbproduto.bulkCreate(pacoteProduto, {
+        updateOnDuplicate: ["curva", "idcurva"],
+      });
+
+      await models.tbprodutoestoque.bulkCreate(pacoteProdutoEstoque, {
+        updateOnDuplicate: ["maximo", "minimo", "mediames"],
+      });
+    } catch (error) {
+      console.log(filename, "Erro ao exportar análise de curva:", error.message);
+    }
   },
 
   async analiseCurva() {
@@ -604,14 +666,10 @@ module.exports = {
     const valoresMinMax = this.calcularMinMax(categoriasOrdenadas, curvas, mediaMes);
 
     // Gerar um objeto com o resultado final
-    let resultadoFinal = {};
+    let resultadoFinal = [];
 
     // Acrescentar dados calculados na lista de resultados
     for (const categoria in categoriasOrdenadas) {
-      resultadoFinal[categoria] = [];
-
-      const categoriaAtual = [];
-
       categoriasOrdenadas[categoria].forEach((sku) => {
         // A lista de produtos separados por categoria contém as informações básicas do produto
         // Incluem: nome, idsku e categoria, vamos complementar com as informações calculadas
@@ -645,7 +703,7 @@ module.exports = {
           curva = curvas[sku];
         }
 
-        categoriaAtual.push({
+        resultadoFinal.push({
           ...registro,
           contador,
           mediaMes: media,
@@ -655,17 +713,13 @@ module.exports = {
           curva,
         });
       });
-
-      resultadoFinal[categoria] = categoriaAtual;
     }
 
     // Após realizar todas as etapas de cálculo, acrescentar os itens sem venda
     const produtosSemVenda = await this.produtosSemVenda(relacionamentos);
 
     produtosSemVenda.forEach((produto) => {
-      const categoriaFinal = resultadoFinal[produto.categoria];
-
-      categoriaFinal.push({
+      resultadoFinal.push({
         ...produto,
         contador: 0,
         mediaMes: 0,
@@ -678,15 +732,28 @@ module.exports = {
 
     console.log(filename, "Tempo gasto no processamento em memória:", elapsedTime(memoryStart));
 
-    // Fase ainda em testes: Converter resultado para retornar para a chamada da API
-    const retornoApi = [];
+    return ok({
+      curvas: [...resultadoFinal],
+    });
+  },
 
-    for (const categoria in resultadoFinal) {
-      retornoApi.push(...resultadoFinal[categoria]);
+  async exportarAnalise() {
+    const resultadoAnalise = await this.analiseCurva();
+
+    if (resultadoAnalise.statusCode === 200) {
+      const resultadoFinal = resultadoAnalise.body.curvas;
+
+      await this.exportarBinx(resultadoFinal);
+
+      console.log(filename, "Exportação da análise de curva finalizada.");
+
+      return ok({
+        message: "Exportação da análise de curva finalizada.",
+      });
     }
 
-    return ok({
-      curvas: [...retornoApi],
+    return failure({
+      message: "Não foi possível exportar a análise de curva, falha ao executar análise.",
     });
   },
 };
