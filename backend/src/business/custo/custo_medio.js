@@ -3,6 +3,8 @@ const CompraProduto = require("../../models/compraProduto.model");
 const Produto = require("../../models/produto.model");
 const ProdutoDeposito = require("../../models/produtoDeposito.model");
 
+const { models } = require("../../modules/sequelize");
+
 const { Op, Sequelize } = require("sequelize");
 const currency = require("currency.js");
 
@@ -13,19 +15,13 @@ const filename = __filename.slice(__dirname.length + 1) + " -";
 
 // Rotina para cálculo de custo médio de um produto específico
 async function custoMedio(sku, quantidadeVendida) {
-  console.log(
-    filename,
-    `Iniciando cálculo de custo médio para o produto: ${sku}`
-  );
+  console.log(filename, `Iniciando cálculo de custo médio para o produto: ${sku}`);
 
   // Primeiramente adquirir custo e quantidade atual do produto
   const produto = await adquireDadosProduto(sku);
 
   if (!produto) {
-    console.log(
-      filename,
-      `O produto '${sku}' não foi encontrado na base dados.`
-    );
+    console.log(filename, `O produto '${sku}' não foi encontrado na base dados.`);
 
     return http.ok({
       message: `O produto ${sku} não foi encontrado na base dados.`,
@@ -42,33 +38,19 @@ async function custoMedio(sku, quantidadeVendida) {
     console.log(filename, "Quantidade a Atender:", quantidadeAtender);
 
     // Localiza quais pedidos será necessário considerar para atingir a quantidade a atender
-    let pedidosConsiderados = await localizarPedidosCompra(
-      produto,
-      quantidadeAtender
-    );
+    let pedidosConsiderados = await localizarPedidosCompra(produto, quantidadeAtender);
 
     // Identificação dos pedidos de compra completo, iniciar cálculo de custo
-    console.log(
-      filename,
-      "Pedidos de compra considerados:",
-      pedidosConsiderados
-    );
+    console.log(filename, "Pedidos de compra considerados:", pedidosConsiderados);
 
     // Agora que temos os pedidos considerados, encontrar o custo para a quantidade vendida
 
     // Primeiro passo, inverter a array de pedidos considerados
     let ocorrenciasCompra = pedidosConsiderados.reverse();
 
-    ocorrenciasCompra = selecionarOcorrenciasCompra(
-      ocorrenciasCompra,
-      quantidadeVendida
-    );
+    ocorrenciasCompra = selecionarOcorrenciasCompra(ocorrenciasCompra, quantidadeVendida);
 
-    console.log(
-      filename,
-      "Quantidades selecionadas para custo:",
-      ocorrenciasCompra
-    );
+    console.log(filename, "Quantidades selecionadas para custo:", ocorrenciasCompra);
 
     // Para 0 unidades vendidas, considerar como cálculo de custo médio do estoque inteiro
     if (quantidadeVendida == 0) quantidadeVendida = quantidadeEstoque;
@@ -82,10 +64,7 @@ async function custoMedio(sku, quantidadeVendida) {
     console.log(filename, "Custo Acumulado:", BRLString(custoAcumulado, "R$ "));
     console.log(filename, "Custo Médio:", BRLString(custoMedio, "R$ "));
   } else {
-    console.log(
-      filename,
-      `O produto ${sku} possui estoque negativo, não é possível calcular custo médio`
-    );
+    console.log(filename, `O produto ${sku} possui estoque negativo, não é possível calcular custo médio`);
 
     return http.ok({
       message: "...",
@@ -99,22 +78,13 @@ async function custoMedio(sku, quantidadeVendida) {
 
 // Adquire dados de produto
 async function adquireDadosProduto(sku) {
-  ProdutoDeposito.hasMany(Produto, {
-    foreignKey: "idsku",
-  });
-
-  Produto.belongsTo(ProdutoDeposito, {
-    foreignKey: "idsku",
-    targetKey: "idsku",
-  });
-
-  const produto = await Produto.findByPk(sku, {
-    attributes: ["idsku", "custo", "ProdutoDeposito.quantidade"],
+  const produto = await models.tbproduto.findByPk(sku, {
+    attributes: ["idsku", "custo", [Sequelize.col("tbprodutoestoques.quantidade"), "quantidade"]],
     include: [
       {
-        model: ProdutoDeposito,
+        model: models.tbprodutoestoque,
         required: true,
-        attributes: [],
+        attributes: ["quantidade"],
         where: {
           idestoque: {
             [Op.eq]: 7141524213,
@@ -124,6 +94,8 @@ async function adquireDadosProduto(sku) {
     ],
     raw: true,
   });
+
+  console.log(produto);
 
   return produto;
 }
@@ -139,10 +111,7 @@ async function localizarPedidosCompra(produto, quantidadeAtender) {
   // Adquire os pedidos de compra que contenham este item
   do {
     // Percorrer os pedidos apenas se a quantidade acumulada não foi atingida
-    let quantidadeAcumulada = acumularQuantidades(
-      ocorrenciasCompra,
-      "considerado"
-    );
+    let quantidadeAcumulada = acumularQuantidades(ocorrenciasCompra, "considerado");
 
     if (quantidadeAcumulada < quantidadeAtender) {
       // Configurar offset e limit para a query de pedidos de compra
@@ -150,20 +119,14 @@ async function localizarPedidosCompra(produto, quantidadeAtender) {
       let limit = 5;
 
       // Buscar pedidos de venda que contenham esse SKU
-      const resultados = await listaPedidosCompra(
-        produto["idsku"],
-        limit,
-        offset
-      );
+      const resultados = await listaPedidosCompra(produto["idsku"], limit, offset);
 
       if (resultados.length > 0) {
         // Existem pedidos de compra para trabalhar, percorrer cada um deles
 
         for (const pedido of resultados) {
           // Adquirir quantidade acumulada até agora
-          let quantidadeAcumulada = acumularQuantidades(ocorrenciasCompra, [
-            "considerado",
-          ]);
+          let quantidadeAcumulada = acumularQuantidades(ocorrenciasCompra, ["considerado"]);
 
           // Verifica se atingimos a quantidade necessária acumulada
           if (quantidadeAcumulada < quantidadeAtender) {
@@ -208,10 +171,7 @@ async function localizarPedidosCompra(produto, quantidadeAtender) {
             break;
           } else {
             // Nenhum pedido de compra retornado, ou nenhum custo no Bling
-            console.log(
-              filename,
-              `Panic - O produto ${sku} não possui nenhum custo associado.`
-            );
+            console.log(filename, `Panic - O produto ${sku} não possui nenhum custo associado.`);
 
             break;
           }
@@ -281,12 +241,9 @@ function acumularCustos(pedidos) {
     const quantidade = parseInt(elemento["quantidade"]);
 
     // ACC += (Custo * Quantidade)
-    return currency(acumulado, { precision: 6 }).add(
-      custo.multiply(quantidade, { precision: 6 }),
-      {
-        precision: 6,
-      }
-    );
+    return currency(acumulado, { precision: 6 }).add(custo.multiply(quantidade, { precision: 6 }), {
+      precision: 6,
+    });
   };
 
   return pedidos.reduce(reducer, 0);
@@ -307,10 +264,7 @@ function selecionarOcorrenciasCompra(ocorrencias, quantidadeVendida) {
 
   for (const pedido of ocorrencias) {
     // Adquirir quantidade acumulada até agora
-    let quantidadeAcumulada = acumularQuantidades(
-      ocorrenciasCompra,
-      "quantidade"
-    );
+    let quantidadeAcumulada = acumularQuantidades(ocorrenciasCompra, "quantidade");
 
     // Verifica se atingimos a quantidade necessária acumulada
     if (quantidadeAcumulada < quantidadeVendida) {

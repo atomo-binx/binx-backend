@@ -423,8 +423,8 @@ module.exports = {
     // Core Config?
     const porcentagensCurvas = {
       "Curva A": 20,
-      "Curva B": 30,
-      "Curva C": 50,
+      "Curva B": 35,
+      "Curva C": 45,
     };
 
     let curvas = {};
