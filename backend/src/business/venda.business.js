@@ -133,10 +133,8 @@ module.exports = {
   },
 
   async vendaTransaction(pedido) {
-    // Realiza separação de dados de venda e lista de itens
     let { itens, ocorrencias, objFormaPagamento, objContato, ...dadosVenda } = pedido;
 
-    // Transação dos dados no banco de dados
     return sequelize.transaction(async (t) => {
       // Atualiza entidade de forma de pagamento no banco de dados
       if (objFormaPagamento) {
@@ -152,10 +150,10 @@ module.exports = {
         });
       }
 
-      // Tenta inserir dados do pedido de venda
+      // Atualiza dados do pedido de venda
       await models.tbpedidovenda.upsert(dadosVenda, { transaction: t });
 
-      // Tenta inserir relacionamento de venda-produto
+      // Atualiza relacionamentos de venda-produto
       if (itens) {
         await models.tbvendaproduto.destroy({
           where: {
@@ -198,10 +196,18 @@ module.exports = {
   async sincronizaPedido(pedido) {
     console.log(filename, `Pedido de Venda: ${pedido.idpedidovenda} - Iniciando sincronização.`);
 
-    // Caso a transportadora ainda seja "Binx", o pedido está sendo inserido
-    // Para essas situações, precisamos salvar o alias original do pedido
-    if (pedido.transportadora === "Binx") {
-      pedido["alias"] = pedido.servico;
+    const pedidoExistente = await models.tbpedidovenda.findByPk(pedido.idpedidovenda);
+
+    if (!pedidoExistente) {
+      // Salvar o alias de transportadora
+      if (pedido.transportadora === "Binx") {
+        pedido["alias"] = pedido.servico;
+      }
+
+      // Na primeira inserção, calcular o custo de cada um dos produtos presentes na venda
+      pedido.itens.forEach((produto) => {
+        console.log(produto);
+      });
     }
 
     return this.vendaTransaction(pedido).then(() => {

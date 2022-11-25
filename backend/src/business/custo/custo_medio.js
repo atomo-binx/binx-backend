@@ -1,8 +1,6 @@
 const { models } = require("../../modules/sequelize");
 const { Op, Sequelize } = require("sequelize");
 const currency = require("currency.js");
-const http = require("../../utils/http");
-
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
 async function custoMedio(sku, quantidadeVendida) {
@@ -10,6 +8,12 @@ async function custoMedio(sku, quantidadeVendida) {
 
   // Adquirir dados do produto: idsku, custo, quantidade
   const produto = await adquireDadosProduto(sku);
+
+  if (!produto) {
+    return {
+      message: "O produto informado não foi encontrado.",
+    };
+  }
 
   // Desestruturar a quantidade atual em estoque e a quantidade a atender
   let quantidadeEstoque = produto.quantidade;
@@ -24,7 +28,7 @@ async function custoMedio(sku, quantidadeVendida) {
 
   if (quantidadeEstoque >= 0) {
     // Localiza quais pedidos devem ser considerados para atingir a quantidade a atender
-    let pedidosCompra = await localizarPedidosCompra(produto, quantidadeAtender);
+    let pedidosCompra = await pedidosCompraConsiderados(produto, quantidadeAtender);
 
     console.log(filename, "Pedidos de compra considerados:", pedidosCompra);
 
@@ -52,18 +56,16 @@ async function custoMedio(sku, quantidadeVendida) {
     console.log(filename, "Custo Acumulado:", custoAcumulado.value);
     console.log(filename, "Custo Médio:", custoMedio.value);
 
-    return http.ok({
+    return {
       custoMedio,
       custoAcumulado,
       pedidosCompra,
       ocorrenciasCompra,
-    });
+    };
   } else {
     console.log(filename, `O produto ${sku} possui estoque negativo, não é possível calcular custo médio`);
 
-    return http.badRequest({
-      message: `O produto ${sku} possui estoque negativo, não é possível calcular custo médio`,
-    });
+    throw Error(`O produto ${sku} possui estoque negativo, não é possível calcular custo médio`);
   }
 }
 
@@ -99,7 +101,61 @@ async function adquireDadosProduto(sku) {
   return produto;
 }
 
-async function localizarPedidosCompra(produto, quantidadeAtender) {
+async function listaPedidosCompra(sku, limit, offset) {
+  // Retorna uma lista com pedidos de compra que contenham o SKU em questão
+
+  // Os pedidos são atendidos e ordenados do mais novo para o mais antigo
+
+  // [
+  //   {
+  //     idpedidocompra, idsku, quantidade, valor, dataconclusao
+  //   },
+  //   {
+  //     ...
+  //   },
+  // ]
+
+  const resultado = await models.tbcompraproduto.findAll({
+    attributes: [
+      [Sequelize.col("tbpedidocompra.idpedidocompra"), "idpedidocompra"],
+      "idsku",
+      "quantidade",
+      "valor",
+      [Sequelize.col("tbpedidocompra.dataconclusao"), "dataconclusao"],
+    ],
+    where: {
+      idsku: sku,
+    },
+    include: [
+      {
+        model: models.tbpedidocompra,
+        required: true,
+        attributes: [],
+        where: {
+          idstatus: 1,
+          idfornecedor: {
+            [Op.notIn]: [
+              "7401278638", // Baú da Eletrônica Componentes Eletronicos Ltda -
+              "9172761844", // Loja Física
+              "10733118103", // TRANSFERENCIA
+              "12331146486", // estoque virtual
+              "15723207321", // ESTOQUE VIRTUAL
+              "15727421793", // LANÇAMENTO DE ESTOQUE DE PEDIDO
+            ],
+          },
+        },
+      },
+    ],
+    order: [[models.tbpedidocompra, "dataconclusao", "desc"]],
+    limit: limit,
+    offset: offset,
+    raw: true,
+  });
+
+  return resultado;
+}
+
+async function pedidosCompraConsiderados(produto, quantidadeAtender) {
   // Formato do objeto de ocorrências de compra que será retornado:
 
   // {
@@ -180,60 +236,6 @@ async function localizarPedidosCompra(produto, quantidadeAtender) {
   } while (procurando);
 
   return ocorrenciasCompra;
-}
-
-async function listaPedidosCompra(sku, limit, offset) {
-  // Retorna uma lista com pedidos de compra que contenham o SKU em questão
-
-  // Os pedidos são atendidos e ordenados do mais novo para o mais antigo
-
-  // [
-  //   {
-  //     idpedidocompra, idsku, quantidade, valor, dataconclusao
-  //   },
-  //   {
-  //     ...
-  //   },
-  // ]
-
-  const resultado = await models.tbcompraproduto.findAll({
-    attributes: [
-      [Sequelize.col("tbpedidocompra.idpedidocompra"), "idpedidocompra"],
-      "idsku",
-      "quantidade",
-      "valor",
-      [Sequelize.col("tbpedidocompra.dataconclusao"), "dataconclusao"],
-    ],
-    where: {
-      idsku: sku,
-    },
-    include: [
-      {
-        model: models.tbpedidocompra,
-        required: true,
-        attributes: [],
-        where: {
-          idstatus: 1,
-          idfornecedor: {
-            [Op.notIn]: [
-              "7401278638", // Baú da Eletrônica Componentes Eletronicos Ltda -
-              "9172761844", // Loja Física
-              "10733118103", // TRANSFERENCIA
-              "12331146486", // estoque virtual
-              "15723207321", // ESTOQUE VIRTUAL
-              "15727421793", // LANÇAMENTO DE ESTOQUE DE PEDIDO
-            ],
-          },
-        },
-      },
-    ],
-    order: [[models.tbpedidocompra, "dataconclusao", "desc"]],
-    limit: limit,
-    offset: offset,
-    raw: true,
-  });
-
-  return resultado;
 }
 
 function acumularQuantidades(pedidos, chave) {

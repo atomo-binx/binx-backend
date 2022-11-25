@@ -1,7 +1,5 @@
 const { custoMedio } = require("../business/custo/custo_medio");
 
-const http = require("../utils/http");
-
 module.exports = {
   async custoMedio(req, res, next) {
     try {
@@ -9,26 +7,15 @@ module.exports = {
       let sku = req.query.sku;
       let qntd = parseInt(req.query.quantidade);
 
-      // Validação dos parâmetros
-      if (!sku) {
-        const resposta = http.badRequest({
-          message: "É necessário informar o SKU do produto",
+      try {
+        const resposta = await custoMedio(sku, qntd);
+
+        return res.status(200).json(resposta);
+      } catch (error) {
+        return res.status(500).json({
+          message: error.message,
         });
-
-        res.status(resposta.statusCode).json(resposta.body);
       }
-
-      if (isNaN(qntd)) {
-        const resposta = http.badRequest({
-          message: "É necessário informar a quantidade vendida corretamente",
-        });
-
-        res.status(resposta.statusCode).json(resposta.body);
-      }
-
-      const resposta = await custoMedio(sku, qntd);
-
-      res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
       next(error);
     }
