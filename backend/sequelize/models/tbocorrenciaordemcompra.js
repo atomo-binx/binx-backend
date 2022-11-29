@@ -1,48 +1,47 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('tbordemcompra', {
-    idordemcompra: {
+  return sequelize.define('tbocorrenciaordemcompra', {
+    idocorrencia: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    idtipoordemcompra: {
+    idordemcompra: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'tbtipoordemcompra',
-        key: 'id'
+        model: 'tbordemcompra',
+        key: 'idordemcompra'
       }
     },
     idsituacaoordemcompra: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1,
       references: {
         model: 'tbsituacaoordemcompra',
         key: 'id'
       }
     },
-    idcomprador: {
+    idusuario: {
       type: DataTypes.STRING(45),
-      allowNull: true,
+      allowNull: false,
       references: {
         model: 'tbusuario',
         key: 'idusuario'
       }
     },
+    dataocorrencia: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
     observacoes: {
       type: DataTypes.TEXT,
-      allowNull: true
-    },
-    datafinalizacao: {
-      type: DataTypes.DATE,
       allowNull: true
     }
   }, {
     sequelize,
-    tableName: 'tbordemcompra',
+    tableName: 'tbocorrenciaordemcompra',
     timestamps: true,
     indexes: [
       {
@@ -50,25 +49,25 @@ module.exports = function(sequelize, DataTypes) {
         unique: true,
         using: "BTREE",
         fields: [
+          { name: "idocorrencia" },
+        ]
+      },
+      {
+        name: "fk_tbocorrenciaordemcompra_idordemcompra_idx",
+        using: "BTREE",
+        fields: [
           { name: "idordemcompra" },
         ]
       },
       {
-        name: "fk_idtipoordemcompra_idx",
+        name: "fk_tbocorrenciaordemcompra_idusuario_idx",
         using: "BTREE",
         fields: [
-          { name: "idtipoordemcompra" },
+          { name: "idusuario" },
         ]
       },
       {
-        name: "fk_tbordemcompra_idcomprador_idx",
-        using: "BTREE",
-        fields: [
-          { name: "idcomprador" },
-        ]
-      },
-      {
-        name: "fk_tbordemcompra_idsituacaoordemcompra_idx",
+        name: "fk_tbocorrenciaordemcompra_idsituacaoordemcompra_idx",
         using: "BTREE",
         fields: [
           { name: "idsituacaoordemcompra" },

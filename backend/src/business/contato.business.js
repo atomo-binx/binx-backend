@@ -3,6 +3,7 @@ const moment = require("moment");
 const { models } = require("../modules/sequelize");
 const { sequelize } = require("../modules/sequelize");
 const { manterApenasNumeros } = require("../utils/replace");
+const { ok } = require("../modules/http");
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
@@ -128,5 +129,54 @@ module.exports = {
     return sequelize.transaction(async (t) => {
       await models.tbcontato.upsert(contato, { transaction: t });
     });
+  },
+
+  async incluir(contato) {
+    contato.cep = manterApenasNumeros(contato.cep);
+    contato.fone = manterApenasNumeros(contato.fone);
+    contato.celular = manterApenasNumeros(contato.celular);
+
+    const xml = `
+    <?xml version="1.0" encoding="UTF-8"?>
+    <contato>
+      <nome>${contato.nome}</nome>
+      <tipoPessoa>${contato.tipoPessoa}</tipoPessoa>
+      <contribuinte>${contato.contribuinte}</contribuinte>
+      <cpf_cnpj>${contato.cpfCnpj}</cpf_cnpj>
+      <ie_rg>${contato.irRg || ""}</ie_rg>
+      <endereco>${contato.endereco || ""}</endereco>
+      <numero>${contato.numero || ""}</numero>
+      <complemento>${contato.complemento || ""}</complemento>
+      <bairro>${contato.bairro || ""}</bairro>
+      <cep>${contato.cep || ""}</cep>
+      <cidade>${contato.cidade || ""}</cidade>
+      <uf>${contato.uf || ""}</uf>
+      <fone>${contato.fone || ""}</fone>
+      <celular>${contato.celular || ""}</celular>
+      <email>${contato.email || ""}</email>
+      <emailNfe>${contato.emailNfe || ""}</emailNfe>
+      <tipos_contato>
+        <tipo_contato>
+          <descricao>${contato.tipoContato}</descricao>
+        <tipo_contato>
+      </tipos_contato>
+    </contato>
+    `;
+
+    // Incluir o contato no Bling conforme o XML criado
+    // await Bling.incluirContato(xml);
+
+    // Adquirir os dados do contato recém incluído no Bling
+    const contatoIncluido = await Bling.contato(contato.cpfCnpj);
+
+    // Para contatos do tipo "Fornecedor", vamos inclui-lo também no Binx
+    if (contato.tipoContato === "Fornecedor") {
+      await models.tbfornecedor.create({
+        idfornecedor: contatoIncluido.idcontato,
+        nomefornecedor: contatoIncluido.nome,
+      });
+    }
+
+    return ok();
   },
 };

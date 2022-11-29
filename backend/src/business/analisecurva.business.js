@@ -240,19 +240,24 @@ module.exports = {
       // Realizar somatória das quantidades vendidas
       const somatoriaQuantidades = ss.sum(quantidades);
 
-      // Adquirir a menor e maior data de venda
+      // Adquirir a menor data de venda
       const menorData = datas.reduce(function (a, b) {
         return a < b ? a : b;
       });
-      const maiorData = datas.reduce(function (a, b) {
-        return a > b ? a : b;
-      });
+
+      // Considerar como maior data de venda a data atual
+      const maiorData = new Date().toLocaleDateString("en-US");
 
       // Calcular a diferença de meses entre a maior e menor data
-      const mesesVendidos = monthDiff(new Date(menorData), new Date(maiorData));
+      const mesesVendidos = monthDiff(new Date(menorData + "T00:00:00"), new Date(maiorData));
 
       // Calcular a média mês
       const media = Math.round(Number(somatoriaQuantidades / mesesVendidos).toFixed(2));
+
+      // Debug
+      // if (idsku == 7779) {
+      //   console.log({ datas, quantidades, menorData, maiorData, mesesVendidos, media });
+      // }
 
       mediaMes[idsku] = {
         media,
