@@ -26,8 +26,8 @@ var _tbmotivoprecificacao = require("./tbmotivoprecificacao");
 var _tbocorrenciaordemcompra = require("./tbocorrenciaordemcompra");
 var _tbocorrenciavenda = require("./tbocorrenciavenda");
 var _tborcamento = require("./tborcamento");
-var _tborcamentoproduto = require("./tborcamentoproduto");
 var _tbordemcompra = require("./tbordemcompra");
+var _tbordemcompraproduto = require("./tbordemcompraproduto");
 var _tbpedidocompra = require("./tbpedidocompra");
 var _tbpedidovenda = require("./tbpedidovenda");
 var _tbprecificacao = require("./tbprecificacao");
@@ -74,8 +74,8 @@ function initModels(sequelize) {
   var tbocorrenciaordemcompra = _tbocorrenciaordemcompra(sequelize, DataTypes);
   var tbocorrenciavenda = _tbocorrenciavenda(sequelize, DataTypes);
   var tborcamento = _tborcamento(sequelize, DataTypes);
-  var tborcamentoproduto = _tborcamentoproduto(sequelize, DataTypes);
   var tbordemcompra = _tbordemcompra(sequelize, DataTypes);
+  var tbordemcompraproduto = _tbordemcompraproduto(sequelize, DataTypes);
   var tbpedidocompra = _tbpedidocompra(sequelize, DataTypes);
   var tbpedidovenda = _tbpedidovenda(sequelize, DataTypes);
   var tbprecificacao = _tbprecificacao(sequelize, DataTypes);
@@ -96,12 +96,12 @@ function initModels(sequelize) {
 
   tbemail.belongsToMany(tbpedidovenda, { as: 'idpedidovenda_tbpedidovendas', through: tbemailenviado, foreignKey: "idemail", otherKey: "idpedidovenda" });
   tbestoque.belongsToMany(tbproduto, { as: 'idsku_tbproduto_tbprodutoestoques', through: tbprodutoestoque, foreignKey: "idestoque", otherKey: "idsku" });
-  tborcamento.belongsToMany(tbproduto, { as: 'idsku_tbproduto_tborcamentoprodutos', through: tborcamentoproduto, foreignKey: "idorcamento", otherKey: "idsku" });
+  tbordemcompra.belongsToMany(tbproduto, { as: 'idsku_tbproduto_tbordemcompraprodutos', through: tbordemcompraproduto, foreignKey: "idordemcompra", otherKey: "idsku" });
   tbpedidocompra.belongsToMany(tbproduto, { as: 'idsku_tbprodutos', through: tbcompraproduto, foreignKey: "idpedidocompra", otherKey: "idsku" });
   tbpedidovenda.belongsToMany(tbemail, { as: 'idemail_tbemails', through: tbemailenviado, foreignKey: "idpedidovenda", otherKey: "idemail" });
   tbpedidovenda.belongsToMany(tbproduto, { as: 'idsku_tbproduto_tbvendaprodutos', through: tbvendaproduto, foreignKey: "idpedidovenda", otherKey: "idsku" });
   tbproduto.belongsToMany(tbestoque, { as: 'idestoque_tbestoques', through: tbprodutoestoque, foreignKey: "idsku", otherKey: "idestoque" });
-  tbproduto.belongsToMany(tborcamento, { as: 'idorcamento_tborcamentos', through: tborcamentoproduto, foreignKey: "idsku", otherKey: "idorcamento" });
+  tbproduto.belongsToMany(tbordemcompra, { as: 'idordemcompra_tbordemcompras', through: tbordemcompraproduto, foreignKey: "idsku", otherKey: "idordemcompra" });
   tbproduto.belongsToMany(tbpedidocompra, { as: 'idpedidocompra_tbpedidocompras', through: tbcompraproduto, foreignKey: "idsku", otherKey: "idpedidocompra" });
   tbproduto.belongsToMany(tbpedidovenda, { as: 'idpedidovenda_tbpedidovenda_tbvendaprodutos', through: tbvendaproduto, foreignKey: "idsku", otherKey: "idpedidovenda" });
   tbproduto.belongsToMany(tbproduto, { as: 'skufilho_tbprodutos', through: tbestrutura, foreignKey: "skupai", otherKey: "skufilho" });
@@ -136,12 +136,12 @@ function initModels(sequelize) {
   tbloja.hasMany(tbpedidovenda, { foreignKey: "idloja"});
   tbprecificacao.belongsTo(tbmotivoprecificacao, { foreignKey: "idmotivo"});
   tbmotivoprecificacao.hasMany(tbprecificacao, { foreignKey: "idmotivo"});
-  tborcamentoproduto.belongsTo(tborcamento, { foreignKey: "idorcamento"});
-  tborcamento.hasMany(tborcamentoproduto, { foreignKey: "idorcamento"});
   tbocorrenciaordemcompra.belongsTo(tbordemcompra, { foreignKey: "idordemcompra"});
   tbordemcompra.hasMany(tbocorrenciaordemcompra, { foreignKey: "idordemcompra"});
   tborcamento.belongsTo(tbordemcompra, { foreignKey: "idordemcompra"});
   tbordemcompra.hasMany(tborcamento, { foreignKey: "idordemcompra"});
+  tbordemcompraproduto.belongsTo(tbordemcompra, { foreignKey: "idordemcompra"});
+  tbordemcompra.hasMany(tbordemcompraproduto, { foreignKey: "idordemcompra"});
   tbcompraproduto.belongsTo(tbpedidocompra, { foreignKey: "idpedidocompra"});
   tbpedidocompra.hasMany(tbcompraproduto, { foreignKey: "idpedidocompra"});
   tbprecificacao.belongsTo(tbpedidocompra, { foreignKey: "pedidocompra"});
@@ -168,8 +168,8 @@ function initModels(sequelize) {
   tbproduto.hasMany(tbkits, { foreignKey: "idskufilho"});
   tborcamento.belongsTo(tbproduto, { foreignKey: "idsku"});
   tbproduto.hasMany(tborcamento, { foreignKey: "idsku"});
-  tborcamentoproduto.belongsTo(tbproduto, { foreignKey: "idsku"});
-  tbproduto.hasMany(tborcamentoproduto, { foreignKey: "idsku"});
+  tbordemcompraproduto.belongsTo(tbproduto, { foreignKey: "idsku"});
+  tbproduto.hasMany(tbordemcompraproduto, { foreignKey: "idsku"});
   tbprecificacao.belongsTo(tbproduto, { foreignKey: "idsku"});
   tbproduto.hasMany(tbprecificacao, { foreignKey: "idsku"});
   tbprodutoestoque.belongsTo(tbproduto, { foreignKey: "idsku"});
@@ -233,8 +233,8 @@ function initModels(sequelize) {
     tbocorrenciaordemcompra,
     tbocorrenciavenda,
     tborcamento,
-    tborcamentoproduto,
     tbordemcompra,
+    tbordemcompraproduto,
     tbpedidocompra,
     tbpedidovenda,
     tbprecificacao,

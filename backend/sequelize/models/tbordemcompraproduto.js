@@ -1,13 +1,13 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('tborcamentoproduto', {
-    idorcamento: {
+  return sequelize.define('tbordemcompraproduto', {
+    idordemcompra: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       references: {
-        model: 'tborcamento',
-        key: 'id'
+        model: 'tbordemcompra',
+        key: 'idordemcompra'
       }
     },
     idsku: {
@@ -29,7 +29,7 @@ module.exports = function(sequelize, DataTypes) {
     }
   }, {
     sequelize,
-    tableName: 'tborcamentoproduto',
+    tableName: 'tbordemcompraproduto',
     timestamps: true,
     indexes: [
       {
@@ -37,7 +37,7 @@ module.exports = function(sequelize, DataTypes) {
         unique: true,
         using: "BTREE",
         fields: [
-          { name: "idorcamento" },
+          { name: "idordemcompra" },
           { name: "idsku" },
         ]
       },

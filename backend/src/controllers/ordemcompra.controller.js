@@ -13,19 +13,21 @@ module.exports = {
     }
   },
 
-  async incluirOcorrencia(req, res, next) {
+  async listar(req, res, next) {
     try {
-      const idUsuario = req.token.sub;
+      const resposta = await OrdemCompraBusiness.listar();
 
-      const { idOrdemCompra, idSituacao, dataOcorrencia, observacoes } = req.body;
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 
-      const resposta = await OrdemCompraBusiness.incluirOcorrencia(
-        idUsuario,
-        idOrdemCompra,
-        idSituacao,
-        dataOcorrencia,
-        observacoes
-      );
+  async incluirProduto(req, res, next) {
+    try {
+      const { idOrdemCompra, produtos } = req.body;
+
+      const resposta = await OrdemCompraBusiness.incluirProduto(idOrdemCompra, produtos);
 
       return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {

@@ -1,5 +1,6 @@
 const { models } = require("../modules/sequelize");
 const { ok } = require("../modules/http");
+const Sequelize = require("sequelize");
 
 module.exports = {
   async incluir(idTipo, observacoes) {
@@ -13,40 +14,48 @@ module.exports = {
     });
   },
 
-  async incluirOcorrencia(idUsuario, idOrdemCompra, idSituacao, dataOcorrencia, observacoes) {
-    // Registrar a ocorrência no banco de dados
-    const ocorrencia = await models.tbocorrenciaordemcompra.create({
-      idordemcompra: idOrdemCompra,
-      idsituacaoordemcompra: idSituacao,
-      idusuario: idUsuario,
-      dataocorrencia: dataOcorrencia,
-      observacoes: observacoes || null,
+  async listar() {
+    const ordensCompra = await models.tbordemcompra.findAll({
+      attributes: [
+        "idordemcompra",
+        "observacoes",
+        "datafinalizacao",
+        "createdAt",
+        [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
+        [Sequelize.col("tbusuario.nome"), "comprador"],
+      ],
+      include: [
+        {
+          model: models.tbsituacaoordemcompra,
+          attributes: [],
+        },
+        {
+          model: models.tbusuario,
+          attributes: [],
+        },
+      ],
+      raw: true,
     });
 
-    // Alterar a situação e o comprador do da ordem de compra no banco de dados
-    let comprador;
+    return ok({
+      ordensCompra,
+    });
+  },
 
-    // A ordem de compra está voltando para "Em Aberto", remover o comprador
-    if (idSituacao === 1) comprador = null;
+  async incluirProduto(idOrdemCompra, produtos) {
+    const pacoteProdutos = produtos.map((produto) => {
+      return {
+        idordemcompra: idOrdemCompra,
+        idsku: produto.idSku,
+        quantidade: produto.quantidade,
+        target: produto.target,
+      };
+    });
 
-    // A ordem de compra está passando de "Em Aberto" para algum outro status, atualizar comprador
-    if (idSituacao !== 1) comprador = idUsuario;
-
-    // Atualizar o modelo de ordem de compra
-    await models.tbordemcompra.update(
-      {
-        idsituacaoordemcompra: idSituacao,
-        idcomprador: comprador,
-      },
-      {
-        where: {
-          idordemcompra: idOrdemCompra,
-        },
-      }
-    );
+    await models.tbordemcompraproduto.bulkCreate(pacoteProdutos);
 
     return ok({
-      ocorrencia: { ...ocorrencia.dataValues },
+      message: "Os produtos foram inseridos na ordem de compra informada.",
     });
   },
 };

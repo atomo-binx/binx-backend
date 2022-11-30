@@ -3,8 +3,8 @@ const { protectedRoute } = require("../middlewares/auth");
 
 function load(routes) {
   routes.post("/ordemcompra", protectedRoute, controller.incluir);
-  routes.post("/ordemcompra/ocorrencia", protectedRoute, controller.incluirOcorrencia);
-  
+  routes.get("/ordemcompra", protectedRoute, controller.listar);
+  routes.post("/ordemcompra/produto", protectedRoute, controller.incluirProduto);
 }
 
 module.exports = load;
