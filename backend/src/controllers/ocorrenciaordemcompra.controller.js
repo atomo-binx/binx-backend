@@ -5,13 +5,12 @@ module.exports = {
     try {
       const idUsuario = req.token.sub;
 
-      const { idOrdemCompra, idSituacao, dataOcorrencia, observacoes } = req.body;
+      const { idOrdemCompra, idSituacao, observacoes } = req.body;
 
       const resposta = await OcorrenciaOrdemCompraBusiness.incluir(
         idUsuario,
         idOrdemCompra,
         idSituacao,
-        dataOcorrencia,
         observacoes
       );
 
@@ -23,7 +22,9 @@ module.exports = {
 
   async listar(req, res, next) {
     try {
-      const resposta = await OcorrenciaOrdemCompraBusiness.listar();
+      const { idOrdemCompra } = req.query;
+
+      const resposta = await OcorrenciaOrdemCompraBusiness.listar(idOrdemCompra);
 
       return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {

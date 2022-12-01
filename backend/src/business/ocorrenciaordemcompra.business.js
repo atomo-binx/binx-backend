@@ -1,8 +1,11 @@
 const { sequelize, models } = require("../modules/sequelize");
 const { ok } = require("../modules/http");
+const Sequelize = require("sequelize");
 
 module.exports = {
-  async incluir(idUsuario, idOrdemCompra, idSituacao, dataOcorrencia, observacoes) {
+  async incluir(idUsuario, idOrdemCompra, idSituacao, observacoes) {
+    idSituacao = parseInt(idSituacao);
+
     return await sequelize.transaction(async (t) => {
       // Registrar a ocorrência no banco de dados
       const ocorrencia = await models.tbocorrenciaordemcompra.create(
@@ -10,7 +13,6 @@ module.exports = {
           idordemcompra: idOrdemCompra,
           idsituacaoordemcompra: idSituacao,
           idusuario: idUsuario,
-          dataocorrencia: dataOcorrencia,
           observacoes: observacoes || null,
         },
         {
@@ -55,14 +57,45 @@ module.exports = {
 
   async listar(idOrdemCompra) {
     const ocorrencias = await models.tbocorrenciaordemcompra.findAll({
+      attributes: [
+        ["idocorrencia", "id"],
+        ["createdAt", "data"],
+        "observacoes",
+        [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
+        [Sequelize.col("tbusuario.nome"), "usuario"],
+      ],
       where: {
         idordemcompra: idOrdemCompra,
       },
+      include: [
+        {
+          model: models.tbsituacaoordemcompra,
+          attributes: [],
+        },
+        {
+          model: models.tbusuario,
+          attributes: [],
+        },
+      ],
+      order: [["createdAt", "desc"]],
       raw: true,
     });
 
+    const ocorrenciasTratadas = ocorrencias.map((ocorrencia) => {
+      const data = new Date(ocorrencia.data).toLocaleDateString();
+      const hora = new Date(ocorrencia.data).toLocaleTimeString();
+
+      delete ocorrencia.data;
+
+      return {
+        ...ocorrencia,
+        data,
+        hora,
+      };
+    });
+
     return ok({
-      ocorrencias,
+      ocorrencias: ocorrenciasTratadas,
     });
   },
 };

@@ -31,10 +31,6 @@ module.exports = function(sequelize, DataTypes) {
         key: 'idusuario'
       }
     },
-    dataocorrencia: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
     observacoes: {
       type: DataTypes.TEXT,
       allowNull: true
