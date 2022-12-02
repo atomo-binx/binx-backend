@@ -34,4 +34,16 @@ module.exports = {
       next(error);
     }
   },
+
+  async lerOrdemCompra(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const resposta = await OrdemCompraBusiness.lerOrdemCompra(id);
+
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

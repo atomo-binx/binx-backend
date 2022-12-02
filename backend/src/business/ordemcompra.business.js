@@ -17,16 +17,21 @@ module.exports = {
   async listar() {
     const ordensCompra = await models.tbordemcompra.findAll({
       attributes: [
-        "idordemcompra",
+        ["idordemcompra", "idOrdemCompra"],
         "observacoes",
-        "datafinalizacao",
-        "createdAt",
+        ["datafinalizacao", "dataFinalizacao"],
+        ["createdAt", "data"],
         [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
         [Sequelize.col("tbusuario.nome"), "comprador"],
+        [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
       ],
       include: [
         {
           model: models.tbsituacaoordemcompra,
+          attributes: [],
+        },
+        {
+          model: models.tbtipoordemcompra,
           attributes: [],
         },
         {
@@ -56,6 +61,42 @@ module.exports = {
 
     return ok({
       message: "Os produtos foram inseridos na ordem de compra informada.",
+    });
+  },
+
+  async lerOrdemCompra(idOrdemCompra) {
+    const ordemCompra = await models.tbordemcompra.findByPk(idOrdemCompra, {
+      attributes: [
+        ["idordemcompra", "idOrdemCompra"],
+        [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
+        [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
+        [Sequelize.col("tbusuario.nome"), "comprador"],
+        "observacoes",
+        ["datafinalizacao", "dataFinalizacao"],
+      ],
+      include: [
+        {
+          model: models.tbordemcompraproduto,
+          attributes: [["idsku", "idSku"], "quantidade", "target"],
+        },
+        {
+          model: models.tbsituacaoordemcompra,
+          attributes: [],
+        },
+        {
+          model: models.tbtipoordemcompra,
+          attributes: [],
+        },
+        {
+          model: models.tbusuario,
+          attributes: [],
+        },
+      ],
+      nest: true,
+    });
+
+    return ok({
+      ordemCompra,
     });
   },
 };
