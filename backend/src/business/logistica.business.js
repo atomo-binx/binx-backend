@@ -123,6 +123,8 @@ module.exports = {
 
     pesoTotal = Number(Number(pesoTotal).toFixed(3));
 
+    if (pesoTotal === 0) pesoTotal = 0.01;
+
     console.log(filename, "Peso total acumulado:", pesoTotal);
 
     const ShippingItemArray = [

@@ -1,6 +1,6 @@
 const { models } = require("../modules/sequelize");
 const { ok } = require("../modules/http");
-const Sequelize = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 
 module.exports = {
   async incluir(idTipo, observacoes) {
@@ -14,7 +14,27 @@ module.exports = {
     });
   },
 
-  async listar() {
+  async listar(busca, situacao, tipo) {
+    let whereClausule = {};
+
+    if (busca) {
+      whereClausule = {
+        [Op.or]: [
+          {
+            observacoes: {
+              [Op.substring]: busca,
+            },
+          },
+          {
+            idordemcompra: busca,
+          },
+        ],
+      };
+    }
+
+    if (situacao) whereClausule.idsituacaoordemcompra = situacao;
+    if (tipo) whereClausule.idtipoordemcompra = tipo;
+
     const ordensCompra = await models.tbordemcompra.findAll({
       attributes: [
         ["idordemcompra", "idOrdemCompra"],
@@ -25,6 +45,7 @@ module.exports = {
         [Sequelize.col("tbusuario.nome"), "comprador"],
         [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
       ],
+      where: whereClausule,
       include: [
         {
           model: models.tbsituacaoordemcompra,

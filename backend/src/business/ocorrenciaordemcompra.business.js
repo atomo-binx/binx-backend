@@ -28,18 +28,29 @@ module.exports = {
 
       // Alterar a situação e o comprador do da ordem de compra no banco de dados
       let comprador = ordemCompra.idcomprador || null;
+      let dataFinalizacao = ordemCompra.datafinalizacao || null;
 
-      // A ordem de compra está voltando para "Em Aberto", remover o comprador
-      if (idSituacao === 1) comprador = null;
+      // A ordem de compra está voltando para "Em Aberto", remover comprador e data de finalização
+      if (idSituacao === 1) {
+        comprador = null;
+        dataFinalizacao = null;
+      }
+
+      // A ordem de compra está sendo "finalizada", atribuir uma data de finalização
+      if (idSituacao === 3 || idSituacao === 4) dataFinalizacao = new Date();
 
       // A ordem está sendo assumida, ou seja, "Em Orçamento", atribuir o comprador que irá assumir
-      if (idSituacao === 2) comprador = idUsuario;
+      if (idSituacao === 2) {
+        comprador = idUsuario;
+        dataFinalizacao = null;
+      }
 
       // Atualizar o modelo de ordem de compra
       await models.tbordemcompra.update(
         {
           idsituacaoordemcompra: idSituacao,
           idcomprador: comprador,
+          datafinalizacao: dataFinalizacao,
         },
         {
           where: {

@@ -15,7 +15,9 @@ module.exports = {
 
   async listar(req, res, next) {
     try {
-      const resposta = await OrdemCompraBusiness.listar();
+      const { busca, situacao, tipo  } = req.query;
+
+      const resposta = await OrdemCompraBusiness.listar(busca, situacao, tipo);
 
       return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
