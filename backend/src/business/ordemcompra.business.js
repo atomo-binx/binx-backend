@@ -86,11 +86,13 @@ module.exports = {
   },
 
   async lerOrdemCompra(idOrdemCompra) {
-    const ordemCompra = await models.tbordemcompra.findByPk(idOrdemCompra, {
+    let ordemCompra = await models.tbordemcompra.findByPk(idOrdemCompra, {
       attributes: [
         ["idordemcompra", "idOrdemCompra"],
         [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
+        ["idtipoordemcompra", "idTipo"],
         [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
+        ["idsituacaoordemcompra", "idSituacao"],
         [Sequelize.col("tbusuario.nome"), "comprador"],
         "observacoes",
         ["datafinalizacao", "dataFinalizacao"],
@@ -99,6 +101,12 @@ module.exports = {
         {
           model: models.tbordemcompraproduto,
           attributes: [["idsku", "idSku"], "quantidade", "target"],
+          include: [
+            {
+              model: models.tbproduto,
+              attributes: ["nome"],
+            },
+          ],
         },
         {
           model: models.tbsituacaoordemcompra,
@@ -113,8 +121,13 @@ module.exports = {
           attributes: [],
         },
       ],
-      nest: true,
     });
+
+    ordemCompra = JSON.parse(JSON.stringify(ordemCompra));
+
+    Object.assign(ordemCompra, { produtos: ordemCompra.tbordemcompraprodutos });
+
+    delete ordemCompra.tbordemcompraprodutos;
 
     return ok({
       ordemCompra,
