@@ -100,11 +100,11 @@ module.exports = {
       include: [
         {
           model: models.tbordemcompraproduto,
-          attributes: [["idsku", "idSku"], "quantidade", "target"],
+          attributes: [["idsku", "idSku"], "quantidade"],
           include: [
             {
               model: models.tbproduto,
-              attributes: ["nome"],
+              attributes: ["nome", "ultimocusto"],
             },
           ],
         },
@@ -125,9 +125,17 @@ module.exports = {
 
     ordemCompra = JSON.parse(JSON.stringify(ordemCompra));
 
+    // Alterar o nome do relacionamento "tbordemcompraprodutos" para "produtos"
     Object.assign(ordemCompra, { produtos: ordemCompra.tbordemcompraprodutos });
-
     delete ordemCompra.tbordemcompraprodutos;
+
+    // Alterar a estrutura do nome do produto de "tbproduto.nome" para "nome"
+    ordemCompra.produtos = ordemCompra.produtos.map((produto) => {
+      produto.nome = produto.tbproduto.nome;
+      produto.ultimoCusto = produto.tbproduto.ultimocusto;
+      delete produto.tbproduto;
+      return produto;
+    });
 
     return ok({
       ordemCompra,
