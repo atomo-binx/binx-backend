@@ -137,6 +137,60 @@ module.exports = {
       return produto;
     });
 
+    // Adquirir os orçamentos, trabalhar a partir daqui
+
+    let orcamentos = [];
+
+    const idOrcamentos = await models.tborcamento.findAll({
+      attributes: ["idFornecedor", [Sequelize.col("tbfornecedor.nomefornecedor"), "fornecedor"]],
+      where: {
+        idordemcompra: idOrdemCompra,
+      },
+      include: [
+        {
+          model: models.tbfornecedor,
+        },
+      ],
+      group: [["idfornecedor"]],
+      raw: true,
+    });
+
+    for (const orcamento of idOrcamentos) {
+      const dadosOrcamento = await models.tborcamento.findAll({
+        attributes: [
+          "idSku",
+          "idSituacaoOrcamento",
+          [Sequelize.col("tbsituacaoorcamento.nome"), "situacao"],
+          "valor",
+        ],
+        where: {
+          idfornecedor: orcamento.idFornecedor,
+          idordemcompra: idOrdemCompra,
+        },
+        include: [
+          {
+            model: models.tbsituacaoorcamento,
+            attributes: [],
+          },
+          {
+            model: models.tbfornecedor,
+            attributes: [],
+          },
+        ],
+        raw: true,
+      });
+
+      orcamentos.push({
+        idFornecedor: orcamento.idFornecedor,
+        fornecedor: orcamento.fornecedor,
+        produtos: [...dadosOrcamento],
+      });
+
+      console.log(dadosOrcamento);
+    }
+
+    ordemCompra.orcamentos = orcamentos;
+
     return ok({
       ordemCompra,
     });
