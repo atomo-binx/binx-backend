@@ -39,4 +39,14 @@ module.exports = {
 
     res.status(resposta.statusCode).json(resposta.body);
   },
+
+  async listarProdutosNomeSku(req, res, next) {
+    try {
+      const resposta = await ProdutoBusiness.listarProdutosNomeSku();
+
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

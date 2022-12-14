@@ -142,7 +142,7 @@ module.exports = {
     let orcamentos = [];
 
     const idOrcamentos = await models.tborcamento.findAll({
-      attributes: ["idFornecedor", [Sequelize.col("tbfornecedor.nomefornecedor"), "fornecedor"]],
+      attributes: ["idFornecedor", [Sequelize.col("tbfornecedor.nomefornecedor"), "nomeFornecedor"]],
       where: {
         idordemcompra: idOrdemCompra,
       },
@@ -182,7 +182,7 @@ module.exports = {
 
       orcamentos.push({
         idFornecedor: orcamento.idFornecedor,
-        fornecedor: orcamento.fornecedor,
+        nomeFornecedor: orcamento.nomeFornecedor,
         produtos: [...dadosOrcamento],
       });
 

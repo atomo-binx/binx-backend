@@ -8,6 +8,7 @@ const { Op } = require("sequelize");
 const http = require("../utils/http");
 
 const { models } = require("../modules/sequelize");
+const { ok } = require("../utils/http");
 
 module.exports = {
   async sincronizaProdutos(dataAlteracao, dataInclusao, situacao, skusNumericos, produtos) {
@@ -356,5 +357,16 @@ module.exports = {
 
     console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
     console.log(filename, "Total de pedidos sincronizados:", inseridos);
+  },
+
+  async listarProdutosNomeSku() {
+    const produtos = await models.tbproduto.findAll({
+      attributes: ["idSku", "nome"],
+      raw: true,
+    });
+
+    return ok({
+      produtos,
+    });
   },
 };
