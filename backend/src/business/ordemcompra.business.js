@@ -60,6 +60,7 @@ module.exports = {
           attributes: [],
         },
       ],
+      order: [["idordemcompra", "desc"]],
       raw: true,
     });
 
@@ -185,8 +186,6 @@ module.exports = {
         nomeFornecedor: orcamento.nomeFornecedor,
         produtos: [...dadosOrcamento],
       });
-
-      console.log(dadosOrcamento);
     }
 
     ordemCompra.orcamentos = orcamentos;
