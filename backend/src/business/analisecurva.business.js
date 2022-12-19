@@ -494,11 +494,10 @@ module.exports = {
         const curva = curvas[idsku];
         const media = mediaMes[idsku].media;
 
-        let min = 0;
-        let max = 0;
+        let min, max;
 
         if (categoria === "Ferramentas") {
-          min = Math.ceil(media / 4);
+          min = Math.ceil(media / 4) || 1;
 
           const fatoresMax = {
             "Curva A": 1,
@@ -509,7 +508,7 @@ module.exports = {
           const fatorMax = fatoresMax[curva];
 
           if (fatorMax) {
-            max = Math.round(media * fatorMax);
+            max = Math.round(media * fatorMax) || 1;
           }
         } else {
           min = Math.round(media) || 1;
@@ -523,7 +522,7 @@ module.exports = {
           const fatorMax = fatoresMax[curva];
 
           if (fatorMax) {
-            max = Math.round(media * fatorMax);
+            max = Math.round(media * fatorMax) || 1;
           }
         }
 
