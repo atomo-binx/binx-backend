@@ -11,8 +11,6 @@ const { replaceAll } = require("../utils/replace");
 
 const { models } = require("../modules/sequelize");
 
-const _filename = __filename.slice(__dirname.length + 1) + " -";
-
 module.exports = {
   async generateQrCode(content) {
     const qrcodeImage = await QRCode.toDataURL(content || "https://baudaeletronica.com.br", {
@@ -32,15 +30,11 @@ module.exports = {
     //   });
     // });
 
-    console.log(_filename, "Iniciando promise de geração de arquivo");
-
     return new Promise((resolve, reject) => {
       pdf.create(html, options).toFile((err, res) => {
         if (!err) {
-          console.log(_filename, "Resolvendo promise de criação de arquivo");
           resolve(res.filename);
         } else {
-          console.log(_filename, "Rejeitando promise de criação de arquivo");
           console.log(err);
           reject(false);
         }
@@ -153,8 +147,6 @@ module.exports = {
   },
 
   async etiquetaProduto(idsku, quantidade, etiquetaSimples) {
-    console.log(_filename, "Iniciando impressão de etiqueta de produto");
-
     // Adquire dados do produto
     const produto = await models.tbproduto.findOne({
       attributes: ["idsku", "nome", "urlproduto"],
@@ -165,26 +157,17 @@ module.exports = {
     });
 
     if (!produto) {
-      console.log(_filename, "Produto não encontrado");
       return notFound({
         status: ErrorStatus,
         message: "Não foi encontrado nenhum produto para o SKU informado.",
       });
     }
 
-    console.log(_filename, "Produto encontrado");
-
     // Parametriza o arquivo PDF
     const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
-    console.log(_filename, "Iniciando leitura asíncrona do corpo da etiqueta");
-
     let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo.html")).toString();
-
-    if (html.length > 0) {
-      console.log(_filename, "Arquivo de copor de etiqueta lido com sucesso");
-    }
 
     // Verifica necessidade de aplicar Zoom no arquivo principal de html
     if (process.env.NODE_ENV === "production") {
@@ -250,8 +233,6 @@ module.exports = {
 
     // Cria o arquivo HTML
     const filename = await this.pdfCreatePromise(html, options);
-
-    console.log(_filename, "Nome do arquivo criado:", filename);
 
     return ok({
       status: OkStatus,
