@@ -2,12 +2,18 @@ const EtiquetaBusiness = require("../business/etiqueta.business");
 const fs = require("fs");
 const { OkStatus } = require("../modules/codes");
 
+const arquivoFilename = __filename.slice(__dirname.length + 1) + " -";
+
 module.exports = {
   async etiquetaProduto(req, res, next) {
     try {
+      console.log(arquivoFilename, "Iniciando chamada de impressão de etiqueta de produto");
+
       const idsku = parseInt(req.query["idsku"]);
       const quantidade = parseInt(req.query["quantidade"]);
       const etiquetaSimples = req.query["etiquetaSimples"] || false;
+
+      console.log(arquivoFilename, { idsku, quantidade, etiquetaSimples });
 
       const resposta = await EtiquetaBusiness.etiquetaProduto(idsku, quantidade, etiquetaSimples);
 
