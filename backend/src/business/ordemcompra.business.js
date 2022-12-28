@@ -122,6 +122,7 @@ module.exports = {
           attributes: [],
         },
       ],
+      order: [[models.tbordemcompraproduto, "createdAt", "asc"]],
     });
 
     ordemCompra = JSON.parse(JSON.stringify(ordemCompra));
@@ -178,6 +179,7 @@ module.exports = {
             attributes: [],
           },
         ],
+        order: [["createdAt", "asc"]],
         raw: true,
       });
 
