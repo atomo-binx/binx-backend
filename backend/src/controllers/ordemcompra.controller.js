@@ -1,7 +1,7 @@
 const OrdemCompraBusiness = require("../business/ordemcompra.business");
 
 module.exports = {
-  async incluir(req, res, next) {
+  async incluirOrdemCompra(req, res, next) {
     try {
       const { idTipo, observacoes } = req.body;
 
@@ -13,9 +13,9 @@ module.exports = {
     }
   },
 
-  async listar(req, res, next) {
+  async listarOrdensCompra(req, res, next) {
     try {
-      const { busca, situacao, tipo  } = req.query;
+      const { busca, situacao, tipo } = req.query;
 
       const resposta = await OrdemCompraBusiness.listar(busca, situacao, tipo);
 
@@ -42,6 +42,20 @@ module.exports = {
       const { id } = req.params;
 
       const resposta = await OrdemCompraBusiness.lerOrdemCompra(id);
+
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async atualizarOrdemCompra(req, res, next) {
+    try {
+      const { id: idOrdemCompra } = req.params;
+
+      const { produtos, orcamentos } = req.body;
+
+      const resposta = await OrdemCompraBusiness.atualizarOrdemCompra(idOrdemCompra, produtos, orcamentos);
 
       return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {

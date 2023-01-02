@@ -22,10 +22,6 @@ module.exports = function(sequelize, DataTypes) {
     quantidade: {
       type: DataTypes.INTEGER,
       allowNull: false
-    },
-    target: {
-      type: DataTypes.DECIMAL(18,6),
-      allowNull: true
     }
   }, {
     sequelize,
@@ -42,7 +38,14 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "fk_tborcamentoproduto_idsku_idx",
+        name: "fk_tbordemcompraproduto_idordemcompra_idx",
+        using: "BTREE",
+        fields: [
+          { name: "idordemcompra" },
+        ]
+      },
+      {
+        name: "fk_tbordemcompraproduto_idsku_idx",
         using: "BTREE",
         fields: [
           { name: "idsku" },

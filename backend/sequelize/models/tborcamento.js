@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     valor: {
       type: DataTypes.DECIMAL(18,6),
-      allowNull: false
+      allowNull: true
     },
     previsao: {
       type: DataTypes.DATE,

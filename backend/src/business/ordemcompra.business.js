@@ -1,6 +1,7 @@
 const { models } = require("../modules/sequelize");
-const { ok } = require("../modules/http");
+const { ok, notFound } = require("../modules/http");
 const { Sequelize, Op } = require("sequelize");
+const { dictionary } = require("../utils/dict");
 
 module.exports = {
   async incluir(idTipo, observacoes) {
@@ -70,19 +71,46 @@ module.exports = {
   },
 
   async incluirProduto(idOrdemCompra, produtos) {
+    // Incluir registro dos produtos na tabela de ordemdecompraproduto
     const pacoteProdutos = produtos.map((produto) => {
       return {
         idordemcompra: idOrdemCompra,
         idsku: produto.idSku,
         quantidade: produto.quantidade,
-        target: produto.target,
       };
     });
 
-    await models.tbordemcompraproduto.bulkCreate(pacoteProdutos);
+    await models.tbordemcompraproduto.bulkCreate(pacoteProdutos, {
+      updateOnDuplicate: ["quantidade"],
+    });
 
     return ok({
       message: "Os produtos foram inseridos na ordem de compra informada.",
+    });
+  },
+
+  async removerProduto(idOrdemCompra, produtos) {},
+
+  async incluirOrcamento(idOrdemCompra, orcamentos) {
+    const pacoteOrcamentos = [];
+
+    orcamentos.forEach((orcamento) => {
+      orcamento.produtos.forEach((produto) => {
+        pacoteOrcamentos.push({
+          id: produto.id,
+          idordemcompra: idOrdemCompra,
+          idsku: produto.idSku,
+          idfornecedor: orcamento.idFornecedor,
+          idsituacaoorcamento: produto.idSituacaoOrcamento,
+          valor: produto.valor,
+        });
+      });
+    });
+
+    console.log(pacoteOrcamentos);
+
+    await models.tborcamento.bulkCreate(pacoteOrcamentos, {
+      updateOnDuplicate: ["idfornecedor", "idsituacaoorcamento", "valor"],
     });
   },
 
@@ -160,6 +188,7 @@ module.exports = {
     for (const orcamento of idOrcamentos) {
       const dadosOrcamento = await models.tborcamento.findAll({
         attributes: [
+          "id",
           "idSku",
           "idSituacaoOrcamento",
           [Sequelize.col("tbsituacaoorcamento.nome"), "situacao"],
@@ -194,6 +223,54 @@ module.exports = {
 
     return ok({
       ordemCompra,
+    });
+  },
+
+  async atualizarOrdemCompra(idOrdemCompra, produtos, orcamentos) {
+    // Primeiro rascunho da rotina de atualização de produtos
+
+    // Verificar existência da ordem de compra informada
+    const ordemCompra = await models.tbordemcompra.findByPk(idOrdemCompra);
+
+    if (!ordemCompra) {
+      return notFound({
+        message: "A ordem de compra informada não foi encontrada.",
+      });
+    }
+
+    // Análise de Produtos
+
+    // Inclusão de novos produtos e atualização das quantidades
+    await this.incluirProduto(idOrdemCompra, produtos);
+
+    // Listar os produtos existentes na ordem de compra informada
+    const produtosOrdemCompra = await models.tbordemcompraproduto.findAll({
+      attributes: ["idSku", "quantidade"],
+      where: {
+        idordemcompra: idOrdemCompra,
+      },
+      raw: true,
+    });
+
+    // Gerar dicionários de produtos
+    const produtosForm = dictionary(produtos, "idSku");
+
+    // Analisar produtos que existam apenas no Binx, e que devem ser removidos
+    const produtosRemover = [];
+
+    produtosOrdemCompra.forEach((produto) => {
+      if (!produtosForm[produto.idSku]) {
+        produtosRemover.push(produto);
+      }
+    });
+
+    console.log({ produtosRemover });
+
+    // Análise de Orçamentos
+    await this.incluirOrcamento(idOrdemCompra, orcamentos);
+
+    return ok({
+      produtos,
     });
   },
 };
