@@ -107,8 +107,6 @@ module.exports = {
       });
     });
 
-    console.log(pacoteOrcamentos);
-
     await models.tborcamento.bulkCreate(pacoteOrcamentos, {
       updateOnDuplicate: ["idfornecedor", "idsituacaoorcamento", "valor"],
     });
