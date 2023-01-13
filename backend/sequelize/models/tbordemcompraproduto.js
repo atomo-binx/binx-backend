@@ -1,19 +1,23 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('tbordemcompraproduto', {
+    id: {
+      autoIncrement: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
+    },
     idordemcompra: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true,
       references: {
         model: 'tbordemcompra',
-        key: 'idordemcompra'
+        key: 'id'
       }
     },
     idsku: {
       type: DataTypes.STRING(50),
       allowNull: false,
-      primaryKey: true,
       references: {
         model: 'tbproduto',
         key: 'idsku'
@@ -33,7 +37,13 @@ module.exports = function(sequelize, DataTypes) {
         unique: true,
         using: "BTREE",
         fields: [
-          { name: "idordemcompra" },
+          { name: "id" },
+        ]
+      },
+      {
+        name: "fk_tbordemcompraproduto_idsku_idx",
+        using: "BTREE",
+        fields: [
           { name: "idsku" },
         ]
       },
@@ -42,13 +52,6 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "idordemcompra" },
-        ]
-      },
-      {
-        name: "fk_tbordemcompraproduto_idsku_idx",
-        using: "BTREE",
-        fields: [
-          { name: "idsku" },
         ]
       },
     ]

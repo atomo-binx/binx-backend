@@ -7,20 +7,12 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    idordemcompra: {
+    idordemcompraproduto: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'tbordemcompra',
-        key: 'idordemcompra'
-      }
-    },
-    idsku: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-      references: {
-        model: 'tbproduto',
-        key: 'idsku'
+        model: 'tbordemcompraproduto',
+        key: 'id'
       }
     },
     idfornecedor: {
@@ -34,6 +26,7 @@ module.exports = function(sequelize, DataTypes) {
     idsituacaoorcamento: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 1,
       references: {
         model: 'tbsituacaoorcamento',
         key: 'id'
@@ -41,10 +34,6 @@ module.exports = function(sequelize, DataTypes) {
     },
     valor: {
       type: DataTypes.DECIMAL(18,6),
-      allowNull: true
-    },
-    previsao: {
-      type: DataTypes.DATE,
       allowNull: true
     }
   }, {
@@ -58,13 +47,6 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "id" },
-        ]
-      },
-      {
-        name: "fk_tborcamento_idsku_idx",
-        using: "BTREE",
-        fields: [
-          { name: "idsku" },
         ]
       },
       {
@@ -82,10 +64,10 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "fk_tborcamento_idordemcompra_idx",
+        name: "fk_tborcamento_idordemcompraproduto_idx",
         using: "BTREE",
         fields: [
-          { name: "idordemcompra" },
+          { name: "idordemcompraproduto" },
         ]
       },
     ]

@@ -27,7 +27,7 @@ module.exports = {
             },
           },
           {
-            idordemcompra: busca,
+            id: busca,
           },
         ],
       };
@@ -38,13 +38,13 @@ module.exports = {
 
     const ordensCompra = await models.tbordemcompra.findAll({
       attributes: [
-        ["idordemcompra", "idOrdemCompra"],
+        ["id", "id"],
         "observacoes",
         ["datafinalizacao", "dataFinalizacao"],
-        ["createdAt", "data"],
         [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
         [Sequelize.col("tbusuario.nome"), "comprador"],
         [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
+        ["createdAt", "data"],
       ],
       where: whereClausule,
       include: [
@@ -61,7 +61,7 @@ module.exports = {
           attributes: [],
         },
       ],
-      order: [["idordemcompra", "desc"]],
+      order: [["id", "desc"]],
       raw: true,
     });
 
@@ -115,11 +115,11 @@ module.exports = {
   async lerOrdemCompra(idOrdemCompra) {
     let ordemCompra = await models.tbordemcompra.findByPk(idOrdemCompra, {
       attributes: [
-        ["idordemcompra", "idOrdemCompra"],
-        [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
+        "id",
         ["idtipoordemcompra", "idTipo"],
-        [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
+        [Sequelize.col("tbtipoordemcompra.nome"), "tipo"],
         ["idsituacaoordemcompra", "idSituacao"],
+        [Sequelize.col("tbsituacaoordemcompra.nome"), "situacao"],
         [Sequelize.col("tbusuario.nome"), "comprador"],
         "observacoes",
         ["datafinalizacao", "dataFinalizacao"],
@@ -127,7 +127,7 @@ module.exports = {
       include: [
         {
           model: models.tbordemcompraproduto,
-          attributes: [["idsku", "idSku"], "quantidade"],
+          attributes: ["id", "idSku", "quantidade"],
           include: [
             {
               model: models.tbproduto,
@@ -165,59 +165,106 @@ module.exports = {
       return produto;
     });
 
-    // Adquirir os orçamentos, trabalhar a partir daqui
+    // Separar a lista de ID's dos produtos nessa ordem de compra
+    const idProdutosOrdemCompra = ordemCompra.produtos.map((produto) => produto.id);
 
-    let orcamentos = [];
-
-    const idOrcamentos = await models.tborcamento.findAll({
-      attributes: ["idFornecedor", [Sequelize.col("tbfornecedor.nomefornecedor"), "nomeFornecedor"]],
-      where: {
-        idordemcompra: idOrdemCompra,
-      },
+    // Adquirir os orçamentos
+    const orcamentos = await models.tborcamento.findAll({
+      attributes: [
+        "id",
+        [Sequelize.col("tbordemcompraproduto.idsku"), "idSku"],
+        "idOrdemCompraProduto",
+        "idFornecedor",
+        [Sequelize.col("tbfornecedor.nomefornecedor"), "fornecedor"],
+        "idSituacaoOrcamento",
+        "valor",
+      ],
       include: [
         {
           model: models.tbfornecedor,
+          attributes: [],
+        },
+        {
+          model: models.tbordemcompraproduto,
+          attributes: [],
         },
       ],
-      group: [["idfornecedor"]],
+      where: {
+        idordemcompraproduto: {
+          [Op.in]: idProdutosOrdemCompra,
+        },
+      },
       raw: true,
     });
 
-    for (const orcamento of idOrcamentos) {
-      const dadosOrcamento = await models.tborcamento.findAll({
-        attributes: [
-          "id",
-          "idSku",
-          "idSituacaoOrcamento",
-          [Sequelize.col("tbsituacaoorcamento.nome"), "situacao"],
-          "valor",
-        ],
-        where: {
-          idfornecedor: orcamento.idFornecedor,
-          idordemcompra: idOrdemCompra,
-        },
-        include: [
-          {
-            model: models.tbsituacaoorcamento,
-            attributes: [],
-          },
-          {
-            model: models.tbfornecedor,
-            attributes: [],
-          },
-        ],
-        order: [["createdAt", "asc"]],
-        raw: true,
-      });
-
-      orcamentos.push({
-        idFornecedor: orcamento.idFornecedor,
-        nomeFornecedor: orcamento.nomeFornecedor,
-        produtos: [...dadosOrcamento],
-      });
-    }
-
     ordemCompra.orcamentos = orcamentos;
+
+    // let orcamentos = [];
+
+    // Essa etapa irá retornar todos os fornecedores com orçamentos existentes para essa ordem de compra
+
+    // [
+    //   { idFornecedor, nomeFornecedor},
+    //   { idFornecedor, nomeFornecedor},
+    //   { ... }
+    // ]
+
+    // const idFornecedores = await models.tborcamento.findAll({
+    //   attributes: ["idFornecedor", [Sequelize.col("tbfornecedor.nomefornecedor"), "nomeFornecedor"]],
+    //   include: [
+    //     {
+    //       model: models.tbordemcompraproduto,
+    //       attributes: [],
+    //       where: {
+    //         idordemcompra: idOrdemCompra,
+    //       },
+    //     },
+    //     {
+    //       model: models.tbfornecedor,
+    //       attributes: [],
+    //     },
+    //   ],
+    //   group: [["idfornecedor"]],
+    //   raw: true,
+    // });
+
+    // console.log(idFornecedores);
+
+    // for (const orcamento of idOrcamentos) {
+    //   const dadosOrcamento = await models.tborcamento.findAll({
+    //     attributes: [
+    //       "id",
+    //       "idSku",
+    //       "idSituacaoOrcamento",
+    //       [Sequelize.col("tbsituacaoorcamento.nome"), "situacao"],
+    //       "valor",
+    //     ],
+    //     where: {
+    //       idfornecedor: orcamento.idFornecedor,
+    //       idordemcompra: idOrdemCompra,
+    //     },
+    //     include: [
+    //       {
+    //         model: models.tbsituacaoorcamento,
+    //         attributes: [],
+    //       },
+    //       {
+    //         model: models.tbfornecedor,
+    //         attributes: [],
+    //       },
+    //     ],
+    //     order: [["createdAt", "asc"]],
+    //     raw: true,
+    //   });
+
+    //   orcamentos.push({
+    //     idFornecedor: orcamento.idFornecedor,
+    //     nomeFornecedor: orcamento.nomeFornecedor,
+    //     produtos: [...dadosOrcamento],
+    //   });
+    // }
+
+    // ordemCompra.orcamentos = orcamentos;
 
     return ok({
       ordemCompra,
