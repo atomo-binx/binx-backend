@@ -262,7 +262,7 @@ module.exports = {
     const options = { height: "25mm", width: "83mm" };
 
     // Carrega o corpo da etiqueta em html
-    let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo personalizada.html")).toString();
+    let html = (await fs.promises.readFile("src/etiquetas/etiqueta_corpo_personalizada.html")).toString();
 
     // Verifica necessidade de aplicar Zoom no arquivo principal de html
     if (process.env.NODE_ENV === "production") {
@@ -270,7 +270,7 @@ module.exports = {
     }
 
     // Carrega uma linha de etiqueta em html
-    let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha personalizada.html")).toString();
+    let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha_personalizada.html")).toString();
 
     html = html.replace("#LINHAS", linha);
 

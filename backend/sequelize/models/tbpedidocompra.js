@@ -33,6 +33,11 @@ module.exports = function(sequelize, DataTypes) {
     dataprevista: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    precificado: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0
     }
   }, {
     sequelize,
