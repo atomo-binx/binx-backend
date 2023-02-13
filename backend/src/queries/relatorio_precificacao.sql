@@ -18,7 +18,10 @@ select
     ".",
     ","
   ) as "Margem",
-  tbpedidocompra.precificado as "Precificado"
+  case
+    when tbpedidocompra.precificado = 1 then "OK"
+    else ""
+  end as "Precificado"
 from
   tbproduto
   join tbcompraproduto on tbproduto.idsku = tbcompraproduto.idsku
