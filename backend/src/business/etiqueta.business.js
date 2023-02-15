@@ -177,7 +177,7 @@ module.exports = {
     // Carrega uma linha de etiqueta em html
     let linha = (await fs.promises.readFile("src/etiquetas/etiqueta_linha.html")).toString();
 
-    if (etiquetaSimples) {
+    if (etiquetaSimples === "true") {
       // Neste modo, a quantidade representa o número de cópias desejado
 
       // Monta a quantidade correta de linhas
