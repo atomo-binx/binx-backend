@@ -67,11 +67,15 @@ module.exports = {
     try {
       const browser = await puppeteer.launch({
         headless: false,
-        args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
-        defaultViewport: {
-          width: 1024 + Math.floor(Math.random() * 100),
-          height: 720 + Math.floor(Math.random() * 100),
-        },
+        // args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
+        args: ["--no-sandbox", "--no-zygote"],
+        // defaultViewport: {
+        //   width: 1024 + Math.floor(Math.random() * 100),
+        //   height: 720 + Math.floor(Math.random() * 100),
+        // },
+        // env: {
+        //   DISPLAY: ":10.0",
+        // },
       });
 
       try {
