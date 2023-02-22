@@ -38,9 +38,17 @@ module.exports = {
     if (pedidos) {
       console.log(filename, "Sincronizando uma lista de pedidos de venda.");
       await this.sincronizaListaPedidos(pedidos);
+
+      return ok({
+        response: "Sincronização de pedidos de venda finalizada.",
+      });
     } else {
       console.log(filename, "Sincronizando através de filtros:", filtros);
       await this.sincronizaPaginasPedidos(filtros);
+
+      return ok({
+        response: "Sincronização de pedidos de venda finalizada.",
+      });
     }
   },
 
