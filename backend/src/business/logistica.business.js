@@ -398,4 +398,37 @@ module.exports = {
 
     return null;
   },
+
+  // Funções novas para a extração da lógica do puppeteer
+  async pedidosComTransportadoraBinx() {
+    const pedidos = await models.tbpedidovenda.findAll({
+      where: {
+        transportadora: "Binx",
+        idstatusvenda: {
+          [Op.notIn]: [9, 12],
+        },
+      },
+      raw: true,
+    });
+
+    return ok({
+      pedidos,
+    });
+  },
+
+  async adquirirDadosPedido(pedidoVenda) {
+    const pedidoBling = await Bling.pedidoVenda(pedidoVenda);
+
+    return ok({
+      pedidoBling,
+    });
+  },
+
+  async adquirirMetodosFreteAPI(pedidoBling) {
+    const { metodosFrete } = await this.adquirirMetodosFrete(pedidoBling);
+
+    return ok({
+      metodosFrete,
+    });
+  },
 };
