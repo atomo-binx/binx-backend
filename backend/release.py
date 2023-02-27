@@ -1,7 +1,7 @@
 import os, zipfile
 
 ignorar_diretorios = ["node_modules", "release"]
-ignorar_arquivos = ["release.py"]
+ignorar_arquivos = ["release.py", ".env"]
 
 print("\nIniciando empacotamente de release para o Beanstalk\n")
 
