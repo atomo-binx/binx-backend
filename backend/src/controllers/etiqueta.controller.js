@@ -9,6 +9,8 @@ module.exports = {
       const quantidade = parseInt(req.query["quantidade"]);
       const etiquetaSimples = req.query["etiquetaSimples"] || false;
 
+      console.log({ etiquetaSimples });
+
       const resposta = await EtiquetaBusiness.etiquetaProduto(idsku, quantidade, etiquetaSimples);
 
       if (resposta.body.status === OkStatus) {

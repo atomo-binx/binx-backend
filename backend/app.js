@@ -1,8 +1,10 @@
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv").config({ path: ".env" });
+const dotenv = require("dotenv");
 const errorHandlerAsync = require("express-async-errors");
 const customErrorHandler = require("./src/modules/error");
+
+dotenv.config({ path: ".env" });
 
 const app = express();
 
@@ -31,8 +33,7 @@ app.all("/*", async (req, res) => {
   return res.status(404).json({
     status: "error",
     code: "NotFound",
-    message:
-      "A rota solicitada não foi encontrada ou implementada. Verifique a documentação: ...",
+    message: "A rota solicitada não foi encontrada ou implementada. Verifique a documentação: ...",
   });
 });
 

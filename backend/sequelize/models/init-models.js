@@ -23,7 +23,11 @@ var _tbhistoricomontante = require("./tbhistoricomontante");
 var _tbkits = require("./tbkits");
 var _tbloja = require("./tbloja");
 var _tbmotivoprecificacao = require("./tbmotivoprecificacao");
+var _tbocorrenciaordemcompra = require("./tbocorrenciaordemcompra");
 var _tbocorrenciavenda = require("./tbocorrenciavenda");
+var _tborcamento = require("./tborcamento");
+var _tbordemcompra = require("./tbordemcompra");
+var _tbordemcompraproduto = require("./tbordemcompraproduto");
 var _tbpedidocompra = require("./tbpedidocompra");
 var _tbpedidovenda = require("./tbpedidovenda");
 var _tbprecificacao = require("./tbprecificacao");
@@ -34,8 +38,11 @@ var _tbprodutoszerados = require("./tbprodutoszerados");
 var _tbprospeccao = require("./tbprospeccao");
 var _tbregistrocaixa = require("./tbregistrocaixa");
 var _tbsituacaocaixa = require("./tbsituacaocaixa");
+var _tbsituacaoorcamento = require("./tbsituacaoorcamento");
+var _tbsituacaoordemcompra = require("./tbsituacaoordemcompra");
 var _tbstatus = require("./tbstatus");
 var _tbstatuscompra = require("./tbstatuscompra");
+var _tbtipoordemcompra = require("./tbtipoordemcompra");
 var _tbusuario = require("./tbusuario");
 var _tbvendaproduto = require("./tbvendaproduto");
 
@@ -64,7 +71,11 @@ function initModels(sequelize) {
   var tbkits = _tbkits(sequelize, DataTypes);
   var tbloja = _tbloja(sequelize, DataTypes);
   var tbmotivoprecificacao = _tbmotivoprecificacao(sequelize, DataTypes);
+  var tbocorrenciaordemcompra = _tbocorrenciaordemcompra(sequelize, DataTypes);
   var tbocorrenciavenda = _tbocorrenciavenda(sequelize, DataTypes);
+  var tborcamento = _tborcamento(sequelize, DataTypes);
+  var tbordemcompra = _tbordemcompra(sequelize, DataTypes);
+  var tbordemcompraproduto = _tbordemcompraproduto(sequelize, DataTypes);
   var tbpedidocompra = _tbpedidocompra(sequelize, DataTypes);
   var tbpedidovenda = _tbpedidovenda(sequelize, DataTypes);
   var tbprecificacao = _tbprecificacao(sequelize, DataTypes);
@@ -75,8 +86,11 @@ function initModels(sequelize) {
   var tbprospeccao = _tbprospeccao(sequelize, DataTypes);
   var tbregistrocaixa = _tbregistrocaixa(sequelize, DataTypes);
   var tbsituacaocaixa = _tbsituacaocaixa(sequelize, DataTypes);
+  var tbsituacaoorcamento = _tbsituacaoorcamento(sequelize, DataTypes);
+  var tbsituacaoordemcompra = _tbsituacaoordemcompra(sequelize, DataTypes);
   var tbstatus = _tbstatus(sequelize, DataTypes);
   var tbstatuscompra = _tbstatuscompra(sequelize, DataTypes);
+  var tbtipoordemcompra = _tbtipoordemcompra(sequelize, DataTypes);
   var tbusuario = _tbusuario(sequelize, DataTypes);
   var tbvendaproduto = _tbvendaproduto(sequelize, DataTypes);
 
@@ -112,12 +126,20 @@ function initModels(sequelize) {
   tbformapagamento.hasMany(tbpedidovenda, { foreignKey: "idformapagamento"});
   tbregistrocaixa.belongsTo(tbformapagamento, { foreignKey: "idformapagamento"});
   tbformapagamento.hasMany(tbregistrocaixa, { foreignKey: "idformapagamento"});
+  tborcamento.belongsTo(tbfornecedor, { foreignKey: "idfornecedor"});
+  tbfornecedor.hasMany(tborcamento, { foreignKey: "idfornecedor"});
   tbpedidocompra.belongsTo(tbfornecedor, { foreignKey: "idfornecedor"});
   tbfornecedor.hasMany(tbpedidocompra, { foreignKey: "idfornecedor"});
   tbpedidovenda.belongsTo(tbloja, { foreignKey: "idloja"});
   tbloja.hasMany(tbpedidovenda, { foreignKey: "idloja"});
   tbprecificacao.belongsTo(tbmotivoprecificacao, { foreignKey: "idmotivo"});
   tbmotivoprecificacao.hasMany(tbprecificacao, { foreignKey: "idmotivo"});
+  tbocorrenciaordemcompra.belongsTo(tbordemcompra, { foreignKey: "idordemcompra"});
+  tbordemcompra.hasMany(tbocorrenciaordemcompra, { foreignKey: "idordemcompra"});
+  tbordemcompraproduto.belongsTo(tbordemcompra, { foreignKey: "idordemcompra"});
+  tbordemcompra.hasMany(tbordemcompraproduto, { foreignKey: "idordemcompra"});
+  tborcamento.belongsTo(tbordemcompraproduto, { foreignKey: "idordemcompraproduto"});
+  tbordemcompraproduto.hasMany(tborcamento, { foreignKey: "idordemcompraproduto"});
   tbcompraproduto.belongsTo(tbpedidocompra, { foreignKey: "idpedidocompra"});
   tbpedidocompra.hasMany(tbcompraproduto, { foreignKey: "idpedidocompra"});
   tbprecificacao.belongsTo(tbpedidocompra, { foreignKey: "pedidocompra"});
@@ -142,6 +164,8 @@ function initModels(sequelize) {
   tbproduto.hasMany(tbkits, { foreignKey: "idskupai"});
   tbkits.belongsTo(tbproduto, { foreignKey: "idskufilho"});
   tbproduto.hasMany(tbkits, { foreignKey: "idskufilho"});
+  tbordemcompraproduto.belongsTo(tbproduto, { foreignKey: "idsku"});
+  tbproduto.hasMany(tbordemcompraproduto, { foreignKey: "idsku"});
   tbprecificacao.belongsTo(tbproduto, { foreignKey: "idsku"});
   tbproduto.hasMany(tbprecificacao, { foreignKey: "idsku"});
   tbprodutoestoque.belongsTo(tbproduto, { foreignKey: "idsku"});
@@ -154,16 +178,28 @@ function initModels(sequelize) {
   tbproduto.hasMany(tbvendaproduto, { foreignKey: "idsku"});
   tbcaixa.belongsTo(tbsituacaocaixa, { foreignKey: "idsituacao"});
   tbsituacaocaixa.hasMany(tbcaixa, { foreignKey: "idsituacao"});
+  tborcamento.belongsTo(tbsituacaoorcamento, { foreignKey: "idsituacaoorcamento"});
+  tbsituacaoorcamento.hasMany(tborcamento, { foreignKey: "idsituacaoorcamento"});
+  tbocorrenciaordemcompra.belongsTo(tbsituacaoordemcompra, { foreignKey: "idsituacaoordemcompra"});
+  tbsituacaoordemcompra.hasMany(tbocorrenciaordemcompra, { foreignKey: "idsituacaoordemcompra"});
+  tbordemcompra.belongsTo(tbsituacaoordemcompra, { foreignKey: "idsituacaoordemcompra"});
+  tbsituacaoordemcompra.hasMany(tbordemcompra, { foreignKey: "idsituacaoordemcompra"});
   tbpedidovenda.belongsTo(tbstatus, { foreignKey: "idstatusvenda"});
   tbstatus.hasMany(tbpedidovenda, { foreignKey: "idstatusvenda"});
   tbpedidocompra.belongsTo(tbstatuscompra, { foreignKey: "idstatus"});
   tbstatuscompra.hasMany(tbpedidocompra, { foreignKey: "idstatus"});
+  tbordemcompra.belongsTo(tbtipoordemcompra, { foreignKey: "idtipoordemcompra"});
+  tbtipoordemcompra.hasMany(tbordemcompra, { foreignKey: "idtipoordemcompra"});
   tbcaixa.belongsTo(tbusuario, { foreignKey: "idoperadorabertura"});
   tbusuario.hasMany(tbcaixa, { foreignKey: "idoperadorabertura"});
   tbcaixa.belongsTo(tbusuario, { foreignKey: "idoperadorconferencia"});
   tbusuario.hasMany(tbcaixa, { foreignKey: "idoperadorconferencia"});
   tbcaixa.belongsTo(tbusuario, { foreignKey: "idoperadorfechamento"});
   tbusuario.hasMany(tbcaixa, { foreignKey: "idoperadorfechamento"});
+  tbocorrenciaordemcompra.belongsTo(tbusuario, { foreignKey: "idusuario"});
+  tbusuario.hasMany(tbocorrenciaordemcompra, { foreignKey: "idusuario"});
+  tbordemcompra.belongsTo(tbusuario, { foreignKey: "idcomprador"});
+  tbusuario.hasMany(tbordemcompra, { foreignKey: "idcomprador"});
 
   return {
     tbanunciosml,
@@ -190,7 +226,11 @@ function initModels(sequelize) {
     tbkits,
     tbloja,
     tbmotivoprecificacao,
+    tbocorrenciaordemcompra,
     tbocorrenciavenda,
+    tborcamento,
+    tbordemcompra,
+    tbordemcompraproduto,
     tbpedidocompra,
     tbpedidovenda,
     tbprecificacao,
@@ -201,8 +241,11 @@ function initModels(sequelize) {
     tbprospeccao,
     tbregistrocaixa,
     tbsituacaocaixa,
+    tbsituacaoorcamento,
+    tbsituacaoordemcompra,
     tbstatus,
     tbstatuscompra,
+    tbtipoordemcompra,
     tbusuario,
     tbvendaproduto,
   };

@@ -8,6 +8,7 @@ const { Op } = require("sequelize");
 const http = require("../utils/http");
 
 const { models } = require("../modules/sequelize");
+const { ok } = require("../utils/http");
 
 module.exports = {
   async sincronizaProdutos(dataAlteracao, dataInclusao, situacao, skusNumericos, produtos) {
@@ -299,6 +300,9 @@ module.exports = {
           const regex = /^[0-9]+$/;
           if (!regex.test(produto.idsku) && skusNumericos) sync = false;
 
+          // Evitar inserção de SKU's vazios
+          if (produto.idsku === "") sync = false;
+
           if (sync) {
             await this.produtoTransaction(produto)
               .then(() => contadorInseridos++)
@@ -356,5 +360,24 @@ module.exports = {
 
     console.log(filename, "Tempo gasto no procedimento:", elapsedTime);
     console.log(filename, "Total de pedidos sincronizados:", inseridos);
+  },
+
+  async listarProdutosNomeSku() {
+    // Função criada durante desenvolvimento da tela de ordens de compra
+    // Para realizar o cache das informações durante manipulação de ordem de compra
+    const produtos = await models.tbproduto.findAll({
+      attributes: ["idSku", "nome", "ultimoCusto"],
+      where: {
+        situacao: 1,
+        idsku: {
+          [Op.regexp]: "^[0-9]+$",
+        },
+      },
+      raw: true,
+    });
+
+    return ok({
+      produtos,
+    });
   },
 };

@@ -108,7 +108,7 @@ module.exports = {
   },
 
   async calcularFreteFrenet(itens, cep, valor) {
-    const ShippingItemArray = itens
+    const shippingItens = itens
       .filter((item) => parseFloat(item.peso) > 0)
       .map((item) => {
         return {
@@ -116,6 +116,25 @@ module.exports = {
           Weight: parseFloat(item.peso),
         };
       });
+
+    console.log(filename, "Objeto inicial de Shipping Array:", shippingItens);
+
+    let pesoTotal = shippingItens.reduce((acc, current) => acc + current.Quantity * current.Weight, 0);
+
+    pesoTotal = Number(Number(pesoTotal).toFixed(3));
+
+    if (pesoTotal === 0) pesoTotal = 0.01;
+
+    console.log(filename, "Peso total acumulado:", pesoTotal);
+
+    const ShippingItemArray = [
+      {
+        Quantity: 1,
+        Weight: pesoTotal,
+      },
+    ];
+
+    console.log(filename, "Objeto final de Shipping Array:", ShippingItemArray);
 
     const body = {
       SellerCEP: "07094000",
