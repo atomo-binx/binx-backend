@@ -68,7 +68,12 @@ module.exports = {
       const browser = await puppeteer.launch({
         headless: false,
         // args: [`--window-size=1024,720`, "--no-sandbox", "--no-zygote"],
-        args: ["--no-sandbox", "--no-zygote", "--incognito"],
+
+        // Versão com parâmetro de navegação anônima
+        // args: ["--no-sandbox", "--no-zygote", "--incognito"],
+
+        args: ["--no-sandbox", "--no-zygote"],
+
         // defaultViewport: {
         //   width: 1024 + Math.floor(Math.random() * 100),
         //   height: 720 + Math.floor(Math.random() * 100),
@@ -78,10 +83,16 @@ module.exports = {
         // },
       });
 
+      const context = await browser.createIncognitoBrowserContext();
+
       try {
         let tempoInicio = new Date();
 
-        const page = await browser.newPage();
+        // Versão sem o contexto de navegação anônima
+        // const page = await browser.newPage();
+
+        // Versão com o contexto de navegação anônima
+        const page = await context.newPage();
 
         await page.setUserAgent("Chrome/97.0.4692.71 (Windows NT 10.0; Win64; x64)");
 
