@@ -18,27 +18,36 @@ module.exports = {
     try {
       const resposta = await LogisticaBusiness.pedidosComTransportadoraBinx();
 
-      res.status(resposta.statusCode).json(resposta.body);
+      return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
       next(error);
     }
   },
 
-  async adquirirDadosPedido(req, res, next) {
+  async escolherMelhorMetodo(req, res, next) {
     try {
-      const { venda } = req.query;
+      const { idPedidoVenda } = req.query;
 
-      const resposta = await LogisticaBusiness.adquirirDadosPedido(venda);
+      const resposta = await LogisticaBusiness.escolherMelhorMetodoAPI(idPedidoVenda);
 
-      res.status(resposta.statusCode).json(resposta.body);
+      return res.status(resposta.statusCode).json(resposta.body);
     } catch (error) {
       next(error);
     }
   },
 
-  async adquirirMetodosFrete(req, res, next) {},
+  async atualizarValorFreteTransportadora(req, res, next) {
+    try {
+      const { idPedidoVenda, valorFreteTransportadora } = req.body;
 
-  async escolherMelhorMetodo(req, res, next) {},
+      const resposta = await LogisticaBusiness.atualizarValorFreteTransportadora(
+        idPedidoVenda,
+        valorFreteTransportadora
+      );
 
-  async atualizarValorFreteTransportadora(req, rex, next) {},
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

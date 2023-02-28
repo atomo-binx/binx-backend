@@ -402,6 +402,7 @@ module.exports = {
   // Funções novas para a extração da lógica do puppeteer
   async pedidosComTransportadoraBinx() {
     const pedidos = await models.tbpedidovenda.findAll({
+      attributes: ["idpedidovenda"],
       where: {
         transportadora: "Binx",
         idstatusvenda: {
@@ -416,19 +417,38 @@ module.exports = {
     });
   },
 
-  async adquirirDadosPedido(pedidoVenda) {
-    const pedidoBling = await Bling.pedidoVenda(pedidoVenda);
+  async escolherMelhorMetodoAPI(idPedidoVenda) {
+    const pedidoBling = await Bling.pedidoVenda(idPedidoVenda);
+
+    const pedidoBinx = await models.tbpedidovenda.findByPk(idPedidoVenda);
+
+    const { metodosFrete } = await this.adquirirMetodosFrete(pedidoBling);
+
+    const melhorMetodo = await this.escolherMelhorMetodo(metodosFrete, pedidoBinx);
 
     return ok({
-      pedidoBling,
+      melhorMetodo,
     });
   },
 
-  async adquirirMetodosFreteAPI(pedidoBling) {
-    const { metodosFrete } = await this.adquirirMetodosFrete(pedidoBling);
+  async atualizarValorFreteTransportadora(idPedidoVenda, valorFreteTransportadora) {
+    try {
+      await models.tbpedidovenda.update(
+        {
+          fretetransportadora: valorFreteTransportadora,
+        },
+        {
+          where: {
+            idpedidovenda: idPedidoVenda,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(filename, "Erro:", error.message);
+    }
 
     return ok({
-      metodosFrete,
+      message: "Valor de frete da transportadora atualizado no pedido de venda no Binx.",
     });
   },
 };
