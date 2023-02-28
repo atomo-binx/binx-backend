@@ -240,19 +240,24 @@ module.exports = {
       // Realizar somatória das quantidades vendidas
       const somatoriaQuantidades = ss.sum(quantidades);
 
-      // Adquirir a menor e maior data de venda
+      // Adquirir a menor data de venda
       const menorData = datas.reduce(function (a, b) {
         return a < b ? a : b;
       });
-      const maiorData = datas.reduce(function (a, b) {
-        return a > b ? a : b;
-      });
+
+      // Considerar como maior data de venda a data atual
+      const maiorData = new Date().toLocaleDateString("en-US");
 
       // Calcular a diferença de meses entre a maior e menor data
-      const mesesVendidos = monthDiff(new Date(menorData), new Date(maiorData));
+      const mesesVendidos = monthDiff(new Date(menorData + "T00:00:00"), new Date(maiorData));
 
       // Calcular a média mês
       const media = Math.round(Number(somatoriaQuantidades / mesesVendidos).toFixed(2));
+
+      // Debug
+      // if (idsku == 7779) {
+      //   console.log({ datas, quantidades, menorData, maiorData, mesesVendidos, media });
+      // }
 
       mediaMes[idsku] = {
         media,
@@ -423,8 +428,8 @@ module.exports = {
     // Core Config?
     const porcentagensCurvas = {
       "Curva A": 20,
-      "Curva B": 30,
-      "Curva C": 50,
+      "Curva B": 35,
+      "Curva C": 45,
     };
 
     let curvas = {};
@@ -489,11 +494,10 @@ module.exports = {
         const curva = curvas[idsku];
         const media = mediaMes[idsku].media;
 
-        let min = 0;
-        let max = 0;
+        let min, max;
 
         if (categoria === "Ferramentas") {
-          min = Math.ceil(media / 4);
+          min = Math.ceil(media / 4) || 1;
 
           const fatoresMax = {
             "Curva A": 1,
@@ -504,7 +508,7 @@ module.exports = {
           const fatorMax = fatoresMax[curva];
 
           if (fatorMax) {
-            max = Math.round(media * fatorMax);
+            max = Math.round(media * fatorMax) || 1;
           }
         } else {
           min = Math.round(media) || 1;
@@ -518,7 +522,7 @@ module.exports = {
           const fatorMax = fatoresMax[curva];
 
           if (fatorMax) {
-            max = Math.round(media * fatorMax);
+            max = Math.round(media * fatorMax) || 1;
           }
         }
 

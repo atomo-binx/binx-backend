@@ -30,6 +30,10 @@ module.exports = function(sequelize, DataTypes) {
     valorunidade: {
       type: DataTypes.DECIMAL(18,2),
       allowNull: false
+    },
+    custo: {
+      type: DataTypes.DECIMAL(18,10),
+      allowNull: true
     }
   }, {
     sequelize,

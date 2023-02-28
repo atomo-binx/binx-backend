@@ -1,13 +1,18 @@
 import os, zipfile
 
 ignorar_diretorios = ["node_modules", "release"]
-ignorar_arquivos = ["release.py"]
+ignorar_arquivos = ["release.py", ".env"]
+
+deploy_ssl = False
+
+if not deploy_ssl:
+    ignorar_diretorios.append(".platform")
+    ignorar_arquivos.append("03_ssl.config")
 
 print("\nIniciando empacotamente de release para o Beanstalk\n")
 
 diretorio_raiz = os.path.relpath(os.getcwd())
 print("Diretório raiz:", diretorio_raiz + "\n")
-
 
 diretorio_final = diretorio_raiz + "/release/"
 print("Diretorio final:", diretorio_final + "\n")

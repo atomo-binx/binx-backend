@@ -38,4 +38,16 @@ module.exports = {
       next(error);
     }
   },
+
+  async registrarPrecificacao(req, res, next) {
+    try {
+      const { idpedidocompra } = req.query;
+
+      const resposta = await PrecificacaoBusiness.registrarPrecificacao(idpedidocompra);
+
+      res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

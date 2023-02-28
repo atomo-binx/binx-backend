@@ -34,4 +34,16 @@ module.exports = {
       next(error);
     }
   },
+
+  async incluir(req, res, next) {
+    try {
+      const contato = req.body;
+
+      const resposta = await ContatoBusiness.incluir(contato);
+
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
 };

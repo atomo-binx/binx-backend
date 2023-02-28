@@ -820,4 +820,19 @@ module.exports = {
         throw Error(`Erro durante requisição na API do Bling: ${error.message}`);
       });
   },
+
+  async incluirContato(xmlContato) {
+    return new Promise((resolve, reject) => {
+      let xml = xmlContato;
+
+      let params = {
+        apikey: process.env.BLING_API_KEY,
+        xml: xml,
+      };
+
+      this.blingRequest("POST", `/contato`, new URLSearchParams(params))
+        .then(() => resolve())
+        .catch((error) => reject(error));
+    });
+  },
 };

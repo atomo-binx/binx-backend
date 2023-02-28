@@ -108,7 +108,7 @@ module.exports = {
   },
 
   async calcularFreteFrenet(itens, cep, valor) {
-    const ShippingItemArray = itens
+    const shippingItens = itens
       .filter((item) => parseFloat(item.peso) > 0)
       .map((item) => {
         return {
@@ -116,6 +116,25 @@ module.exports = {
           Weight: parseFloat(item.peso),
         };
       });
+
+    console.log(filename, "Objeto inicial de Shipping Array:", shippingItens);
+
+    let pesoTotal = shippingItens.reduce((acc, current) => acc + current.Quantity * current.Weight, 0);
+
+    pesoTotal = Number(Number(pesoTotal).toFixed(3));
+
+    if (pesoTotal === 0) pesoTotal = 0.01;
+
+    console.log(filename, "Peso total acumulado:", pesoTotal);
+
+    const ShippingItemArray = [
+      {
+        Quantity: 1,
+        Weight: pesoTotal,
+      },
+    ];
+
+    console.log(filename, "Objeto final de Shipping Array:", ShippingItemArray);
 
     const body = {
       SellerCEP: "07094000",
@@ -378,5 +397,58 @@ module.exports = {
     }
 
     return null;
+  },
+
+  // Funções novas para a extração da lógica do puppeteer
+  async pedidosComTransportadoraBinx() {
+    const pedidos = await models.tbpedidovenda.findAll({
+      attributes: ["idpedidovenda"],
+      where: {
+        transportadora: "Binx",
+        idstatusvenda: {
+          [Op.notIn]: [9, 12],
+        },
+      },
+      raw: true,
+    });
+
+    return ok({
+      pedidos,
+    });
+  },
+
+  async escolherMelhorMetodoAPI(idPedidoVenda) {
+    const pedidoBling = await Bling.pedidoVenda(idPedidoVenda);
+
+    const pedidoBinx = await models.tbpedidovenda.findByPk(idPedidoVenda);
+
+    const { metodosFrete } = await this.adquirirMetodosFrete(pedidoBling);
+
+    const melhorMetodo = await this.escolherMelhorMetodo(metodosFrete, pedidoBinx);
+
+    return ok({
+      melhorMetodo,
+    });
+  },
+
+  async atualizarValorFreteTransportadora(idPedidoVenda, valorFreteTransportadora) {
+    try {
+      await models.tbpedidovenda.update(
+        {
+          fretetransportadora: valorFreteTransportadora,
+        },
+        {
+          where: {
+            idpedidovenda: idPedidoVenda,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(filename, "Erro:", error.message);
+    }
+
+    return ok({
+      message: "Valor de frete da transportadora atualizado no pedido de venda no Binx.",
+    });
   },
 };

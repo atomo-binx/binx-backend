@@ -1,9 +1,9 @@
 select
   tbproduto.idsku as "SKU",
   tbproduto.nome as "Produto",
-  replace(tbproduto.precovenda, ".", ",") as "Preço de Venda",
-  replace(tbproduto.ultimocusto, ".", ",") as "Último Custo",
-  replace(tbcompraproduto.valor, ".", ",") as "Valor de Compra",
+  replace (tbproduto.precovenda, ".", ",") as "Preço de Venda",
+  replace (tbproduto.ultimocusto, ".", ",") as "Último Custo",
+  replace (tbcompraproduto.valor, ".", ",") as "Valor de Compra",
   tbcompraproduto.quantidade as "Quantidade",
   case
     when tbcompraproduto.valor > tbproduto.ultimocusto then "Maior"
@@ -13,11 +13,15 @@ select
   end as "Situação",
   tbpedidocompra.idpedidocompra as "Pedido",
   tbfornecedor.nomefornecedor as "Fornecedor",
-  replace(
+  replace (
     (tbproduto.precovenda - tbcompraproduto.valor) / tbproduto.precovenda,
     ".",
     ","
-  ) as "Margem"
+  ) as "Margem",
+  case
+    when tbpedidocompra.precificado = 1 then "OK"
+    else ""
+  end as "Precificado"
 from
   tbproduto
   join tbcompraproduto on tbproduto.idsku = tbcompraproduto.idsku
