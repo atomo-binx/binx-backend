@@ -38,6 +38,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TINYINT,
       allowNull: true,
       defaultValue: 0
+    },
+    idcategoria: {
+      type: DataTypes.STRING(16),
+      allowNull: true,
+      references: {
+        model: 'tbcategoriapedidocompra',
+        key: 'idcategoria'
+      }
     }
   }, {
     sequelize,
@@ -64,6 +72,13 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "idstatus" },
+        ]
+      },
+      {
+        name: "idcategoria_idx",
+        using: "BTREE",
+        fields: [
+          { name: "idcategoria" },
         ]
       },
     ]

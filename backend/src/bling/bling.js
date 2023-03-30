@@ -286,17 +286,28 @@ module.exports = {
       const idfornecedor = compra["fornecedor"]["id"];
       const nomefornecedor = compra["fornecedor"]["nome"];
 
+      // Desestrutura dados da categoria do pedido de compra
+      // Por padrão a API do Bling sempre está retornando uma categoria
+      // A categoria padrão é com id: 0, descrição: "Despesas de Infraestrutura"
+      const idCategoria = compra["categoria"]["id"];
+      const descricaoCategoria = compra["categoria"]["descricao"];
+
       // Monta um objeto que representa o pedido de venda
       const dadosCompra = {
         idpedidocompra: compra["numeropedido"],
         idfornecedor: compra["fornecedor"]["id"],
         datacriacao: compra["datacompra"],
-
         dataprevista: compra["dataprevista"] || null,
+        idcategoria: idCategoria,
 
         fornecedor: {
           idfornecedor,
           nomefornecedor,
+        },
+
+        categoria: {
+          idcategoria: idCategoria,
+          descricao: descricaoCategoria,
         },
 
         itens,

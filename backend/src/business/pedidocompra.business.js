@@ -1,11 +1,6 @@
 const http = require("../utils/http");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 
-const PedidoCompra = require("../models/pedidoCompra.model");
-const CompraProduto = require("../models/compraProduto.model");
-const Fornecedor = require("../models/fornecedor.model");
-const StatusCompra = require("../models/status_compra.model");
-
 const { atualizaCusto } = require("./custo/atualiza_custo");
 
 const Bling = require("../bling/bling");
@@ -18,6 +13,8 @@ const { dictionary } = require("../utils/dict");
 
 const { ok } = require("../modules/http");
 const { OkStatus } = require("../modules/codes");
+
+const { models } = require("../modules/sequelize");
 
 module.exports = {
   // Inicia sincronização de pedidos de compra em segundo plano
@@ -77,12 +74,7 @@ module.exports = {
 
         filtrosBling = `dataEmissao[${dataFinal} TO ${dataInicial}]`;
 
-        console.log(
-          filename,
-          "Sincronizando pedidos de compras para o período de:",
-          valor,
-          periodo
-        );
+        console.log(filename, "Sincronizando pedidos de compras para o período de:", valor, periodo);
       }
 
       // Sincronização por data de inicio e final
@@ -129,7 +121,7 @@ module.exports = {
       let start = new Date();
 
       // Adquirir todos os pedidos não concluídos do Binx
-      let pedidosBinx = await PedidoCompra.findAll({
+      let pedidosBinx = await models.tbpedidocompra.findAll({
         where: {
           idstatus: {
             [Op.or]: {
@@ -150,24 +142,18 @@ module.exports = {
       // Gerar dicionário dos pedidos retornados do Binx
       let dicPedidosBinx = dictionary(pedidosBinx, "idpedidocompra");
 
-      console.log(
-        filename,
-        "Quantidade de pedidos de compra não concluídos no Binx:",
-        pedidosBinx.length
-      );
+      console.log(filename, "Quantidade de pedidos de compra não concluídos no Binx:", pedidosBinx.length);
 
       // Gerar as datas de intervalo: data mais antiga e data mais nova
       let dataInicial = moment.utc(pedidosBinx[0]["datacriacao"]).format("DD/MM/YYYY");
-      let dataFinal = moment
-        .utc(pedidosBinx[pedidosBinx.length - 1]["datacriacao"])
-        .format("DD/MM/YYYY");
+      let dataFinal = moment.utc(pedidosBinx[pedidosBinx.length - 1]["datacriacao"]).format("DD/MM/YYYY");
 
       console.log(filename, "Data mais antiga:", dataInicial);
       console.log(filename, "Data mais nova:", dataFinal);
 
       let pedidosBling = [];
 
-      const statusCompra = await StatusCompra.findAll({
+      const statusCompra = await models.tbstatuscompra.findAll({
         raw: true,
       });
 
@@ -228,15 +214,11 @@ module.exports = {
             pedidosAtualizar.push(pedidoBling);
           }
         } catch (error) {
-          console.log(filename, "Falha no pedido:", chave);
+          console.log(filename, "Falha no pedido:", chave, error.message);
         }
       }
 
-      console.log(
-        filename,
-        "Quantidade de pedidos para atualizar status:",
-        pedidosAtualizar.length
-      );
+      console.log(filename, "Quantidade de pedidos para atualizar status:", pedidosAtualizar.length);
 
       // O status foi localizado procurando em cada uma das listas do Bling
       // Prosseguir com a atualização dos pedidos que possuem status diferente entre Binx e Bling
@@ -393,75 +375,37 @@ module.exports = {
 
   // Realiza a transação de pedido de compra, compra produto e de fornecedor
   async compraTransaction(compra) {
-    return new Promise(async (resolve, reject) => {
-      // Inicia transação de um relacionamento
-      const t = await sequelize.transaction();
+    let { itens, fornecedor, categoria, ...dadosCompra } = compra;
 
-      try {
-        // Realiza separação de dados de compra e lista de itens e fornecedor
-        let { itens, fornecedor, ...dadosCompra } = compra;
+    return sequelize.transaction(async (t) => {
+      // Tenta inserir relacionamento de fornecedor
+      if (fornecedor) {
+        await models.tbfornecedor.upsert(fornecedor, {
+          transaction: t,
+        });
+      }
 
-        // Tenta inserir relacionamento de fornecedor
-        if (fornecedor) {
-          await Fornecedor.upsert(fornecedor, {
-            transaction: t,
-          });
-        }
+      // Tenta inserir a categoria do pedido de compra
+      await models.tbcategoriapedidocompra.upsert(categoria, { transaction: t });
 
-        // Tenta inserir dados do pedido de compra
-        await PedidoCompra.upsert(dadosCompra, { transaction: t });
+      // Tenta inserir dados do pedido de compra
+      await models.tbpedidocompra.upsert(dadosCompra, { transaction: t });
 
-        // Tenta inserir relacionamento de compra-produto
-        if (itens) {
-          // Apagar os registros de compra produto dessa compra antes de re-escrever
-          await CompraProduto.destroy({
-            where: {
-              idpedidocompra: dadosCompra.idpedidocompra,
-            },
-            transaction: t,
-          });
+      // Tenta inserir relacionamento de compra-produto
+      if (itens) {
+        // Apagar os registros de compra produto dessa compra antes de re-escrever
+        await models.tbcompraproduto.destroy({
+          where: {
+            idpedidocompra: dadosCompra.idpedidocompra,
+          },
+          transaction: t,
+        });
 
-          if (itens.length > 0) {
-            for (const relacionamento of itens) {
-              await CompraProduto.create(relacionamento, { transaction: t });
-            }
+        if (itens.length > 0) {
+          for (const relacionamento of itens) {
+            await models.tbcompraproduto.create(relacionamento, { transaction: t });
           }
         }
-
-        //Se chegamos até aqui, as inserções foram bem sucedidas
-        await t
-          .commit()
-          .then(() => {
-            resolve();
-          })
-          .catch((error) => {
-            console.log(
-              filename,
-              `Pedido de Compra: ${compra.idpedidocompra} -`,
-              `Erro durante o commit da transaction para o pedido de compra:`,
-              error.message
-            );
-
-            reject(error);
-          });
-      } catch (error) {
-        // Se caímos no catch, alguma inserção foi mal executada, executar rollback na transação
-        await t
-          .rollback()
-          .then(() => {
-            // Rollback bem sucedido, reject na promise original
-            reject(error);
-          })
-          .catch((error) => {
-            console.log(
-              filename,
-              `Pedido de Compra: ${compra.idpedidocompra} -`,
-              `Erro durante o rollback da transaction para o pedido de compra:`,
-              error.message
-            );
-
-            reject(error);
-          });
       }
     });
   },

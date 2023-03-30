@@ -2,7 +2,7 @@ var DataTypes = require("sequelize").DataTypes;
 var _tbanunciosml = require("./tbanunciosml");
 var _tbcaixa = require("./tbcaixa");
 var _tbcategoria = require("./tbcategoria");
-var _tbcategoriacompra = require("./tbcategoriacompra");
+var _tbcategoriapedidocompra = require("./tbcategoriapedidocompra");
 var _tbcompraproduto = require("./tbcompraproduto");
 var _tbconfigvalidadeprecificacao = require("./tbconfigvalidadeprecificacao");
 var _tbcontato = require("./tbcontato");
@@ -50,7 +50,7 @@ function initModels(sequelize) {
   var tbanunciosml = _tbanunciosml(sequelize, DataTypes);
   var tbcaixa = _tbcaixa(sequelize, DataTypes);
   var tbcategoria = _tbcategoria(sequelize, DataTypes);
-  var tbcategoriacompra = _tbcategoriacompra(sequelize, DataTypes);
+  var tbcategoriapedidocompra = _tbcategoriapedidocompra(sequelize, DataTypes);
   var tbcompraproduto = _tbcompraproduto(sequelize, DataTypes);
   var tbconfigvalidadeprecificacao = _tbconfigvalidadeprecificacao(sequelize, DataTypes);
   var tbcontato = _tbcontato(sequelize, DataTypes);
@@ -112,6 +112,8 @@ function initModels(sequelize) {
   tbcategoria.hasMany(tbconfigvalidadeprecificacao, { foreignKey: "idcategoria"});
   tbproduto.belongsTo(tbcategoria, { foreignKey: "idcategoria"});
   tbcategoria.hasMany(tbproduto, { foreignKey: "idcategoria"});
+  tbpedidocompra.belongsTo(tbcategoriapedidocompra, { foreignKey: "idcategoria"});
+  tbcategoriapedidocompra.hasMany(tbpedidocompra, { foreignKey: "idcategoria"});
   tbpedidovenda.belongsTo(tbcontato, { foreignKey: "idcontato"});
   tbcontato.hasMany(tbpedidovenda, { foreignKey: "idcontato"});
   tbconfigvalidadeprecificacao.belongsTo(tbcurva, { foreignKey: "idcurva"});
@@ -205,7 +207,7 @@ function initModels(sequelize) {
     tbanunciosml,
     tbcaixa,
     tbcategoria,
-    tbcategoriacompra,
+    tbcategoriapedidocompra,
     tbcompraproduto,
     tbconfigvalidadeprecificacao,
     tbcontato,
