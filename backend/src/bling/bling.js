@@ -1,5 +1,6 @@
 const axios = require("axios");
 const dotenv = require("dotenv");
+
 dotenv.config({ path: "../../.env" });
 
 const filename = __filename.slice(__dirname.length + 1) + " -";
@@ -10,6 +11,8 @@ const api = axios.create({ baseURL: url });
 const { manterApenasNumeros } = require("../utils/replace");
 
 const crypto = require("crypto");
+
+const dayjs = require("dayjs");
 
 const situacoes = {
   "Em aberto": 6,
@@ -43,6 +46,14 @@ const categorias = {
 };
 
 module.exports = {
+  // Desestrutura forma de pagamento
+  desestruturaFormaPagamento(formaPagamento) {
+    return {
+      idformapagamento: formaPagamento["id"],
+      descricao: formaPagamento["descricao"],
+    };
+  },
+
   // Desestrutura os dados de um pedido de venda
   desestruturaPedidoVenda(venda) {
     try {
@@ -92,13 +103,7 @@ module.exports = {
       if (Object.prototype.hasOwnProperty.call(venda, "parcelas")) {
         let pagamento = venda["parcelas"][0]["parcela"]["forma_pagamento"];
 
-        idformapagamento = pagamento["id"];
-        formapagamento = pagamento["descricao"];
-
-        objFormaPagamento = {
-          idformapagamento: pagamento["id"],
-          descricao: pagamento["descricao"],
-        };
+        objFormaPagamento = this.desestruturaFormaPagamento(pagamento);
       }
 
       // Verifica se o pedido possui um método de transporte associado
@@ -292,6 +297,29 @@ module.exports = {
       const idCategoria = compra["categoria"]["id"];
       const descricaoCategoria = compra["categoria"]["descricao"];
 
+      // Desestrutura informações da parcela associada ao pedido de compra
+      let parcelas = [];
+
+      if (Object.prototype.hasOwnProperty.call(compra, "parcelas")) {
+        parcelas = compra.parcelas.map((parcela) => {
+          const dadosParcela = parcela["parcela"];
+
+          const objFormaPagamento = this.desestruturaFormaPagamento(dadosParcela["forma_pagamento"]);
+
+          let dataVencimento = dayjs(dadosParcela["dataVencimento"], "DD/MM/YYYY").format("YYYY-MM-DD");
+
+          return {
+            idpedido: compra["numeropedido"],
+            tipo: "Compra",
+            idlancamento: dadosParcela["idLancamento"],
+            valor: dadosParcela["valor"],
+            datavencimento: dataVencimento,
+            idformapagamento: dadosParcela["forma_pagamento"]["id"],
+            objFormaPagamento: objFormaPagamento,
+          };
+        });
+      }
+
       // Monta um objeto que representa o pedido de venda
       const dadosCompra = {
         idpedidocompra: compra["numeropedido"],
@@ -309,6 +337,8 @@ module.exports = {
           idcategoria: idCategoria,
           descricao: descricaoCategoria,
         },
+
+        parcelas,
 
         itens,
       };

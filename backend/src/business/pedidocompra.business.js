@@ -375,7 +375,7 @@ module.exports = {
 
   // Realiza a transação de pedido de compra, compra produto e de fornecedor
   async compraTransaction(compra) {
-    let { itens, fornecedor, categoria, ...dadosCompra } = compra;
+    let { itens, fornecedor, categoria, parcelas, ...dadosCompra } = compra;
 
     return sequelize.transaction(async (t) => {
       // Tenta inserir relacionamento de fornecedor
@@ -405,6 +405,34 @@ module.exports = {
           for (const relacionamento of itens) {
             await models.tbcompraproduto.create(relacionamento, { transaction: t });
           }
+        }
+      }
+
+      // Apagar os registros existentes de parcelas para esse pedido de compra
+      await models.tbparcela.destroy(
+        {
+          where: {
+            idpedido: dadosCompra.idpedidocompra,
+          },
+        },
+        {
+          transaction: t,
+        }
+      );
+
+      // Tenta inserir as informações de parcelas
+      if (parcelas) {
+        for (const parcela of parcelas) {
+          // Tenta inserir as informações da forma de pagamento associada a parcela
+          // Etapa necessária para criar um novo método de pagamento no banco caso ele não exista
+          await models.tbformapagamento.upsert(parcela.objFormaPagamento, {
+            transaction: t,
+          });
+
+          // Tenta inserir as informções da parcela
+          await models.tbparcela.create(parcela, {
+            transaction: t,
+          });
         }
       }
     });

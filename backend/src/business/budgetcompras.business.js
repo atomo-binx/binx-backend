@@ -25,17 +25,21 @@ module.exports = {
       raw: true,
     });
 
-    console.log("Esperado aqui:", budgetsFiltrados);
+    console.log({ budgetsFiltrados });
 
-    const dataBudgetFormatada = dayjs(budgetsFiltrados[0].datainicio).format("YYYY-MM-DD HH:mm:ss");
+    let dataBudgetFormatada = "";
 
-    console.log({ dataBudgetFormatada });
+    if (budgetsFiltrados.length > 0) {
+      dataBudgetFormatada = dayjs(budgetsFiltrados[0].datainicio).format("YYYY-MM-DD HH:mm:ss");
+      console.log({ dataBudgetFormatada });
+    }
 
     return ok({
       inicioMes,
       budgetsBrutos,
       budgetsFiltrados,
       dataBudgetFormatada,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
   },
 };

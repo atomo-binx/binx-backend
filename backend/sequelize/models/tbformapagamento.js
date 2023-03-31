@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     descricao: {
       type: DataTypes.STRING(45),
-      allowNull: true
+      allowNull: false
     }
   }, {
     sequelize,
