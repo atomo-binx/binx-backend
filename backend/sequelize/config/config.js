@@ -6,7 +6,7 @@ module.exports = {
     host: process.env.DB_HOST_NAME,
     logging: false,
     dialect: "mysql",
-    // timezone: "-03:00",
+    timezone: "-03:00",
     dialectOptions: {
       // typeCast: function (field, next) {
       //   if (field.type === "DATETIME" || field.type === "TIMESTAMP") {
