@@ -1,19 +1,19 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('tbparcela', {
+  return sequelize.define('tbparcelapedidocompra', {
     idparcela: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    idpedido: {
+    idpedidocompra: {
       type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    tipo: {
-      type: DataTypes.STRING(8),
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'tbpedidocompra',
+        key: 'idpedidocompra'
+      }
     },
     idlancamento: {
       type: DataTypes.STRING(16),
@@ -37,7 +37,7 @@ module.exports = function(sequelize, DataTypes) {
     }
   }, {
     sequelize,
-    tableName: 'tbparcela',
+    tableName: 'tbparcelapedidocompra',
     timestamps: true,
     indexes: [
       {
@@ -53,6 +53,13 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "idformapagamento" },
+        ]
+      },
+      {
+        name: "tbparcela_idpedidocompra_idx",
+        using: "BTREE",
+        fields: [
+          { name: "idpedidocompra" },
         ]
       },
     ]

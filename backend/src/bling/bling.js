@@ -309,8 +309,7 @@ module.exports = {
           let dataVencimento = dayjs(dadosParcela["dataVencimento"], "DD/MM/YYYY").format("YYYY-MM-DD");
 
           return {
-            idpedido: compra["numeropedido"],
-            tipo: "Compra",
+            idpedidocompra: compra["numeropedido"],
             idlancamento: dadosParcela["idLancamento"],
             valor: dadosParcela["valor"],
             datavencimento: dataVencimento,
