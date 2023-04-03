@@ -51,6 +51,33 @@ module.exports = {
     return dicionarioCategorias;
   },
 
+  async montarDicionarioFormasPagamentos() {
+    // Enumera as formas de pagamentos existentes para as parcelas em formato de dicionário
+
+    // {
+    //   "Reposição de estoque à vista": "ID",
+    //   "Reposição de estoque faturado": "ID"
+    // }
+
+    const categoriasFormasPagamento = await models.tbformapagamento.findAll({
+      attributes: ["idformapagamento", "descricao"],
+      where: {
+        descricao: {
+          [Op.in]: ["Reposição de estoque à vista", "Reposição de estoque faturado"],
+        },
+      },
+      raw: true,
+    });
+
+    let dicionarioFormasPagamento = {};
+
+    categoriasFormasPagamento.forEach((categoria) => {
+      dicionarioFormasPagamento[categoria.descricao] = categoria.idformapagamento;
+    });
+
+    return dicionarioFormasPagamento;
+  },
+
   async adquirirBudgets(inicioMes) {
     // Adquire os budgets referente ao mês vigente informado e retorna em formato de dicionário
 
@@ -77,6 +104,8 @@ module.exports = {
   },
 
   async queryPedidosCompra(inicioMes, finalMes) {
+    const dicionarioFormasPagamento = await this.montarDicionarioFormasPagamentos();
+
     const pedidosPeriodo = await models.tbpedidocompra.findAll({
       attributes: [
         "idpedidocompra",
@@ -95,7 +124,14 @@ module.exports = {
         {
           model: models.tbparcelapedidocompra,
           attributes: ["idparcela", "valor", "idformapagamento"],
-          required: true,
+          where: {
+            idformapagamento: {
+              [Op.in]: [
+                dicionarioFormasPagamento["Reposição de estoque à vista"],
+                dicionarioFormasPagamento["Reposição de estoque faturado"],
+              ],
+            },
+          },
         },
       ],
       nest: true,
@@ -131,8 +167,8 @@ module.exports = {
     );
 
     // Acumular valor para pedidos de budget Nacional
-    let budgetUtilizadoNacional = 0;
-    let budgetUtilizadoInternacional = 0;
+    let budgetUtilizadoNacional = currency(0);
+    let budgetUtilizadoInternacional = currency(0);
 
     pedidosBudgetNacional.forEach((pedido) => {
       pedido.tbparcelapedidocompras.forEach((parcela) => {
