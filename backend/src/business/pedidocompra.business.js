@@ -17,20 +17,6 @@ const { OkStatus } = require("../modules/codes");
 const { models } = require("../modules/sequelize");
 
 module.exports = {
-  // Inicia sincronização de pedidos de compra em segundo plano
-  async sincroniza(req) {
-    console.log(filename, "Sincronização de pedidos de compra iniciada.");
-
-    this.sincronizaPedidosCompra(req.query);
-
-    return ok({
-      status: OkStatus,
-      response: {
-        message: "Sincronização de pedidos de compra iniciada.",
-      },
-    });
-  },
-
   // Inicia análise de pedidos de compra em segundo plano
   async analisa() {
     console.log(filename, "Análise de pedidos de compra iniciada.");
@@ -46,19 +32,11 @@ module.exports = {
   },
 
   // Rotina de sincronização de pedidos de compra
-  async sincronizaPedidosCompra(parametros) {
+  async sincronizaPedidosCompra(tudo, inicio, fim, periodo, valor, situacao, pedidos) {
     try {
       // Na rotina de sincronização, duas etapas são realidas:
       // 1 - Os pedidos de compra são sincronizados (copiados do Bling para o Binx)
       // 2 - Os pedidos de compra são analisados (identificado a sua situação)
-
-      // Adquire filtros da requisição
-      let tudo = parametros.tudo;
-      let inicio = parametros.inicio;
-      let fim = parametros.fim;
-      let valor = parametros.valor;
-      let situacao = parametros.situacao;
-      let periodo = parametros.periodo;
 
       // Por padrão, sincronizar os pedidos de compra criados no dia de hoje
       // Por padrão, sincronizar todas as situações de pedido
@@ -100,11 +78,18 @@ module.exports = {
         }
       }
 
-      // Chamar a função de sincronização
-      await this.sincronizaPedidos(filtrosBling);
+      if (pedidos) {
+        console.log(filename, "Sincronizando uma lista de pedidos de compras.");
+
+        await this.sincronizaListaPedidos(pedidos);
+      } else {
+        console.log(filename, "Sincronizando pedidos de compra através de filtros:", filtrosBling);
+
+        await this.sincronizaPedidos(filtrosBling);
+      }
 
       // Após sincronizar, chamar a função de análise de pedidos
-      await this.analisaPedidosCompra();
+      await this.analisaPedidosCompra(pedidos);
     } catch (error) {
       console.log(
         filename,
@@ -115,24 +100,47 @@ module.exports = {
   },
 
   // Rotina de análise de pedidos de compra
-  async analisaPedidosCompra() {
+  async analisaPedidosCompra(pedidos) {
     try {
       // Medida de tempo de execução
       let start = new Date();
 
-      // Adquirir todos os pedidos não concluídos do Binx
-      let pedidosBinx = await models.tbpedidocompra.findAll({
-        where: {
-          idstatus: {
-            [Op.or]: {
-              [Op.is]: null,
-              [Op.or]: [0, 3],
+      // Para realizar a busca de situação de pedidos de compra é necessário verificar o parametro de pedidos
+      // Caso recebido uma lista, buscar dentro da maior e menor data da lista de pedidos
+      // Caso não recebido, buscar dentro da maior e menor data de pedidos não concluídos do Binx
+
+      let pedidosBinx = [];
+
+      if (pedidos) {
+        console.log(filename, "Analisando pedidos de compras com base em lista de pedidos.");
+
+        // Adquirir todos os pedidos não concluídos do Binx
+        pedidosBinx = await models.tbpedidocompra.findAll({
+          where: {
+            idpedidocompra: {
+              [Op.in]: pedidos,
             },
           },
-        },
-        order: [["datacriacao", "asc"]],
-        raw: true,
-      });
+          order: [["datacriacao", "asc"]],
+          raw: true,
+        });
+      } else {
+        console.log(filename, "Analisando pedidos de compra com base no histórico geral.");
+
+        // Adquirir todos os pedidos não concluídos do Binx
+        pedidosBinx = await models.tbpedidocompra.findAll({
+          where: {
+            idstatus: {
+              [Op.or]: {
+                [Op.is]: null,
+                [Op.or]: [0, 3],
+              },
+            },
+          },
+          order: [["datacriacao", "asc"]],
+          raw: true,
+        });
+      }
 
       console.log(
         filename,
@@ -340,6 +348,19 @@ module.exports = {
     console.log(filename, "Pedidos Rejeitados:", pedidosRejeitados);
   },
 
+  // Executa a sincronização de pedidos de compra através de lista de pedidos de compra específicos
+  async sincronizaListaPedidos(pedidos) {
+    for (const pedido of pedidos) {
+      try {
+        const compra = await Bling.pedidoCompra(pedido);
+
+        await this.sincronizaPedido(compra);
+      } catch (error) {
+        console.log(filename, `Falha na sincronização do pedido de compra: ${pedido}:`, error.message);
+      }
+    }
+  },
+
   // Realiza a sincronização de 1 pedido de compra
   async sincronizaPedido(compra) {
     return new Promise((resolve, reject) => {
@@ -409,10 +430,10 @@ module.exports = {
       }
 
       // Apagar os registros existentes de parcelas para esse pedido de compra
-      await models.tbparcela.destroy(
+      await models.tbparcelapedidocompra.destroy(
         {
           where: {
-            idpedido: dadosCompra.idpedidocompra,
+            idpedidocompra: dadosCompra.idpedidocompra,
           },
         },
         {
@@ -430,7 +451,7 @@ module.exports = {
           });
 
           // Tenta inserir as informções da parcela
-          await models.tbparcela.create(parcela, {
+          await models.tbparcelapedidocompra.create(parcela, {
             transaction: t,
           });
         }

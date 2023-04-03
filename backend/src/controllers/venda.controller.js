@@ -5,14 +5,6 @@ module.exports = {
     try {
       const { all, periodo, situacao, unidade, tempo, pedidos, sincrono = false } = req.query;
 
-      // const rules = [[userId, UserIdValidator]];
-
-      // const validationResult = validation.run(rules);
-
-      // if (validationResult["status"] === "error") {
-      //   return res.status(400).json(validationResult);
-      // }
-
       const arrayPedidos = pedidos ? pedidos.split(",").map((element) => element.trim()) : null;
 
       if (sincrono === "true" || sincrono === true) {
