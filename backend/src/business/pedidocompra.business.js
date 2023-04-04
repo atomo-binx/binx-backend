@@ -15,6 +15,7 @@ const { ok } = require("../modules/http");
 const { OkStatus } = require("../modules/codes");
 
 const { models } = require("../modules/sequelize");
+const { failure } = require("../utils/http");
 
 module.exports = {
   // Inicia análise de pedidos de compra em segundo plano
@@ -90,12 +91,20 @@ module.exports = {
 
       // Após sincronizar, chamar a função de análise de pedidos
       await this.analisaPedidosCompra(pedidos);
+
+      return ok({
+        message: "Sincronização de pedidos de compra finalizada.",
+      });
     } catch (error) {
       console.log(
         filename,
         "Erro na execução de rotina de sincronização de pedidos de compra:",
         error.message
       );
+
+      return failure({
+        message: `Falha durante sincronização de pedidos de compra: ${error.message}`,
+      });
     }
   },
 
