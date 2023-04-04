@@ -108,7 +108,13 @@ module.exports = {
       },
       include: [
         {
+          model: models.tbfornecedor,
+          required: true,
+          attributes: ["nomefornecedor"],
+        },
+        {
           model: models.tbparcelapedidocompra,
+          required: true,
           attributes: ["idparcela", "valor", "idformapagamento"],
           where: {
             idformapagamento: {
@@ -120,6 +126,7 @@ module.exports = {
           },
         },
       ],
+      order: [["datacriacao", "desc"]],
       nest: true,
     });
 
@@ -209,6 +216,9 @@ module.exports = {
 
       budgetNacionalPercentual,
       budgetInternacionalPercentual,
+
+      pedidosBudgetNacional,
+      pedidosBudgetInternacional,
     });
   },
 };
