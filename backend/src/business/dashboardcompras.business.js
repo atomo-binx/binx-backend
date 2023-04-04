@@ -231,7 +231,7 @@ module.exports = {
     });
 
     // Adquire os últimos valores de montantes
-    let historicoMontantes = await models.tbhistoricomontante.findAll({
+    const historicoMontantes = await models.tbhistoricomontante.findAll({
       attributes: [
         "data",
         "montante_geral",
@@ -245,9 +245,15 @@ module.exports = {
         "montante_relativo_sem_curva",
       ],
       raw: true,
-      limit: 10,
+      limit: 49,
       order: [["data", "desc"]],
     });
+
+    const historicoMontantesFiltrados = historicoMontantes.filter((registro, idx) => {
+      return !(idx % 7);
+    });
+
+    console.log(historicoMontantesFiltrados);
 
     // Monta a resposta para enviar ao frontend
     let resposta = {
@@ -268,7 +274,7 @@ module.exports = {
       montantesPorCurva,
       montanteGeral,
       pMontantesPorCurva,
-      historicoMontantes,
+      historicoMontantes: historicoMontantesFiltrados,
     };
 
     // Retorna resposta para chamada da API
