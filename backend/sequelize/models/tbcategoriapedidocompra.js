@@ -1,19 +1,19 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('tbcategoriacompra', {
+  return sequelize.define('tbcategoriapedidocompra', {
     idcategoria: {
       type: DataTypes.STRING(16),
       allowNull: false,
       primaryKey: true
     },
-    nome: {
-      type: DataTypes.STRING(100),
+    descricao: {
+      type: DataTypes.STRING(45),
       allowNull: false
     }
   }, {
     sequelize,
-    tableName: 'tbcategoriacompra',
-    timestamps: true,
+    tableName: 'tbcategoriapedidocompra',
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",
