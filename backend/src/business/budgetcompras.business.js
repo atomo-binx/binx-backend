@@ -2,28 +2,14 @@ const { ok } = require("../modules/http");
 const { models } = require("../modules/sequelize");
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
-const { dictionary } = require("../utils/dict");
 const currency = require("currency.js");
 
 const dayjsBusinessDays = require("dayjs-business-days2").default;
+const dayjsConfig = require("../utils/dayjsConfig");
 
-dayjs.extend(dayjsBusinessDays);
+dayjs.extend(dayjsBusinessDays, dayjsConfig);
 
 module.exports = {
-  // Objetivos
-
-  // Budget Nacional
-  // Budget Internacional
-
-  // Utilizado Nacional
-  // Utilizado Internacional
-
-  // Budget Diario Nacional
-  // Budget Diario Internacional
-
-  // Progresso Nacional
-  // Progresso Internacional
-
   async montarDicionarioCategorias() {
     // Enumera as categorias de pedidos de compra em formato de dicionario
 
