@@ -98,6 +98,9 @@ module.exports = {
         datacriacao: {
           [Op.between]: [inicioPeriodo, finalPeriodo],
         },
+        idstatus: {
+          [Op.in]: [0, 1, 3],
+        },
       },
       include: [
         {
