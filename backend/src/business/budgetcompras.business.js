@@ -64,7 +64,7 @@ module.exports = {
     return dicionarioFormasPagamento;
   },
 
-  async adquirirBudgets(inicioMes) {
+  async adquirirBudgets(inicioPeriodo) {
     // Adquire os budgets referente ao mês vigente informado e retorna em formato de dicionário
 
     // {
@@ -75,7 +75,7 @@ module.exports = {
     const budgetsFiltrados = await models.tbbudgetcompras.findAll({
       attributes: ["idbudget", "datainicio", "valor", "idcategoria"],
       where: {
-        datainicio: inicioMes,
+        datainicio: inicioPeriodo,
       },
       raw: true,
     });
@@ -89,21 +89,14 @@ module.exports = {
     return budgets;
   },
 
-  async queryPedidosCompra(inicioMes, finalMes) {
+  async queryPedidosCompra(inicioPeriodo, finalPeriodo) {
     const dicionarioFormasPagamento = await this.montarDicionarioFormasPagamentos();
 
     const pedidosPeriodo = await models.tbpedidocompra.findAll({
-      attributes: [
-        "idpedidocompra",
-        "idstatus",
-        "datacriacao",
-        "dataconclusao",
-        "dataprevista",
-        "idcategoria",
-      ],
+      attributes: ["idpedidocompra", "idstatus", "datacriacao", "idcategoria"],
       where: {
         datacriacao: {
-          [Op.between]: [inicioMes, finalMes],
+          [Op.between]: [inicioPeriodo, finalPeriodo],
         },
       },
       include: [
@@ -116,64 +109,99 @@ module.exports = {
           model: models.tbparcelapedidocompra,
           required: true,
           attributes: ["idparcela", "valor", "idformapagamento"],
-          where: {
-            idformapagamento: {
-              [Op.in]: [
-                dicionarioFormasPagamento["Reposição de estoque à vista"],
-                dicionarioFormasPagamento["Reposição de estoque faturado"],
-              ],
-            },
-          },
         },
       ],
       order: [["datacriacao", "desc"]],
       nest: true,
     });
 
-    return pedidosPeriodo;
+    const pedidos = [];
+
+    for (const _pedido of pedidosPeriodo) {
+      const pedido = JSON.parse(JSON.stringify(_pedido));
+
+      // Acumular parcelas para definir valor total do pedido e valor total considerado
+      let valorPedido = currency(0);
+      let valorConsiderado = currency(0);
+
+      pedido.tbparcelapedidocompras.forEach((parcela) => {
+        valorPedido = valorPedido.add(currency(parcela.valor));
+
+        if (
+          parcela.idformapagamento === dicionarioFormasPagamento["Reposição de estoque à vista"] ||
+          parcela.idformapagamento === dicionarioFormasPagamento["Reposição de estoque faturado"]
+        ) {
+          valorConsiderado = valorConsiderado.add(currency(parcela.valor));
+        }
+      });
+
+      pedido["total"] = valorPedido;
+      pedido["totalConsiderado"] = valorConsiderado;
+
+      pedidos.push(pedido);
+    }
+
+    return pedidos;
   },
 
   async dashboard() {
-    // Montar dicionário de categorias de pedidos de compra
     const dicionarioCategorias = await this.montarDicionarioCategorias();
+    const dicionarioFormasPagamento = await this.montarDicionarioFormasPagamentos();
 
-    // Definir o início do mês vigente para cálculo de budget
-    const inicioMes = dayjs().startOf("month").format("YYYY-MM-DD HH:mm:ss");
-    const finalMes = dayjs().endOf("month").format("YYYY-MM-DD HH:mm:ss");
+    // Definir o período vigente para o cálculo
+    const inicioPeriodo = dayjs().startOf("month").format("YYYY-MM-DD HH:mm:ss");
+    const finalPeriodo = dayjs().endOf("month").format("YYYY-MM-DD HH:mm:ss");
 
     // Adquirir os budgets existentes para o mês vigente
-    const budgets = await this.adquirirBudgets(inicioMes);
+    const budgets = await this.adquirirBudgets(inicioPeriodo);
 
     let budgetNacional = currency(budgets[dicionarioCategorias["Nacional"]] || 0);
     let budgetInternacional = currency(budgets[dicionarioCategorias["Internacional"]] || 0);
 
     // Adquirir os pedidos de compra dentro do período do mês vigente
-    const pedidosPeriodo = await this.queryPedidosCompra(inicioMes, finalMes);
+    const pedidosPeriodo = await this.queryPedidosCompra(inicioPeriodo, finalPeriodo);
 
     // Separar lista de pedidos de budget Nacional e Internacional
-    const pedidosBudgetNacional = pedidosPeriodo.filter(
+    let pedidosBudgetNacional = pedidosPeriodo.filter(
       (pedido) => pedido.idcategoria == dicionarioCategorias["Nacional"]
     );
 
-    const pedidosBudgetInternacional = pedidosPeriodo.filter(
+    let pedidosBudgetInternacional = pedidosPeriodo.filter(
       (pedido) => pedido.idcategoria == dicionarioCategorias["Internacional"]
     );
 
-    // Acumular valor para pedidos de budget Nacional
+    // Acumular valores utilizados
     let budgetUtilizadoNacional = currency(0);
     let budgetUtilizadoInternacional = currency(0);
 
     pedidosBudgetNacional.forEach((pedido) => {
       pedido.tbparcelapedidocompras.forEach((parcela) => {
-        budgetUtilizadoNacional = currency(budgetUtilizadoNacional).add(currency(parcela.valor));
+        if (
+          parcela.idformapagamento === dicionarioFormasPagamento["Reposição de estoque à vista"] ||
+          parcela.idformapagamento === dicionarioFormasPagamento["Reposição de estoque faturado"]
+        ) {
+          budgetUtilizadoNacional = currency(budgetUtilizadoNacional).add(currency(parcela.valor));
+        }
       });
     });
 
     pedidosBudgetInternacional.forEach((pedido) => {
       pedido.tbparcelapedidocompras.forEach((parcela) => {
-        budgetUtilizadoInternacional = currency(budgetUtilizadoInternacional).add(currency(parcela.valor));
+        if (
+          parcela.idformapagamento === dicionarioFormasPagamento["Reposição de estoque à vista"] ||
+          parcela.idformapagamento === dicionarioFormasPagamento["Reposição de estoque faturado"]
+        ) {
+          budgetUtilizadoInternacional = currency(budgetUtilizadoInternacional).add(currency(parcela.valor));
+        }
       });
     });
+
+    // Filtrar pedidos que não possuem parcelas consideráveis (nenhuma parcela de reposição)
+    pedidosBudgetNacional = pedidosBudgetNacional.filter((pedido) => pedido.totalConsiderado.value > 0);
+
+    pedidosBudgetInternacional = pedidosBudgetInternacional.filter(
+      (pedido) => pedido.totalConsiderado.value > 0
+    );
 
     // Calcular budget diário Nacional e Internacional
     const diasUteis = dayjs().businessDaysInMonth().length;
