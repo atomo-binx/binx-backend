@@ -4,6 +4,8 @@ const currency = require("currency.js");
 const { ok } = require("../utils/http");
 const filename = __filename.slice(__dirname.length + 1) + " -";
 const { sequelize } = require("../modules/sequelize");
+const dayjs = require("dayjs");
+const { ordenaPorChave } = require("../utils/sort");
 
 module.exports = {
   async query() {
@@ -280,6 +282,70 @@ module.exports = {
     // Retorna resposta para chamada da API
     return ok({
       ...resposta,
+    });
+  },
+
+  async dashboardDisponibilidade(dataInicio, dataFinal) {
+    dataInicio = dayjs(dataInicio, "DD/MM/YYYY").startOf("day").format("YYYY-MM-DD HH:mm:ss");
+    dataFinal = dayjs(dataFinal, "DD/MM/YYYY").endOf("day").format("YYYY-MM-DD HH:mm:ss");
+
+    const disponibilidadeGeral = await models.tbdisponibilidade.findAll({
+      attributes: ["data", "valor"],
+      where: {
+        data: {
+          [Op.between]: [dataInicio, dataFinal],
+        },
+      },
+    });
+
+    const disponibilidadeCurvas = await models.tbdisponibilidadecurva.findAll({
+      attributes: ["data", "curva_1", "curva_2", "curva_3", "curva_4"],
+      where: {
+        data: {
+          [Op.between]: [dataInicio, dataFinal],
+        },
+      },
+    });
+
+    // Dicionário de registros completo para unificar os resultados por curva e gerais
+    const disponibilidades = {};
+
+    // Insere a disponibilidade geral no dicionário completo, a chave é a data do registro
+    disponibilidadeGeral.forEach((registro) => {
+      const dataFormatada = dayjs(registro.data).format("DD/MM/YYYY");
+      const registros = disponibilidades[dataFormatada] || {};
+      registros["geral"] = registro.valor;
+      disponibilidades[dataFormatada] = registros;
+    });
+
+    // Insere as disponibilidades por curva no dicionário completo, a chave é a data do registro
+    disponibilidadeCurvas.forEach((registro) => {
+      const dataFormatada = dayjs(registro.data).format("DD/MM/YYYY");
+      const registros = disponibilidades[dataFormatada] || {};
+      registros["curva_1"] = registro["curva_1"];
+      registros["curva_2"] = registro["curva_2"];
+      registros["curva_3"] = registro["curva_3"];
+      registros["curva_4"] = registro["curva_4"];
+      disponibilidades[dataFormatada] = registros;
+    });
+
+    // Transformar o dicionário completo em uma array
+    const disponibilidadesDesordenadas = [];
+
+    for (const data in disponibilidades) {
+      disponibilidadesDesordenadas.push({
+        data: data,
+        ...disponibilidades[data],
+      });
+    }
+
+    const disponibilidadesOrdenadas = ordenaPorChave(disponibilidadesDesordenadas, "curva");
+
+    return ok({
+      dataInicio,
+      dataFinal,
+      quantidadeRegistros: Object.keys(disponibilidades).length,
+      disponibilidades: disponibilidadesOrdenadas,
     });
   },
 

@@ -3,6 +3,7 @@ const DashboardComprasBusiness = require("../business/dashboardcompras.business"
 const { OkStatus } = require("../modules/codes");
 
 module.exports = {
+  // Dashboard geral de compras
   async dashboard(req, res, next) {
     try {
       const resposta = await DashboardComprasBusiness.dashboard();
@@ -12,14 +13,22 @@ module.exports = {
     }
   },
 
+  // Dashboard específico do gráfico de disponibilidade
+  async dashboardDisponibilidade(req, res, next) {
+    try {
+      const { dataInicio, dataFinal } = req.query;
+
+      const resposta = await DashboardComprasBusiness.dashboardDisponibilidade(dataInicio, dataFinal);
+
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async salvarDashboard(req, res) {
     const resposta = await DashboardComprasBusiness.salvarDashboard(req);
 
-    res.status(resposta.statusCode).json(resposta.body);
-  },
-
-  async disponibilidade(req, res) {
-    const resposta = await ComprasBusiness.disponibilidade(req);
     res.status(resposta.statusCode).json(resposta.body);
   },
 
