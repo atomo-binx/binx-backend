@@ -349,6 +349,49 @@ module.exports = {
     });
   },
 
+  async dashboardMontantes(dataInicio, dataFinal) {
+    dataInicio = dayjs(dataInicio, "DD/MM/YYYY").startOf("day").format("YYYY-MM-DD HH:mm:ss");
+    dataFinal = dayjs(dataFinal, "DD/MM/YYYY").endOf("day").format("YYYY-MM-DD HH:mm:ss");
+
+    const historicoMontantes = await models.tbhistoricomontante.findAll({
+      attributes: [
+        "data",
+        "montante_geral",
+        "montante_curva_a",
+        "montante_curva_b",
+        "montante_curva_c",
+        "montante_sem_curva",
+      ],
+      where: {
+        data: {
+          [Op.between]: [dataInicio, dataFinal],
+        },
+      },
+    });
+
+    const montantes = [];
+
+    historicoMontantes.forEach((montante) => {
+      const dataFormatada = dayjs(montante.data).format("DD/MM/YYYY");
+
+      montantes.push({
+        data: dataFormatada,
+        montanteGeral: parseFloat(montante["montante_geral"]),
+        montanteCurvaA: parseFloat(montante["montante_curva_a"]),
+        montanteCurvaB: parseFloat(montante["montante_curva_b"]),
+        montanteCurvaC: parseFloat(montante["montante_curva_c"]),
+        montanteSemCurva: parseFloat(montante["montante_sem_curva"]),
+      });
+    });
+
+    return ok({
+      dataInicio,
+      dataFinal,
+      quantidadeRegistros: montantes.length,
+      montantes: montantes,
+    });
+  },
+
   async salvarDashboard() {
     let resposta = await this.dashboard();
 

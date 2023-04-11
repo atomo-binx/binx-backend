@@ -26,6 +26,19 @@ module.exports = {
     }
   },
 
+  // Dashboard específico do gráfico de montantes
+  async dashboardMontantes(req, res, next) {
+    try {
+      const { dataInicio, dataFinal } = req.query;
+
+      const resposta = await DashboardComprasBusiness.dashboardMontantes(dataInicio, dataFinal);
+
+      return res.status(resposta.statusCode).json(resposta.body);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async salvarDashboard(req, res) {
     const resposta = await DashboardComprasBusiness.salvarDashboard(req);
 

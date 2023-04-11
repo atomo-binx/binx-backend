@@ -7,6 +7,7 @@ function load(routes) {
   routes.get("/compras/dashboard", ControllerCompras.dashboard);
   routes.get("/compras/dashboard/salvar", protectedRoute, ControllerCompras.salvarDashboard);
   routes.get("/compras/disponibilidade", protectedRoute, ControllerCompras.dashboardDisponibilidade);
+  routes.get("/compras/montantes", protectedRoute, ControllerCompras.dashboardMontantes);
 
   routes.get("/compras/relatorio/precificacao", protectedRoute, ControllerCompras.relatorioPrecificacao);
   routes.get("/compras/relatorio/ultimocusto", protectedRoute, ControllerCompras.relatorioUltimoCusto);
