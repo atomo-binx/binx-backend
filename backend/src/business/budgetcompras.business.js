@@ -253,13 +253,14 @@ module.exports = {
     const budgetEsperadoNacional = budgetDiarioInicialNacional.multiply(diasCorridos);
     const budgetEsperadoInternacional = budgetDiarioInicialInternacional.multiply(diasCorridos);
 
-    const budgetNacionalPercentual = (budgetUtilizadoNacional.divide(budgetEsperadoNacional) * 100).toFixed(
-      2
-    );
+    let budgetNacionalPercentual = (budgetUtilizadoNacional.divide(budgetEsperadoNacional) * 100).toFixed(2);
 
-    const budgetInternacionalPercentual = (
+    let budgetInternacionalPercentual = (
       budgetUtilizadoInternacional.divide(budgetEsperadoInternacional) * 100
     ).toFixed(2);
+
+    budgetNacionalPercentual = isNaN(budgetNacionalPercentual) ? 0 : budgetNacionalPercentual;
+    budgetInternacionalPercentual = isNaN(budgetInternacionalPercentual) ? 0 : budgetInternacionalPercentual;
 
     return ok({
       budgetNacional,
