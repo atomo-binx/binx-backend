@@ -147,13 +147,33 @@ module.exports = {
     return pedidos;
   },
 
-  async dashboard() {
+  async dashboard(mes, ano) {
     const dicionarioCategorias = await this.montarDicionarioCategorias();
     const dicionarioFormasPagamento = await this.montarDicionarioFormasPagamentos();
 
     // Definir o período vigente para o cálculo
-    const inicioPeriodo = dayjs().startOf("month").format("YYYY-MM-DD HH:mm:ss");
-    const finalPeriodo = dayjs().endOf("month").format("YYYY-MM-DD HH:mm:ss");
+    const dicionarioMeses = {
+      Jan: "01",
+      Fev: "02",
+      Mar: "03",
+      Abr: "04",
+      Mai: "05",
+      Jun: "06",
+      Jul: "07",
+      Ago: "08",
+      Set: "09",
+      Out: "10",
+      Nov: "11",
+      Dez: "12",
+    };
+
+    const inicioPeriodo = dayjs(`01/${dicionarioMeses[mes]}/${ano}`, "DD/MM/YYYY")
+      .startOf("month")
+      .format("YYYY-MM-DD HH:mm:ss");
+
+    const finalPeriodo = dayjs(`01/${dicionarioMeses[mes]}/${ano}`, "DD/MM/YYYY")
+      .endOf("month")
+      .format("YYYY-MM-DD HH:mm:ss");
 
     // Adquirir os budgets existentes para o mês vigente
     const budgets = await this.adquirirBudgets(inicioPeriodo);
@@ -207,9 +227,20 @@ module.exports = {
     );
 
     // Calcular budget diário Nacional e Internacional
-    const diasUteis = dayjs().businessDaysInMonth().length;
-    const diasCorridos = 1 + diasUteis + dayjs().businessDiff(dayjs().endOf("month"));
-    const diasRestantes = diasUteis - diasCorridos;
+    const diasUteis = dayjs(inicioPeriodo).businessDaysInMonth().length;
+
+    let diasCorridos = 1 + diasUteis + dayjs().businessDiff(dayjs().endOf("month"));
+    let diasRestantes = diasUteis - diasCorridos;
+
+    // Para calcular a quantidade de dias corridos, verificar se a data é passada
+    // Caso seja de um mês passado, atribuir o valor total de dias úteis
+    const mesAtual = dayjs().month();
+    const mesDoPeriodo = dayjs(inicioPeriodo).month();
+
+    if (mesAtual > mesDoPeriodo) {
+      diasCorridos = diasUteis;
+      diasRestantes = 0;
+    }
 
     const budgetDiarioInicialNacional = budgetNacional.divide(diasUteis);
     const budgetDiarioInicialInternacional = budgetInternacional.divide(diasUteis);

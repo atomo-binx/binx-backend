@@ -21,10 +21,7 @@ module.exports = {
           resolve(client);
         })
         .catch((error) => {
-          console.log(
-            filename,
-            `Erro durante a criação do cliente: ${error.message}`
-          );
+          console.log(filename, `Erro durante a criação do cliente: ${error.message}`);
           reject(error);
         });
     });
@@ -65,15 +62,9 @@ module.exports = {
   // Lista de Pedidos de Venda
   async salesOrderList(client, sessionId) {
     return new Promise((resolve, reject) => {
-      let dataInicial = moment()
-        .subtract(14, "days")
-        .startOf("day")
-        .format("YYYY-MM-DD HH:mm:ss");
+      let dataInicial = moment().subtract(14, "days").startOf("day").format("YYYY-MM-DD HH:mm:ss");
 
-      let dataFinal = moment()
-        .add(1, "days")
-        .endOf("day")
-        .format("YYYY-MM-DD HH:mm:ss");
+      let dataFinal = moment().add(1, "days").endOf("day").format("YYYY-MM-DD HH:mm:ss");
 
       console.log(filename, "Data Inicial:", dataInicial);
       console.log(filename, "Data Final:", dataFinal);
@@ -105,6 +96,10 @@ module.exports = {
       client
         .salesOrderListAsync(callArgs)
         .then((result) => {
+          const size = Buffer.byteLength(JSON.stringify(result));
+
+          console.log(filename, "Tamanho da resposta do Magento:", size);
+
           if (result[0]["result"]["item"]) {
             const vendas = result[0]["result"]["item"];
             console.log(filename, "Quantidade de vendas:", vendas.length);
@@ -131,11 +126,7 @@ module.exports = {
           reject();
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro durante a chamada 'salesOrderList':",
-            error.message
-          );
+          console.log(filename, "Erro durante a chamada 'salesOrderList':", error.message);
           reject(error);
         });
     });
@@ -172,10 +163,7 @@ module.exports = {
           });
         })
         .catch((error) => {
-          console.log(
-            filename,
-            `Erro durante a chamada 'catalogProductInfo': ${error.message}`
-          );
+          console.log(filename, `Erro durante a chamada 'catalogProductInfo': ${error.message}`);
           reject(error);
         });
     });
@@ -204,10 +192,7 @@ module.exports = {
           });
         })
         .catch((error) => {
-          console.log(
-            filename,
-            `Erro durante a chamada 'catalogProductInfo': ${error.message}`
-          );
+          console.log(filename, `Erro durante a chamada 'catalogProductInfo': ${error.message}`);
           reject(error);
         });
     });
@@ -233,19 +218,11 @@ module.exports = {
           });
 
           parser.parseStringPromise(result[1]).then(function (result) {
-            resolve(
-              result["SOAP-ENV:Body"][
-                "ns1:catalogProductAttributeMediaListResponse"
-              ]
-            );
+            resolve(result["SOAP-ENV:Body"]["ns1:catalogProductAttributeMediaListResponse"]);
           });
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro durante a chamada 'catalogProductAttributeMediaList':",
-            error.message
-          );
+          console.log(filename, "Erro durante a chamada 'catalogProductAttributeMediaList':", error.message);
           reject(error);
         });
     });
@@ -273,17 +250,11 @@ module.exports = {
             console.dir(result);
             console.log("Done");
 
-            resolve(
-              result["SOAP-ENV:Body"]["ns1:catalogProductAttributeListResponse"]
-            );
+            resolve(result["SOAP-ENV:Body"]["ns1:catalogProductAttributeListResponse"]);
           });
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro durante a chamada 'catalogProductAttributeList':",
-            error.message
-          );
+          console.log(filename, "Erro durante a chamada 'catalogProductAttributeList':", error.message);
           reject(error);
         });
     });
@@ -312,11 +283,7 @@ module.exports = {
           });
         })
         .catch((error) => {
-          console.log(
-            filename,
-            "Erro durante a chamada 'salesOrderInfo':",
-            error.message
-          );
+          console.log(filename, "Erro durante a chamada 'salesOrderInfo':", error.message);
           reject(error);
         });
     });
