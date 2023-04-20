@@ -232,14 +232,20 @@ module.exports = {
     let diasCorridos = 1 + diasUteis + dayjs().businessDiff(dayjs().endOf("month"));
     let diasRestantes = diasUteis - diasCorridos;
 
-    // Para calcular a quantidade de dias corridos, verificar se a data é passada
-    // Caso seja de um mês passado, atribuir o valor total de dias úteis
+    // Para calcular a quantidade de dias corridos, verificar se a data é passada ou futura
     const mesAtual = dayjs().month();
     const mesDoPeriodo = dayjs(inicioPeriodo).month();
 
+    // Caso seja de um mês passado, atribuir o valor total de dias úteis
     if (mesAtual > mesDoPeriodo) {
       diasCorridos = diasUteis;
       diasRestantes = 0;
+    }
+
+    // Caso seja de um mês futuro, atribuir o valor de 0 dias corridos
+    if (mesAtual < mesDoPeriodo) {
+      diasCorridos = 0;
+      diasRestantes = diasUteis;
     }
 
     const budgetDiarioInicialNacional = budgetNacional.divide(diasUteis);
